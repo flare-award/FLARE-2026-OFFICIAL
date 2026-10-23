@@ -4,13 +4,13 @@
 
 ## Публикация на GitHub Pages
 
-В репозитории уже настроен GitHub Actions workflow: **после push в `main` он сразу публикует папку `public/`**, без `npm install`, сборки и ручной загрузки файлов.
+В репозитории уже настроен GitHub Actions workflow: **после push в `main` или в ветку `arena/62d09ade-flare-2026-official` он сразу публикует папку `public/`**, без `npm install`, сборки и ручной загрузки файлов. Публикация из Arena-ветки не требует слияния в `main`; она будет обновлять тот же адрес GitHub Pages.
 
 Один раз включите источник публикации:
 
 1. Откройте **Settings → Pages** репозитория.
 2. В разделе **Build and deployment** выберите **Source: GitHub Actions**.
-3. После попадания изменений в `main` дождитесь успешного workflow **Deploy FLARE 2026 to GitHub Pages** во вкладке **Actions**. Ссылка на сайт появится в Settings → Pages.
+3. После push в `main` или `arena/62d09ade-flare-2026-official` дождитесь успешного workflow **Deploy FLARE 2026 to GitHub Pages** во вкладке **Actions**. Оба варианта обновляют сайт по ссылке из Settings → Pages.
 
 Повторно публиковать сайт вручную не нужно. Workflow также можно запустить кнопкой **Run workflow**.
 

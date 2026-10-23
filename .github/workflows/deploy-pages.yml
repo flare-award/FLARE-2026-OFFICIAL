@@ -2,7 +2,9 @@ name: Deploy FLARE 2026 to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'arena/62d09ade-flare-2026-official'
     paths:
       - 'public/**'
       - '.github/workflows/deploy-pages.yml'
