@@ -2,7 +2,7 @@ name: Publish FLARE 2026 to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [arena/7360ef95-flare-2026-official]
   workflow_dispatch:
 
 permissions:
