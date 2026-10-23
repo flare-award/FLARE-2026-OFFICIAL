@@ -17,7 +17,7 @@
 3. Участник при первом входе выбирает закреплённый ник и задаёт PIN (латиница/цифры, 4–72 знака). Первый email автоматически создаёт аккаунт; остальные разрешённые email этого же ника привяжутся к нему, только если указан тот же PIN. Вручную искать UUID и допривязывать дополнительные почты не нужно.
 4. В **Project Settings → API** возьми Project URL и публичный `anon`/`publishable` key. Вставь их в `config.js` вместо `YOUR_SUPABASE_PROJECT_URL` и `YOUR_SUPABASE_ANON_KEY`. Это публичный ключ с ограниченными правами; **никогда** не вставляй `service_role`.
 5. Убедись, что в Supabase API доступна схема `public` (обычно значение по умолчанию). В настройке CORS/allowed origins разреши домен GitHub Pages проекта, если в настройках проекта ограничен список origin.
-6. В GitHub открой **Settings → Pages** и укажи **Source: GitHub Actions**. В **Settings → Environments → github-pages → Deployment branches** добавь `arena/7360ef95-flare-2026-official`: сейчас окружение может разрешать публикации только из `main`. После этого workflow будет выкладывать изменения прямо из этой ветки, без слияния в `main`. Для ручного запуска доступен **Actions → Publish FLARE 2026 to GitHub Pages → Run workflow**.
+6. В GitHub открой **Settings → Pages** и укажи **Source: GitHub Actions**. Окружение `github-pages` должно разрешать ветку `arena/7360ef95-flare-2026-official` в **Settings → Environments → Deployment branches**. Workflow выкладывает изменения прямо из этой ветки, без слияния в `main`. Для ручного запуска доступен **Actions → Publish FLARE 2026 to GitHub Pages → Run workflow**.
 
 ## Важно перед рассылкой ссылки
 
