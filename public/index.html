@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090909" />
+    <meta name="description" content="FLARE 2026 — ежегодная премия сервера. Отдай голос за тех, кто сделал этот год незабываемым." />
+    <title>FLARE 2026 — премия сообщества</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./config.js" defer></script>
+    <script src="./data.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="ambient ambient--one" aria-hidden="true"></div>
+    <div class="ambient ambient--two" aria-hidden="true"></div>
+
+    <header class="site-header" id="top">
+      <a class="brand" href="#top" aria-label="FLARE 2026 — на главную">
+        <span class="brand-mark" aria-hidden="true">F</span>
+        <span class="brand-word">FLARE<span class="brand-year">2026</span></span>
+      </a>
+
+      <nav class="main-nav" aria-label="Основная навигация">
+        <a href="#nominations">Номинации</a>
+        <a href="#archive">Архив</a>
+        <a href="#faq">F.A.Q.</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="header-progress" id="ballotButton" type="button" aria-label="Открыть мой бюллетень">
+          <span class="progress-dot" aria-hidden="true"></span>
+          <span id="headerProgressLabel">Мой бюллетень</span>
+        </button>
+        <button class="button button--small button--outline" id="adminButton" type="button" hidden>Панель организатора</button>
+        <button class="button button--small button--gold" id="userAction" type="button">Войти</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-visual">
+          <img class="hero-banner" src="./assets/banner-flare2026.png" alt="Яркие лучи света и логотип FLARE" draggable="false" />
+          <div class="hero-shade" aria-hidden="true"></div>
+          <div class="hero-overline"><span class="live-dot"></span> ПРЕМИЯ СООБЩЕСТВА · 2026</div>
+          <div class="hero-copy">
+            <h1 id="hero-title">Этот год — наша история.</h1>
+            <p>Назови тех, кто сделал его ярче.</p>
+            <div class="hero-actions">
+              <a class="button button--gold button--large" href="#nominations">Выбрать номинации <span aria-hidden="true">↘</span></a>
+              <a class="button button--glass button--large" href="#archive">Вспомнить прошлый год</a>
+            </div>
+          </div>
+          <div class="hero-side-note" aria-hidden="true">THE YEAR<br />THAT BURNS BRIGHT</div>
+        </div>
+        <div class="hero-meta page-width">
+          <div class="hero-meta-item"><span class="meta-icon meta-icon--spark" aria-hidden="true">✦</span><span><strong>18 номинаций</strong><small>Один голос в каждой</small></span></div>
+          <div class="hero-meta-item"><span class="meta-icon" aria-hidden="true">◷</span><span><strong>До 21 ноября</strong><small>Можно изменить выбор</small></span></div>
+          <div class="hero-meta-item"><span class="meta-icon" aria-hidden="true">⌖</span><span><strong>5 декабря 2026</strong><small>Встречаемся на трибуне</small></span></div>
+          <div class="hero-countdown"><span class="countdown-label">ДО ЗАКРЫТИЯ ГОЛОСОВАНИЯ</span><strong id="countdown">—</strong></div>
+        </div>
+      </section>
+
+      <section class="section nominations-section page-width" id="nominations" aria-labelledby="nominations-title">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow"><span class="eyebrow-line"></span> ГОЛОС КАЖДОГО ВАЖЕН</span>
+            <h2 id="nominations-title">Выбери, чем<br class="desktop-break" /> запомнится этот год.</h2>
+            <p class="section-intro">От ярких личностей до общих историй. Открой категорию и отдай голос за своего номинанта.</p>
+          </div>
+          <div class="award-stamp" aria-hidden="true"><span>FLARE</span><strong>26</strong><i>✦</i></div>
+        </div>
+
+        <div class="ballot-overview" id="ballotOverview">
+          <div class="overview-symbol" aria-hidden="true">✦</div>
+          <div class="overview-copy">
+            <strong id="overviewTitle">Твой бюллетень ждёт первого голоса</strong>
+            <span id="overviewSubtitle">Выбери номинанта в каждой из 18 категорий. Голоса анонимны.</span>
+          </div>
+          <div class="overview-meter" aria-label="Прогресс голосования">
+            <div class="meter-track"><span id="progressFill"></span></div>
+            <span id="progressText">0 / 18</span>
+          </div>
+          <button class="button button--outline overview-button" id="overviewAction" type="button">Войти и голосовать <span aria-hidden="true">↗</span></button>
+        </div>
+
+        <div class="connection-note" id="connectionNote" hidden>
+          <span class="connection-mark" aria-hidden="true">i</span>
+          <span><strong>Онлайн-голосование ещё не подключено.</strong> Номинации доступны для просмотра; организатору нужно добавить настройки Supabase, чтобы принимать голоса.</span>
+        </div>
+
+        <div class="category-grid">
+          <button class="category-card category-card--main" type="button" data-open-category="main">
+            <span class="category-art" aria-hidden="true"><span class="category-orbit"></span><span class="category-art-word">FLARE</span><span class="category-art-number">01</span></span>
+            <span class="category-card-content">
+              <span class="category-label">ГЛАВНАЯ ПРОГРАММА <i>12 НОМИНАЦИЙ</i></span>
+              <strong>Основные<br />номинации</strong>
+              <span class="category-description">Люди, игры и события, которыми жил сервер.</span>
+              <span class="category-link">Открыть категорию <b aria-hidden="true">↗</b></span>
+            </span>
+            <span class="category-arrow" aria-hidden="true">↗</span>
+          </button>
+          <button class="category-card category-card--extra" type="button" data-open-category="extra">
+            <span class="category-art" aria-hidden="true"><span class="category-orbit"></span><span class="category-art-word">AFTER<br />GLOW</span><span class="category-art-number">02</span></span>
+            <span class="category-card-content">
+              <span class="category-label">ОСОБЫЙ ВЫПУСК <i>6 НОМИНАЦИЙ</i></span>
+              <strong>Дополнительные<br />номинации</strong>
+              <span class="category-description">Тонкие детали и свои люди — всё то, что тоже стало частью года.</span>
+              <span class="category-link">Открыть категорию <b aria-hidden="true">↗</b></span>
+            </span>
+            <span class="category-arrow" aria-hidden="true">↗</span>
+          </button>
+        </div>
+        <p class="nomination-footnote"><span class="lock-mini" aria-hidden="true">⌑</span> В большинстве номинаций нельзя голосовать за себя. Система проверит это автоматически.</p>
+      </section>
+
+      <section class="archive-section" id="archive" aria-labelledby="archive-title">
+        <div class="archive-glow" aria-hidden="true"></div>
+        <div class="page-width archive-inner">
+          <div class="archive-heading">
+            <div>
+              <span class="eyebrow"><span class="eyebrow-line"></span> КАЖДЫЙ ГОД ОСТАВЛЯЕТ СЛЕД</span>
+              <h2 id="archive-title">Победители<br /><em>прошлого года.</em></h2>
+            </div>
+            <div class="carousel-controls" id="carouselControls" hidden>
+              <button class="round-control" id="carouselPrev" type="button" aria-label="Предыдущие победители">←</button>
+              <span class="carousel-counter" id="carouselCounter">01 / 01</span>
+              <button class="round-control" id="carouselNext" type="button" aria-label="Следующие победители">→</button>
+            </div>
+          </div>
+          <div class="winner-carousel" id="winnerCarousel" aria-live="polite"></div>
+          <div class="archive-footer"><span>FLARE · 2025</span><span>ИСТОРИЯ ПРОДОЛЖАЕТСЯ</span></div>
+        </div>
+      </section>
+
+      <section class="faq-section" id="faq" aria-labelledby="faq-title">
+        <div class="page-width faq-inner">
+          <div class="faq-heading">
+            <span class="eyebrow"><span class="eyebrow-line"></span> ПЕРЕД ТЕМ КАК ГОЛОСОВАТЬ</span>
+            <h2 id="faq-title">Всё, что<br /><em>важно знать.</em></h2>
+            <p>Коротко о правилах, сроках и том, как устроен выбор.</p>
+            <a class="faq-contact" href="#top">Вернуться к началу <span aria-hidden="true">↑</span></a>
+          </div>
+          <div class="faq-list">
+            <details class="faq-item" open>
+              <summary><span>01</span><strong>Кто может голосовать?</strong><i aria-hidden="true"></i></summary>
+              <p>Голосовать может только участник сервера, зарегистрированный по своему email и личному PIN-коду.</p>
+            </details>
+            <details class="faq-item">
+              <summary><span>02</span><strong>Можно ли голосовать за себя?</strong><i aria-hidden="true"></i></summary>
+              <p>В большинстве номинаций — нет. Исключения: КОНФЛИКТ ГОДА, КИДАЛОВО ГОДА, СОБЫТИЕ ГОДА, КОМПАШКА ГОДА, С.О.С. ГОДА и номинации, где победитель — ситуация или группа.</p>
+            </details>
+            <details class="faq-item">
+              <summary><span>03</span><strong>Нужно ли голосовать во всех номинациях?</strong><i aria-hidden="true"></i></summary>
+              <p>Да. Голосование обязательно по всем номинациям — пропустить категорию нельзя. Итоговое подтверждение станет доступно, когда заполнен весь бюллетень.</p>
+            </details>
+            <details class="faq-item">
+              <summary><span>04</span><strong>Можно ли изменить свой голос?</strong><i aria-hidden="true"></i></summary>
+              <p>Да. До закрытия голосования 21 ноября можно зайти повторно и изменить любой свой выбор.</p>
+            </details>
+            <details class="faq-item">
+              <summary><span>05</span><strong>Анонимно ли голосование?</strong><i aria-hidden="true"></i></summary>
+              <p>Другие участники не видят, кто и за что проголосовал. Организатор имеет доступ к данным для подсчёта результатов и работы системы, но не разглашает и не обсуждает отдельные голоса.</p>
+            </details>
+            <details class="faq-item">
+              <summary><span>06</span><strong>Что будет за попытку накрутки или использование чужого аккаунта?</strong><i aria-hidden="true"></i></summary>
+              <p>Такие голоса аннулируются, а дальнейший доступ нарушителя может быть ограничен.</p>
+            </details>
+            <details class="faq-item">
+              <summary><span>07</span><strong>До какого числа идёт голосование?</strong><i aria-hidden="true"></i></summary>
+              <p>Голосование закрывается 21 ноября 2026 года, в 23:59 по уральскому времени. После этого изменить голос или проголосовать уже нельзя.</p>
+            </details>
+            <details class="faq-item">
+              <summary><span>08</span><strong>Когда и где пройдёт сама премия?</strong><i aria-hidden="true"></i></summary>
+              <p>Премия FLARE 2026 состоится 5 декабря на трибуне сервера «нодбин жоски».</p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="page-width footer-top">
+        <a class="brand brand--footer" href="#top" aria-label="FLARE 2026 — на главную">
+          <span class="brand-mark" aria-hidden="true">F</span>
+          <span class="brand-word">FLARE<span class="brand-year">2026</span></span>
+        </a>
+        <p>Мы не просто вспоминаем этот год.<br /><strong>Мы выбираем, что будет жить дальше.</strong></p>
+        <a class="footer-up" href="#top" aria-label="Наверх">↑</a>
+      </div>
+      <div class="page-width footer-bottom"><span>© FLARE 2026 · ПРЕМИЯ СООБЩЕСТВА</span><span>СДЕЛАНО С ОГНЁМ <i>✦</i></span></div>
+    </footer>
+
+    <dialog class="app-dialog nomination-dialog" id="nominationDialog" aria-labelledby="dialogHeading">
+      <div class="dialog-frame" id="nominationDialogContent"></div>
+    </dialog>
+
+    <dialog class="app-dialog auth-dialog" id="authDialog" aria-labelledby="authHeading">
+      <div class="auth-shell">
+        <button class="dialog-close" type="button" data-close-dialog="authDialog" aria-label="Закрыть окно">×</button>
+        <div class="auth-emblem" aria-hidden="true">F<span>✦</span></div>
+        <span class="eyebrow"><span class="eyebrow-line"></span> FLARE 2026</span>
+        <h2 id="authHeading">Твой голос<br /><em>имеет значение.</em></h2>
+        <p class="auth-lead">Войди по email и PIN-коду. Впервые здесь? Создай аккаунт за минуту.</p>
+        <div class="auth-tabs" role="tablist" aria-label="Выберите действие">
+          <button class="auth-tab is-active" id="loginTab" type="button" role="tab" aria-selected="true" data-auth-mode="login">Войти</button>
+          <button class="auth-tab" id="registerTab" type="button" role="tab" aria-selected="false" data-auth-mode="register">Создать аккаунт</button>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <label class="field-label" for="loginEmail">Email</label>
+          <input class="field-input" id="loginEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required />
+          <label class="field-label" for="loginPin">Личный PIN-код</label>
+          <input class="field-input" id="loginPin" name="pin" type="password" autocomplete="current-password" minlength="4" maxlength="32" placeholder="Не менее 4 символов" required />
+          <button class="button button--gold button--full" type="submit">Войти в бюллетень <span aria-hidden="true">↗</span></button>
+        </form>
+        <form id="registerForm" class="auth-form" hidden>
+          <label class="field-label" for="registerEmail">Email</label>
+          <input class="field-input" id="registerEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required />
+          <label class="field-label" for="registerNickname">Твой ник на сервере</label>
+          <select class="field-input" id="registerNickname" name="nickname" required>
+            <option value="" disabled selected>Выбери свой ник</option>
+          </select>
+          <label class="field-label" for="registerPin">Придумай PIN-код</label>
+          <input class="field-input" id="registerPin" name="pin" type="password" autocomplete="new-password" minlength="4" maxlength="32" pattern="[A-Za-z0-9]{4,32}" placeholder="Латинские буквы и цифры" required />
+          <label class="field-label" for="registerPinConfirm">Повтори PIN-код</label>
+          <input class="field-input" id="registerPinConfirm" name="pinConfirm" type="password" autocomplete="new-password" minlength="4" maxlength="32" pattern="[A-Za-z0-9]{4,32}" placeholder="Ещё раз, без ошибок" required />
+          <button class="button button--gold button--full" type="submit">Создать аккаунт <span aria-hidden="true">↗</span></button>
+        </form>
+        <div class="form-message" id="authMessage" role="status" aria-live="polite"></div>
+        <p class="auth-footnote"><span aria-hidden="true">⌑</span> PIN-код хранится в защищённом виде. Email не подтверждается кодом — используй только свой адрес.</p>
+      </div>
+    </dialog>
+
+    <dialog class="app-dialog ballot-dialog" id="ballotDialog" aria-labelledby="ballotHeading">
+      <div class="dialog-frame" id="ballotDialogContent"></div>
+    </dialog>
+
+    <dialog class="app-dialog admin-dialog" id="adminDialog" aria-labelledby="adminHeading">
+      <div class="dialog-frame" id="adminDialogContent"></div>
+    </dialog>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>
