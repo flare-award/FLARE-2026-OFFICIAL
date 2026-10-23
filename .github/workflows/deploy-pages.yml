@@ -1,0 +1,41 @@
+name: Deploy FLARE 2026 to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - 'arena/62d09ade-flare-2026-official'
+    paths:
+      - 'public/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: ${{ github.ref_name == 'main' && 'github-pages' || 'github-pages-arena' }}
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static site (no build step)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
