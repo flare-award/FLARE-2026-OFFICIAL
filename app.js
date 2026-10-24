@@ -51,7 +51,7 @@ async function showAdmin(){
       const leaders=ranked.filter(option=>option.rank===1).length;
       const rows=ranked.map(option=>{
         const winner=option.rank===1;
-        const place=winner?(leaders>1?'НИЧЬЯ · 1 МЕСТО':(isClosed()?'ПОБЕДИТЕЛЬ':'ЛИДЕР')):`${option.rank} МЕСТО`;
+        const place=winner?(leaders>1?'НИЧЬЯ · 1 МЕСТО':'ПОБЕДИТЕЛЬ'):`${option.rank} МЕСТО`;
         const percent=ranked[0]?.count?Math.round(option.count/ranked[0].count*100):0;
         return `<div class="admin-rank-row ${winner?'is-winner':''} ${option.rank===2?'is-second':''} ${option.rank===3?'is-third':''}"><span class="admin-rank-badge"><strong>${winner?'★':option.rank}</strong><small>${place}</small></span><div class="admin-rank-candidate"><strong>${esc(option.name)}</strong><span class="admin-rank-track"><i style="width:${percent}%"></i></span></div><strong class="admin-rank-count">${countLabel(option.count,'голос','голоса','голосов')}</strong><details class="admin-voter-list"><summary>Участники (${option.voters.length})</summary><div>${option.voters.map(name=>`<span>${esc(name)}</span>`).join('')}</div></details></div>`
       }).join('');
@@ -65,7 +65,7 @@ async function showAdmin(){
       const percent=total?Math.round(voters.length/total*100):0;
       return `<div class="admin-poll-row"><div class="admin-poll-choice"><strong>${date}</strong><span>${day}</span></div><div class="admin-poll-meter"><div class="admin-poll-track"><span style="width:${percent}%"></span></div><div class="admin-poll-stats"><strong>${percent}%</strong><span>${countLabel(voters.length,'голос','голоса','голосов')}</span></div></div><div class="admin-poll-voters">${voters.length?voters.map(x=>`<span>${esc(x.nickname)}</span>`).join(''):'<span class="empty">Пока нет голосов</span>'}</div></div>`
     }).join('');
-    openModal(`<div class="admin-head"><h2>Панель организатора</h2><button class="close-button" aria-label="Закрыть">×</button></div><div class="admin-wrap"><div class="eyebrow">ГОЛОСА · ТОЛЬКО ДЛЯ MARONNIX</div><section class="admin-ballot-results"><div class="admin-results-heading"><h3>Результаты голосования</h3><span>${nominations.length} номинаций</span></div><div class="admin-nomination-results">${nominationCards}</div></section><section class="admin-poll"><div class="admin-poll-heading"><h3>Результаты опроса</h3><span>${countLabel(total,'ответ','ответа','ответов')}</span></div><div class="admin-poll-results">${pollRows}</div></section></div>`)
+    openModal(`<div class="admin-head"><h2>Панель организатора</h2><button class="close-button" aria-label="Закрыть">×</button></div><div class="admin-wrap"><div class="eyebrow">ГОЛОСА · ТОЛЬКО ДЛЯ MARONNIX</div><section class="admin-ballot-results"><div class="admin-results-heading"><h3>Результаты голосования</h3><span>Рейтинг по текущим голосам</span></div><div class="admin-nomination-results">${nominationCards}</div></section><section class="admin-poll"><div class="admin-poll-heading"><h3>Результаты опроса</h3><span>${countLabel(total,'ответ','ответа','ответов')}</span></div><div class="admin-poll-results">${pollRows}</div></section></div>`)
   }catch(e){toast(e.message)}
 }
 $('#auth-button').onclick=async()=>{if(state.session){const current=state.session;state.session=null;localStorage.removeItem('flare-session');updateAccount();rpc('flare_logout',{p_token:current.token}).catch(()=>{});toast('Ты вышел из аккаунта.')}else{renderAuth()}};
