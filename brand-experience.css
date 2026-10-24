@@ -1,0 +1,748 @@
+@font-face{
+  font-family:"Roundo Cyrillic";
+  src:url("assets/brand/RoundoCyr-Regular.woff2?v=1") format("woff2"),url("assets/brand/RoundoCyr-Regular.woff?v=1") format("woff");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+:root{--logo:"Roundo Cyrillic",sans-serif}
+body{background:#010101}
+.brand-intro{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:47.5px;width:100%;height:100vh;height:100svh;min-height:575px;overflow:hidden;background:#010101}
+.intro-rays{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left center;z-index:0;user-select:none;-webkit-user-drag:none}
+.brand-intro::before{content:"";position:absolute;inset:-2.5px;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(1,1,1,.4) 0%,rgba(1,1,1,.4) 67%,rgba(1,1,1,.2) 100%),linear-gradient(180deg,rgba(1,1,1,.2) 0%,rgba(1,1,1,.24) 66%,#010101 100%)}
+.intro-logo{position:relative;z-index:2;margin:0;font-family:"Rubik",var(--font),sans-serif;font-size:clamp(90px,15vw,240px);font-weight:700;line-height:.92;letter-spacing:.045em;text-align:center;text-transform:uppercase;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;transform:none;filter:var(--flare-logo-glow);user-select:none}
+.intro-links{position:relative;z-index:3;display:flex;flex-wrap:wrap;justify-content:center;gap:17.5px;padding:0 25px}
+.intro-link{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 28.75px;border:1.25px solid transparent;border-radius:1248.75px;background:linear-gradient(110deg,#FFD54F 0%,#FF9800 100%);box-shadow:0 6.25px 25px rgba(255,152,0,.18);color:#1b1005;font-family:var(--font);font-size:15px;font-weight:600;letter-spacing:.02em;text-align:center;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
+.intro-link:nth-child(2){background:linear-gradient(#0a080b,#0a080b) padding-box,linear-gradient(110deg,#FF4D9D 0%,#7B1FA2 100%) border-box;color:#fff0dd;box-shadow:0 5px 22.5px rgba(123,31,162,.16)}
+.intro-link:hover{transform:translateY(-2.5px);filter:brightness(1.08);box-shadow:0 8.75px 30px rgba(255,152,0,.27)}
+.intro-link:nth-child(2):hover{box-shadow:0 8.75px 30px rgba(240,98,146,.24)}
+.topbar{position:fixed;z-index:15;top:0;left:0;right:0;width:100%;height:95px;margin:0;padding:0 clamp(20px,3.2vw,55px);display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,7,.96);-webkit-backdrop-filter:none;backdrop-filter:none;border:0;border-bottom:1.25px solid rgba(255,255,255,.08);border-radius:0;transform:translate3d(0,0,0);opacity:1;visibility:visible;pointer-events:auto;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease,background-color .3s ease,border-color .3s ease,visibility 0s;will-change:transform}
+.topbar.is-at-top{justify-content:flex-end;background:transparent;border-color:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.topbar.is-at-top .top-actions{gap:0}
+.topbar.is-at-top .wordmark{flex-basis:0;width:0;min-width:0;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,-6.25px,0);transition:opacity .18s ease,transform .18s ease,visibility 0s linear .18s}
+.topbar.is-at-top #account-status{max-width:0;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,-6.25px,0);transition:max-width .22s ease,opacity .18s ease,transform .18s ease,visibility 0s linear .18s}
+.topbar.is-scrolled .wordmark{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:opacity .25s ease .16s,transform .25s ease .16s,visibility 0s linear .16s}
+.topbar.is-scrolled #account-status{max-width:600px;opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:max-width .25s ease .12s,opacity .25s ease .12s,transform .25s ease .12s,visibility 0s linear .12s}
+.topbar.is-faq-hidden{transform:translate3d(0,-105%,0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease,background-color .3s ease,border-color .3s ease,visibility 0s linear .32s}
+.wordmark{display:flex;flex:0 0 auto;align-items:center;line-height:1;color:transparent;font-family:"Rubik",var(--font),sans-serif;font-size:31.25px;font-weight:700;letter-spacing:.045em;white-space:nowrap;filter:none}
+.wordmark>span{font:inherit;letter-spacing:inherit;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;filter:var(--flare-logo-glow)}
+main{margin:0;background:linear-gradient(180deg,#010101 0%,#0a0a0a 850px)}
+.hero{padding-top:122.5px}
+.hero h1{max-width:775px;font-size:clamp(60px,5.8vw,90px)}
+#category-primary,#category-extra{scroll-margin-top:120px}
+.footer-bottom{align-items:center;justify-content:center;gap:7.5px 15px;flex-wrap:wrap;color:#77736d;font-size:11.25px;letter-spacing:.04em;text-align:center}
+.footer-credit-separator{color:#40382d}
+.footer-bottom .terms-link{color:#c1a679;white-space:nowrap;border-bottom:1.25px solid rgba(193,166,121,.45);cursor:pointer;transition:color .18s,border-color .18s}
+.footer-bottom .terms-link:hover{color:#f3d08a;border-color:#f3d08a}
+html{scrollbar-width:thin;scrollbar-color:#3a332a #080808;scrollbar-gutter:stable}
+*{scrollbar-width:thin;scrollbar-color:#3a332a #0b0b0b}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{margin:6.25px;background:#080808;border-radius:1248.75px}
+::-webkit-scrollbar-thumb{background:#393229;border:2.5px solid #080808;border-radius:1248.75px}
+::-webkit-scrollbar-thumb:hover{background:#685438}
+::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+.modal,.admin-wrap{scrollbar-width:thin;scrollbar-color:#40372b #10100f;scrollbar-gutter:stable;overscroll-behavior:contain}
+.modal::-webkit-scrollbar,.admin-wrap::-webkit-scrollbar{width:8.75px;height:8.75px}
+.modal::-webkit-scrollbar-track,.admin-wrap::-webkit-scrollbar-track{margin-block:12.5px;background:#10100f;border-radius:1248.75px}
+.modal::-webkit-scrollbar-thumb,.admin-wrap::-webkit-scrollbar-thumb{background:#463b2e;border:2.5px solid #10100f;border-radius:1248.75px}
+.modal::-webkit-scrollbar-thumb:hover,.admin-wrap::-webkit-scrollbar-thumb:hover{background:#735832}
+@media(max-width:975px){
+  .brand-intro{gap:40px}
+  .intro-logo{font-size:clamp(75px,17vw,150px);transform:none}
+  .intro-links{gap:12.5px}
+  .intro-link{min-height:57.5px;padding-inline:23.75px;font-size:13.75px}
+  .topbar{height:87.5px;padding-inline:27.5px}
+  .wordmark{font-size:28.75px}
+  .hero{padding-top:97.5px}
+}
+@media(max-width:600px){
+  .brand-intro{min-height:625px;gap:25px}
+  .intro-logo{font-size:clamp(60px,18vw,120px);transform:none}
+  .intro-links{flex-direction:column;width:min(100%,362.5px)}
+  .intro-link{width:100%}
+  .topbar{padding-inline:20px}
+  .wordmark{font-size:26.25px}
+  .hero{padding-top:87.5px}
+  .footer-bottom{font-size:10px;justify-content:center;gap:7.5px 12.5px}
+  .footer-credit-separator{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .topbar,.topbar.is-at-top,.topbar.is-scrolled,.topbar.is-faq-hidden,.intro-link,.footer-bottom .terms-link{transition:none}
+}
+
+/* Strong FLARE wordmark with typography shared by the site's primary actions. */
+.nomination-card-body{min-height:150px;padding:21.25px 18.75px 10px}
+.nomination-card-meta{padding-top:10px}
+h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomination-tile-title{font-family:var(--logo);font-weight:700;font-synthesis:weight}
+.hero h1,.section-heading h2,.poll-copy h2,.faq-intro h2,.modal-header h2,.nom-detail-title,.admin-head h2{font-family:var(--logo);font-weight:700;font-synthesis:weight}
+.intro-link{font-family:var(--font);font-size:13.75px;font-weight:700;letter-spacing:.045em;text-transform:uppercase}
+.intro-link:nth-child(2){font-weight:700}
+.close-button{display:grid;place-items:center;line-height:1;padding:0;transition:color .18s ease,background-color .18s ease,border-color .18s ease,transform .18s ease}
+.close-button:hover{color:#ff7777;background:rgba(220,55,55,.12)}
+.nom-detail-top .close-button{border:1.25px solid rgba(255,255,255,.12);color:#bbb5ad}
+.nom-detail-top .close-button:hover{border-color:rgba(255,100,100,.62);color:#ff7777;background:rgba(220,55,55,.16);transform:scale(1.04)}
+.nom-detail{padding:43.75px 36.25px 16.25px}
+.nom-detail .description{margin:13.75px 0 16.25px}
+.nomination-list-modal.extra-category-list>.extra-list-header{justify-content:flex-start;min-height:82.5px;padding:16.25px 30px}
+.nomination-list-modal.extra-category-list>.extra-list-header h2{margin:0;color:#f6f1e7;font-size:35px;line-height:1.2;font-weight:700;letter-spacing:-.025em}
+.nomination-list-modal.primary-category-list>.primary-list-header{justify-content:flex-end;min-height:46.25px;padding:6.25px 18.75px;background:#0e0e0d;border-bottom:0}
+.nomination-list-modal.primary-category-list>.nomination-grid{padding-top:5px}
+.nomination-list-modal{clip-path:inset(0 round 21.25px)}
+.nomination-list-modal::-webkit-scrollbar-track{margin-block:22.5px;background:transparent;border-radius:1248.75px}
+.nomination-list-modal::-webkit-scrollbar-thumb{border-color:#0e0e0d}
+.modal.is-view-entering{animation:modalViewEnter .22s cubic-bezier(.2,.7,.25,1) both}
+@keyframes modalViewEnter{from{opacity:.35;transform:translateY(10px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:975px){
+  .intro-link{font-size:13px}
+  .nomination-card-body{min-height:155px;padding:20px 15px 10px}
+  .nom-detail{padding:38.75px 25px 15px}
+  .nomination-list-modal.extra-category-list>.extra-list-header{min-height:77.5px;padding:15px 23.75px}
+  .nomination-list-modal.extra-category-list>.extra-list-header h2{font-size:31.25px}
+}
+@media(max-width:600px){
+  .intro-link{font-size:12.5px;letter-spacing:.035em}
+  .nomination-tile{min-height:140px}
+  .nomination-art{min-height:140px}
+  .nomination-card-body{min-height:140px;padding:18.75px 15px 8.75px}
+  .nomination-card-meta{padding-top:7.5px}
+  .nom-detail{padding:31.25px 18.75px 12.5px}
+  .nom-detail .description{margin:10px 0 13.75px}
+  .nomination-list-modal.extra-category-list>.extra-list-header{min-height:70px;padding:12.5px 18.75px}
+  .nomination-list-modal.extra-category-list>.extra-list-header h2{font-size:27.5px}
+  .nomination-list-modal.primary-category-list>.primary-list-header{min-height:40px;padding:5px 13.75px}
+  .nomination-list-modal.primary-category-list>.nomination-grid{padding-top:2.5px}
+}
+@media(prefers-reduced-motion:reduce){.modal.is-view-entering{animation:none}.close-button{transition:none}}
+
+/* Refined 2026 interaction and typography pass. */
+:root{--flare-logo-gradient:linear-gradient(180deg,#F0DB2C 0%,#FE6F01 100%);--flare-logo-glow:drop-shadow(0 0 7px rgba(240,219,44,.34)) drop-shadow(0 0 18px rgba(254,111,1,.3)) drop-shadow(0 0 32px rgba(254,111,1,.16))}
+.intro-logo,.wordmark,.wordmark>span{font-family:"Rubik",var(--font),sans-serif;font-weight:700;font-synthesis:none}
+.intro-logo,.wordmark>span{background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text}
+.intro-logo{letter-spacing:.045em}
+.wordmark{letter-spacing:.045em}
+.hero h1,.section-heading h2,.poll-copy h2,.faq-intro h2,.modal-header h2,.nom-detail-title,.admin-head h2,.auth-title,.category-title{letter-spacing:0}
+.hero h1{letter-spacing:.005em}
+.nom-detail-title{letter-spacing:0}
+.topbar.is-at-top .top-actions{gap:16px}
+.topbar.is-at-top #account-status{max-width:600px;overflow:visible;opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .2s ease}
+.account-status{white-space:nowrap}
+.nomination-card-meta{transform:translateY(-4px)}
+.toast{border-radius:14px;font-weight:700;line-height:1.45;box-shadow:0 12px 36px rgba(0,0,0,.38)}
+.nomination-list-modal>.modal-header.primary-list-header,.nomination-list-modal>.modal-header.extra-list-header{justify-content:space-between;min-height:82px;padding:17px 30px}
+.nomination-list-modal>.modal-header.primary-list-header h2,.nomination-list-modal>.modal-header.extra-list-header h2{display:block;margin:0;color:#f6f1e7;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:0}
+.nomination-list-modal>.modal-header.primary-list-header{border-bottom:1px solid rgba(255,255,255,.08)}
+.nomination-list-modal>.modal-header .close-button{flex:0 0 44px;width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:#171614;color:#d7d1c8;font-size:27px;line-height:1}
+.nomination-list-modal>.modal-header .close-button:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.13);color:#ff8585}
+.nomination-list-modal.primary-category-list>.nomination-grid{padding-top:19px}
+.nom-detail{padding-top:23px}
+.nom-detail-title{line-height:1.2}
+.nom-detail .description{margin-top:10px}
+.nom-detail-top .back-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;margin:0;padding:10px 15px;border:1px solid rgba(255,193,7,.26);border-radius:999px;background:rgba(255,193,7,.055);color:#e9c879;font-size:13px;font-weight:600;transition:transform .2s,border-color .2s,background .2s,color .2s}
+.nom-detail-top .back-link svg{width:17px;height:17px;flex:0 0 17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nom-detail-top .back-link:hover{transform:translateX(-2px);border-color:rgba(255,193,7,.52);background:rgba(255,193,7,.11);color:#ffe1a0}
+.modal.is-view-entering{animation:none}
+.faq-question span:first-child{font-weight:700}
+.faq-question span:last-child{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;font-size:20px;font-weight:500;line-height:1;text-align:center;transform-origin:50% 50%}
+.faq-item.open .faq-question span:last-child{transform:rotate(45deg)}
+.footer-credit-separator{color:#aa8c54;font-weight:700}
+
+/* Poll results appear only after the participant has saved a choice. */
+.poll-option.has-results{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:15px 18px}
+.poll-option-top{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0}
+.poll-option-date{display:grid;gap:2px;min-width:0}
+.poll-option-date strong{font-size:15px}
+.poll-option-date small{font-size:12px;color:#9b9790}
+.poll-result-badge{min-height:21px;padding:4px 8px;border:1px solid transparent;border-radius:999px;color:transparent;font-size:9px;font-weight:800;letter-spacing:.09em;white-space:nowrap}
+.poll-leader .poll-result-badge{border-color:rgba(255,193,7,.28);background:rgba(255,193,7,.1);color:#ffd574}
+.poll-leader{border-color:rgba(255,193,7,.55);background:linear-gradient(110deg,rgba(255,193,7,.09),rgba(255,132,0,.045))}
+.poll-result-track{display:block;width:100%;height:5px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
+.poll-result-track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffc83d,#ff7d20);transition:width .35s ease}
+.poll-leader .poll-result-track>span{background:linear-gradient(90deg,#ffe16c,#ff8a22);box-shadow:0 0 10px rgba(255,171,50,.32)}
+.poll-result-meta{display:flex;align-items:center;justify-content:space-between;color:#969087;font-size:11px;line-height:1.2}
+.poll-result-meta strong{color:#e9d7ac;font-size:13px}
+.poll-leader .poll-result-meta strong{color:#ffd574}
+.poll-option.has-results:disabled{opacity:1}
+
+/* Self-vote guidance without a persistent nickname label. */
+.nominee-card.self{overflow:hidden}
+.nominee-card.self.locked:hover{transform:none;border-color:rgba(255,76,76,.72);background:#241313;box-shadow:0 0 0 1px rgba(255,75,75,.18)}
+.nominee-card.self::after{content:attr(data-hover-message);position:absolute;z-index:5;inset:0;display:grid;place-items:center;padding:14px;background:rgba(135,24,24,.88);color:#fff1ef;font-size:clamp(10px,1.4vw,13px);font-weight:800;letter-spacing:.08em;line-height:1.45;text-align:center;opacity:0;transition:opacity .18s ease}
+.nominee-card.self:hover::after,.nominee-card.self:focus-visible::after{opacity:1}
+
+/* PIN visibility control. */
+.form-field .pin-input-wrap{position:relative;display:block;margin:0;padding:0;color:inherit;letter-spacing:normal}
+.form-field .pin-input-wrap input{padding-right:54px}
+.pin-toggle{position:absolute;top:50%;right:10px;display:grid;place-items:center;width:36px;height:36px;padding:0;transform:translateY(-50%);border:0;border-radius:9px;background:transparent;color:#aaa397;cursor:pointer;transition:color .18s,background .18s}
+.pin-toggle:hover{background:rgba(255,193,7,.1);color:#ffd071}
+.pin-toggle:focus-visible{outline:2px solid #ffc107;outline-offset:1px}
+.pin-toggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pin-toggle svg[hidden]{display:none}
+
+/* Organizer poll summary: choice, percentage bar, then its voters. */
+.admin-poll{margin-top:35px}
+.admin-poll-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:15px}
+.admin-poll-heading h3{margin:0}
+.admin-poll-heading>span{color:#9a9488;font-size:12px;white-space:nowrap}
+.admin-poll-results{display:grid;gap:10px}
+.admin-poll-row{display:grid;grid-template-columns:minmax(135px,.7fr) minmax(180px,1fr) minmax(180px,1.15fr);align-items:center;gap:18px;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:linear-gradient(120deg,rgba(29,26,20,.74),rgba(17,17,16,.92))}
+.admin-poll-choice{display:grid;gap:4px}
+.admin-poll-choice strong{color:#f2ede4;font-size:15px}
+.admin-poll-choice span{color:#a49d91;font-size:12px}
+.admin-poll-meter{display:grid;grid-template-columns:minmax(50px,1fr) auto;align-items:center;gap:8px 12px}
+.admin-poll-track{height:7px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.09)}
+.admin-poll-track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffc83d,#ff7d20)}
+.admin-poll-stats{display:flex;align-items:center;gap:8px;color:#aaa397;font-size:11px;white-space:nowrap}
+.admin-poll-stats strong{color:#f5d17c;font-size:15px}
+.admin-poll-voters{display:flex;flex-wrap:wrap;gap:6px}
+.admin-poll-voters>span{padding:5px 8px;border:1px solid rgba(255,193,7,.16);border-radius:999px;background:rgba(255,193,7,.055);color:#ddd3c1;font-size:11px}
+.admin-poll-voters>.empty{padding:0;border:0;background:none;color:#888278}
+@media(max-width:700px){
+  .nomination-list-modal>.modal-header.primary-list-header,.nomination-list-modal>.modal-header.extra-list-header{min-height:70px;padding:13px 16px}
+  .nomination-list-modal>.modal-header.primary-list-header h2,.nomination-list-modal>.modal-header.extra-list-header h2{font-size:23px}
+  .nomination-list-modal>.modal-header .close-button{flex-basis:40px;width:40px;height:40px}
+  .nom-detail{padding-top:17px}
+  .nom-detail-top .back-link{gap:7px;padding-inline:11px;font-size:12px}
+  .poll-option.has-results{padding:14px}
+  .admin-poll-row{grid-template-columns:minmax(0,1fr);gap:10px}
+  .admin-poll-meter{grid-template-columns:minmax(70px,1fr) auto}
+  .admin-poll-voters{padding-top:2px}
+  .footer-credit-separator{display:inline-block}
+  .topbar.is-at-top .top-actions{gap:10px}
+}
+@media(max-width:430px){
+  .topbar.is-at-top .top-actions{gap:7px}
+  .topbar.is-at-top #account-status{font-size:11px}
+  .topbar.is-at-top .button-quiet{padding:9px 10px;font-size:12px}
+  .poll-result-badge{font-size:8px;padding-inline:6px}
+}
+@media(prefers-reduced-motion:reduce){.pin-toggle,.nominee-card.self::after,.poll-result-track>span{transition:none}}
+
+/* QHD and wider: keep 1920x1080 Full HD on the original desktop layout. */
+@media(min-width:2000px){
+  .wrap{width:min(1780px,calc(100% - 120px))}
+  .topbar{padding-inline:max(60px,calc((100vw - 1780px)/2))}
+  .hero{padding-top:clamp(320px,23vh,390px)}
+  .hero h1{max-width:980px;font-size:clamp(92px,5vw,122px);line-height:1.04}
+  .hero-copy{font-size:21px}
+  .hero-meta{font-size:12px}
+  .section-heading h2,.poll-copy h2,.faq-intro h2{font-size:clamp(64px,3.5vw,78px)}
+  .category-actions{gap:24px;margin-top:48px}
+  .category-card{height:360px;padding:40px 45px}
+  .category-title{max-width:64%;font-size:clamp(46px,2.5vw,58px);line-height:1.12}
+  .category-foot{left:45px;bottom:30px}
+  .category-count{min-height:43px;padding-inline:18px;font-size:14px}
+  .category-symbol{width:230px;height:230px;right:42px;font-size:210px}
+  .winners-section{margin-top:180px;padding-block:110px}
+  .winner-window{margin-top:42px}
+  .winner-track{gap:24px}
+  .winner-card{flex-basis:330px;min-height:285px;padding:30px}
+  .winner-name{font-size:23px}
+  .event-poll{column-gap:110px;padding-block:150px}
+  .poll-option{padding:20px 24px}
+  .poll-option.has-results{padding:18px 22px}
+  .faq-question{padding-block:28px;font-size:18px}
+  .nomination-list-modal{width:min(1640px,calc(100vw - 120px))}
+  .nomination-detail-modal{width:min(1480px,calc(100vw - 120px))}
+  .nomination-grid{gap:20px;padding:32px 38px 40px}
+  .nomination-tile-title{font-size:19px}
+  .nomination-tile-description{font-size:14px}
+  .nom-detail{padding-inline:48px}
+  .nominee-grid{gap:18px}
+  .modal-backdrop{padding:48px}
+}
+@media(min-width:2400px){
+  .category-card{height:385px}
+  .category-title{font-size:58px}
+  .category-symbol{width:250px;height:250px;font-size:228px}
+  .nomination-list-modal>.nomination-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .nomination-detail-modal .nominee-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+
+/* Touch-first layout and iOS safe areas. */
+@media(max-width:700px){
+  html,body{-webkit-text-size-adjust:100%;min-width:320px}
+  body{min-height:100vh;min-height:100dvh}
+  button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,193,7,.12)}
+  .wrap{width:calc(100% - 32px)}
+  .topbar{width:100%;height:calc(76px + env(safe-area-inset-top));padding:env(safe-area-inset-top) max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));margin-bottom:0}
+  .topbar.is-at-top .top-actions{gap:10px;min-width:0}
+  .topbar.is-at-top #account-status{max-width:min(55vw,260px);overflow:hidden;text-overflow:ellipsis}
+  .topbar.is-at-top .button-quiet{min-height:44px}
+  .brand-intro{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+  .modal-backdrop{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));align-items:center}
+  .modal{max-height:94vh;max-height:94dvh;scroll-padding-block:18px;-webkit-overflow-scrolling:touch}
+  .modal.auth-modal{max-height:94vh;max-height:94dvh;overflow-y:auto;overscroll-behavior:contain}
+  .admin-wrap{-webkit-overflow-scrolling:touch}
+  .nom-detail-top{gap:8px;padding-inline:10px}
+  .nom-detail-top .back-link{min-width:0;max-width:calc(100% - 50px);min-height:44px;gap:6px;padding-inline:9px;font-size:11.5px}
+  .nom-detail-top .back-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nom-detail-top .close-button{width:44px;height:44px;flex:0 0 44px}
+  .nomination-list-modal>.modal-header .close-button{flex-basis:44px;width:44px;height:44px}
+  .vote-actions{padding-bottom:max(14px,env(safe-area-inset-bottom))}
+  .admin-wrap{overflow:auto;overscroll-behavior:contain}
+  .admin-table{min-width:560px}
+  .toast{left:50%;right:auto;bottom:max(20px,calc(env(safe-area-inset-bottom) + 12px));width:max-content;max-width:calc(100vw - 32px);text-align:center}
+  .footer-bottom{row-gap:8px}
+}
+@media(max-width:430px){
+  .topbar.is-at-top .top-actions{gap:6px}
+  .topbar.is-at-top #account-status{max-width:52vw;font-size:11px}
+  .topbar.is-at-top .text-button{font-size:11px}
+  .topbar.is-at-top .button-quiet{padding-inline:10px;font-size:12px}
+  .hero h1{font-size:clamp(45px,12vw,53px);line-height:1.08}
+  .category-card{padding-inline:18px}
+  .category-title{max-width:100%;font-size:clamp(23px,7.2vw,28px);line-height:1.15}
+  .category-foot{left:18px}
+  .category-symbol{right:10px;width:112px;height:112px;font-size:105px;opacity:.58}
+  .category-count{min-height:35px;padding-inline:12px;font-size:11px}
+  .nomination-tile{grid-template-columns:minmax(105px,38%) minmax(0,1fr)}
+  .nomination-card-body{padding-inline:11px}
+  .nomination-tile-title{font-size:14px;line-height:1.3}
+  .nomination-tile-description{font-size:10.5px;line-height:1.4}
+  .nomination-card-meta{font-size:9px}
+  .nominee-grid{gap:8px}
+  .nominee-card{padding:9px}
+  .nominee-name{font-size:12px}
+  .portrait{margin-bottom:10px}
+  .poll-option-top{gap:8px}
+  .poll-result-badge{letter-spacing:.04em}
+  .poll-option-date strong{font-size:13px}
+  .faq-answer{padding-right:12px}
+}
+@media(max-width:360px){
+  .hero h1{font-size:44px}
+  .topbar.is-at-top .top-actions{gap:5px}
+  .topbar.is-at-top #account-status{font-size:10px}
+  .topbar.is-at-top .text-button{font-size:10px}
+  .topbar.is-at-top .button-quiet{padding-inline:8px;font-size:11px}
+  .nom-detail-top .back-link{font-size:10.5px;padding-inline:7px}
+  .poll-result-badge{padding-inline:4px;font-size:7px}
+}
+@media(hover:none){
+  .category-card:hover{transform:none}
+  .category-card:hover::after{animation:none}
+  .nomination-tile:hover,.nominee-card:hover{transform:none}
+  .faq-question:hover{color:inherit}
+  .nominee-card.self::after{inset:auto 0 0;min-height:38px;padding:7px 8px;font-size:9px;opacity:1}
+}
+
+/* Final brand consistency: a shared vertical gradient, medium bold weight and glow. */
+:root{
+  --flare-logo-gradient:linear-gradient(180deg,#F0DB2C 0%,#FE6F01 100%);
+  --flare-logo-glow:drop-shadow(0 0 7px rgba(240,219,44,.34)) drop-shadow(0 0 18px rgba(254,111,1,.3)) drop-shadow(0 0 32px rgba(254,111,1,.16));
+}
+.intro-logo,.wordmark,.wordmark>span{font-family:"Rubik",var(--font),sans-serif;font-weight:700;font-synthesis:none;letter-spacing:.045em}
+.intro-logo,.wordmark>span{background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;filter:var(--flare-logo-glow)}
+.intro-logo{filter:var(--flare-logo-glow);transform:none}
+.wordmark{filter:none}
+
+/* Keep the floating header above page content while leaving modal layers above it. */
+.topbar{z-index:19}
+.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:16px}
+
+/* Every close control uses the same centered, dark square treatment. */
+.nom-detail-top .close-button,
+.nomination-list-modal>.modal-header .close-button,
+.admin-head .close-button{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:0;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:#171614;color:#d7d1c8;font-size:27px;line-height:1;text-align:center;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.nom-detail-top .close-button:hover,
+.nomination-list-modal>.modal-header .close-button:hover,
+.admin-head .close-button:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.13);color:#ff8585;transform:scale(1.04)}
+
+/* A subtle completion mark instead of a text pill on voted nominations. */
+.nomination-voted{display:grid;place-items:center;width:35px;height:35px;padding:0;border:1px solid rgba(197,244,181,.64);border-radius:50%;background:linear-gradient(145deg,rgba(23,70,37,.96),rgba(11,34,20,.96));color:#d4ffc5;font-size:20px;font-weight:800;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.38),0 0 16px rgba(124,219,129,.18)}
+
+/* Paired carousel arrows remain the same glyph; the previous arrow is mirrored. */
+.carousel-controls .icon-button{display:grid;place-items:center;padding:0;line-height:1}
+.carousel-arrow{display:block;font-family:"Segoe UI Symbol","Noto Sans Symbols 2","Apple Symbols",Arial,sans-serif;font-size:25px;font-weight:400;line-height:1;transform:translateY(-1px)}
+.carousel-arrow-left{transform:scaleX(-1) translateY(-1px)}
+
+/* Poll weekday is integrated with the date, with no dangling secondary label. */
+.poll-option-date{display:block;min-width:0}
+.poll-option-date strong{font-size:16px;line-height:1.35}
+.poll-option-date small{display:none}
+
+/* Requested emphasis colors. */
+.poll-copy h2 em{color:#7900B9}
+.faq-intro h2 em{color:transparent;background:linear-gradient(100deg,#FE613F 0%,#EE01C6 56%,#6801D7 100%);-webkit-background-clip:text;background-clip:text}
+
+/* Deadline countdown beside the hero heading. */
+.hero-topline{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,330px);align-items:center;gap:clamp(22px,4vw,64px)}
+.hero-topline h1{margin-right:0}
+.vote-countdown{justify-self:end;width:100%;max-width:330px;padding:18px 20px;border:1px solid rgba(255,193,7,.24);border-radius:16px;background:radial-gradient(ellipse at 100% 0%,rgba(255,175,43,.11),transparent 55%),linear-gradient(145deg,rgba(25,22,17,.94),rgba(14,14,13,.96));box-shadow:0 12px 34px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.035)}
+.countdown-label{display:block;color:#c8ae76;font-size:10px;font-weight:700;letter-spacing:.16em;line-height:1.45}
+.countdown-values{display:flex;align-items:center;justify-content:space-between;gap:5px;margin:12px 0 9px}
+.countdown-unit{display:grid;justify-items:center;gap:3px;min-width:0}
+.countdown-unit strong{color:#f4eee2;font-size:clamp(22px,2vw,29px);font-variant-numeric:tabular-nums;font-weight:700;line-height:1}
+.countdown-unit small{color:#938c80;font-size:9px;line-height:1.2}
+.countdown-separator{margin-top:-10px;color:#846d45;font-size:20px}
+.countdown-deadline{display:block;color:#a9a094;font-size:11px;line-height:1.4}
+.vote-countdown.is-finished{border-color:rgba(139,198,130,.35);background:linear-gradient(145deg,rgba(15,30,19,.94),rgba(14,14,13,.96))}
+.vote-countdown.is-finished .countdown-unit strong{color:#bde6ae}
+
+/* Dense, ranked admin results: winner, runner-up, third place and expandable voters. */
+.admin-ballot-results{margin-top:25px}
+.admin-results-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 13px}
+.admin-results-heading h3{margin:0}
+.admin-results-heading>span{color:#9a9488;font-size:12px;white-space:nowrap}
+.admin-nomination-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-nomination-card{min-width:0;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:linear-gradient(145deg,rgba(31,28,22,.72),rgba(17,17,16,.95));box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.admin-nomination-card>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.admin-nomination-category{display:block;margin-bottom:5px;color:#b49a65;font-size:9px;font-weight:700;letter-spacing:.13em}
+.admin-nomination-card h4{margin:0;color:#f3eee4;font-size:14px;line-height:1.35}
+.admin-nomination-total{flex:0 0 auto;padding:5px 8px;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#a8a195;font-size:10px;white-space:nowrap}
+.admin-rankings{display:grid;gap:6px}
+.admin-rank-row{display:grid;grid-template-columns:88px minmax(80px,1fr) auto;align-items:center;gap:9px;padding:9px;border:1px solid rgba(255,255,255,.055);border-radius:9px;background:rgba(255,255,255,.018)}
+.admin-rank-row.is-winner{border-color:rgba(255,193,7,.28);background:linear-gradient(100deg,rgba(255,193,7,.09),rgba(255,193,7,.025))}
+.admin-rank-row.is-second{border-color:rgba(201,208,218,.15);background:rgba(201,208,218,.035)}
+.admin-rank-row.is-third{border-color:rgba(195,128,78,.16);background:rgba(195,128,78,.035)}
+.admin-rank-badge{display:flex;align-items:center;gap:6px;min-width:0}
+.admin-rank-badge>strong{display:grid;place-items:center;width:23px;height:23px;flex:0 0 23px;border:1px solid rgba(255,255,255,.12);border-radius:50%;color:#ccc4b7;font-size:11px}
+.admin-rank-row.is-winner .admin-rank-badge>strong{border-color:rgba(255,193,7,.42);background:rgba(255,193,7,.13);color:#ffd770}
+.admin-rank-row.is-second .admin-rank-badge>strong{border-color:rgba(201,208,218,.34);color:#d4d9df}
+.admin-rank-row.is-third .admin-rank-badge>strong{border-color:rgba(195,128,78,.4);color:#dfa578}
+.admin-rank-badge>small{color:#aaa397;font-size:8px;font-weight:800;letter-spacing:.045em;line-height:1.2}
+.admin-rank-row.is-winner .admin-rank-badge>small{color:#f2cb69}
+.admin-rank-candidate{display:grid;gap:6px;min-width:0}
+.admin-rank-candidate>strong{overflow-wrap:anywhere;color:#e8e3da;font-size:12px;line-height:1.3}
+.admin-rank-track{display:block;height:4px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
+.admin-rank-track i{display:block;height:100%;border-radius:inherit;background:#aaa397}
+.admin-rank-row.is-winner .admin-rank-track i{background:linear-gradient(90deg,#ffe16c,#ff8a22)}
+.admin-rank-row.is-second .admin-rank-track i{background:linear-gradient(90deg,#cbd1d8,#7f8994)}
+.admin-rank-row.is-third .admin-rank-track i{background:linear-gradient(90deg,#d9a178,#85573f)}
+.admin-rank-count{color:#e6d5ad;font-size:10px;white-space:nowrap}
+.admin-voter-list{grid-column:2 / -1;color:#a39b8e;font-size:10px}
+.admin-voter-list summary{width:max-content;max-width:100%;cursor:pointer;list-style:none}
+.admin-voter-list summary::-webkit-details-marker{display:none}
+.admin-voter-list summary::before{content:"＋";display:inline-grid;place-items:center;width:15px;height:15px;margin-right:5px;border:1px solid rgba(255,255,255,.15);border-radius:50%;font-size:10px;vertical-align:middle}
+.admin-voter-list[open] summary::before{content:"−"}
+.admin-voter-list>div{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.admin-voter-list>div span{padding:4px 7px;border:1px solid rgba(255,193,7,.13);border-radius:999px;background:rgba(255,193,7,.045);color:#ddd3c1;font-size:10px}
+.admin-no-votes{margin:0;padding:12px;color:#888278;font-size:12px}
+@media(max-width:900px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) minmax(245px,290px);gap:20px}
+  .vote-countdown{padding:15px}
+  .admin-nomination-results{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:700px){
+  .hero-topline{grid-template-columns:minmax(0,1fr);gap:5px}
+  .vote-countdown{justify-self:start;max-width:380px;margin:5px 0 20px}
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:10px}
+  .admin-rank-row{grid-template-columns:82px minmax(70px,1fr) auto;gap:7px;padding:8px}
+}
+@media(max-width:430px){
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:6px}
+  .countdown-label{font-size:9px}
+  .vote-countdown{padding:13px 14px}
+  .countdown-unit strong{font-size:23px}
+  .admin-rank-row{grid-template-columns:73px minmax(60px,1fr) auto;gap:6px;padding:7px}
+  .admin-rank-badge{gap:4px}
+  .admin-rank-badge>small{font-size:7px}
+  .admin-rank-badge>strong{width:20px;height:20px;flex-basis:20px;font-size:10px}
+  .admin-rank-count{font-size:9px}
+  .admin-voter-list{font-size:9px}
+}
+@media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:5px}}
+
+
+/* Final pass: accessible page scroll below the floating navigation. */
+html::-webkit-scrollbar-track:vertical{margin-top:95px}
+@media(max-width:975px){html::-webkit-scrollbar-track:vertical{margin-top:87.5px}}
+
+/* Countdown typography is the focus; remove the enclosing plate and center its copy. */
+.vote-countdown{max-width:390px;padding:8px 0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.countdown-label,.countdown-deadline{text-align:center}
+.countdown-label{color:#d5bd80;font-size:11px;letter-spacing:.17em}
+.countdown-values{justify-content:center;gap:10px;margin:15px 0 10px}
+.countdown-unit{min-width:58px;gap:5px}
+.countdown-unit strong{font-family:"Rubik",var(--font),sans-serif;font-size:clamp(34px,3vw,43px);font-weight:700;letter-spacing:.015em;font-variant-numeric:tabular-nums;line-height:.98;text-shadow:0 0 22px rgba(255,191,58,.14)}
+.countdown-unit small{font-size:10px;letter-spacing:.035em}
+.countdown-separator{margin-top:-10px;font-size:26px}
+.countdown-deadline{font-size:12px}
+.vote-countdown.is-finished{border:0;background:transparent}
+.vote-countdown.is-finished .countdown-unit strong{color:#bde6ae}
+@media(max-width:700px){
+  .vote-countdown{max-width:420px}
+  .countdown-values{gap:clamp(5px,2vw,12px)}
+  .countdown-unit{min-width:clamp(48px,14vw,65px)}
+}
+
+/* Matching, slightly wider and flatter FLARE wordmarks in both positions. */
+.intro-logo{transform:scaleX(1.08) scaleY(.9)}
+.wordmark>span{display:inline-block;transform:scaleX(1.08) scaleY(.9)}
+
+/* Center the close glyph optically, and keep its size stable on hover. */
+.close-button{position:relative;font-size:0!important;transition:color .18s ease,background-color .18s ease,border-color .18s ease!important}
+.close-button::before,.close-button::after{position:absolute;top:50%;left:50%;width:16px;height:1.5px;border-radius:2px;background:currentColor;content:"";transform:translate(-50%,-50%) rotate(45deg)}
+.close-button::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.nom-detail-top .close-button:hover,
+.nomination-list-modal>.modal-header .close-button:hover,
+.admin-head .close-button:hover{transform:none!important}
+
+/* Keep nomination detail chrome fixed while its card grid owns the scrollbar. */
+.nomination-detail-modal{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.nom-detail-top{position:relative;top:auto;flex:0 0 auto}
+.nom-detail-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#463b2e #10100f}
+.nom-detail-scroll::-webkit-scrollbar{width:9px}
+.nom-detail-scroll::-webkit-scrollbar-track{margin-block:10px;background:#10100f;border-radius:999px}
+.nom-detail-scroll::-webkit-scrollbar-thumb{border:2px solid #10100f;border-radius:999px;background:#463b2e}
+.nomination-detail-modal>.vote-actions{position:relative;bottom:auto;flex:0 0 auto}
+
+/* Identical modal header geometry for both nomination lists. */
+.nomination-list-modal{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.nomination-list-modal>.modal-header.primary-list-header,
+.nomination-list-modal>.modal-header.extra-list-header{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;min-height:82px;padding:17px 30px;border-bottom:1px solid rgba(255,255,255,.08);background:#0e0e0d}
+.nomination-list-modal>.modal-header.primary-list-header h2,
+.nomination-list-modal>.modal-header.extra-list-header h2{margin:0;color:#f6f1e7;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:0}
+.nomination-list-modal>.nomination-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.nomination-list-modal>.nomination-grid::-webkit-scrollbar-track{margin-block:10px;background:#0e0e0d}
+@media(max-width:600px){
+  .nomination-list-modal>.modal-header.primary-list-header,
+  .nomination-list-modal>.modal-header.extra-list-header{min-height:70px;padding:13px 16px}
+  .nomination-list-modal>.modal-header.primary-list-header h2,
+  .nomination-list-modal>.modal-header.extra-list-header h2{font-size:23px}
+}
+
+/* Organizer dialog: a stationary title row and a genuinely scrollable results body. */
+.admin-modal{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.admin-modal>.admin-head{flex:0 0 auto}
+.admin-modal>.admin-wrap{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+
+/* Make the visible eye unmistakably indicate that the PIN is being revealed. */
+.pin-toggle[aria-pressed="true"]{color:#ffd12e;background:rgba(255,209,46,.1)}
+.pin-toggle[aria-pressed="true"]:hover{color:#ffe16b;background:rgba(255,209,46,.15)}
+
+/* Distinguish the stored poll answer from an unsaved replacement choice. */
+.poll-option-date .poll-choice-status{display:block;margin-top:5px;color:#a9a195;font-size:9px;font-weight:800;letter-spacing:.1em;line-height:1.25}
+.poll-option.pending-choice{border-color:rgba(186,117,255,.68);background:linear-gradient(110deg,rgba(111,45,154,.14),rgba(18,17,18,.92));box-shadow:inset 3px 0 #b875ff,0 0 20px rgba(156,82,213,.08)}
+.poll-option.pending-choice .radio{border-color:#c58cff;box-shadow:0 0 0 3px rgba(184,117,255,.11)}
+.poll-option.pending-choice .poll-choice-status{color:#d3a3ff}
+.poll-option.saved-choice:not(.selected){border-color:rgba(255,193,7,.29);background:linear-gradient(110deg,rgba(255,193,7,.055),rgba(17,17,16,.92))}
+.poll-option.saved-choice:not(.selected) .poll-choice-status{color:#cfb56f}
+.poll-option.selected.saved-choice .poll-choice-status{color:#f4cf72}
+.poll-option.selected.pending-choice .poll-choice-status{color:#d3a3ff}
+.poll-footer #save-event-poll:disabled{opacity:.48}
+
+
+/* Use a locally bundled, true display-black typeface for both FLARE wordmarks. */
+@font-face{
+  font-family:"Archivo Black";
+  src:url("assets/brand/ArchivoBlack-Regular.woff2?v=1") format("woff2");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+.intro-logo,.wordmark,.wordmark>span{font-family:"Archivo Black",sans-serif;font-weight:400;font-synthesis:none;letter-spacing:.035em}
+/* The text is painted once on the inner span; remove inherited parent paint/shadows. */
+.wordmark{background:none;-webkit-background-clip:border-box;background-clip:border-box;text-shadow:none}
+.wordmark>span{text-shadow:none}
+
+/* Give the countdown a wide column so larger digits have room instead of shrinking. */
+.hero-topline{grid-template-columns:minmax(0,1fr) minmax(420px,480px);gap:clamp(24px,3.5vw,56px)}
+.vote-countdown{max-width:480px;padding:8px 0}
+.countdown-label{font-size:12px;letter-spacing:.17em}
+.countdown-values{justify-content:center;gap:10px;margin:16px 0 11px}
+.countdown-unit{min-width:78px;gap:6px}
+.countdown-unit strong{font-family:"Archivo Black",sans-serif;font-size:clamp(48px,4.2vw,64px);font-weight:400;line-height:.98;letter-spacing:0}
+.countdown-unit small{font-size:11px}
+.countdown-separator{margin-top:-12px;font-size:31px}
+.countdown-deadline{font-size:14px}
+@media(max-width:900px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) minmax(320px,360px);gap:20px}
+  .vote-countdown{max-width:360px}
+  .countdown-values{gap:6px}
+  .countdown-unit{min-width:56px}
+  .countdown-unit strong{font-size:clamp(43px,5.4vw,54px)}
+}
+@media(max-width:700px){
+  .hero-topline{grid-template-columns:minmax(0,1fr);gap:12px}
+  .vote-countdown{width:100%;max-width:480px;margin:5px 0 20px;padding:8px 0}
+  .countdown-unit{min-width:clamp(58px,15vw,78px)}
+  .countdown-unit strong{font-size:clamp(44px,8vw,56px)}
+  .countdown-values{gap:clamp(6px,2.3vw,12px)}
+}
+@media(max-width:430px){
+  .countdown-label{font-size:10px}
+  .countdown-unit{min-width:clamp(48px,14vw,60px)}
+  .countdown-unit strong{font-size:clamp(38px,11vw,47px)}
+  .countdown-unit small{font-size:9px}
+  .countdown-separator{font-size:24px}
+  .countdown-deadline{font-size:12px}
+}
+
+/* Keep the winners viewport clipped to the same rounded silhouette as its cards. */
+.winner-window{overflow:hidden;border-radius:22px;isolation:isolate}
+@media(max-width:600px){.winner-window{border-radius:17px}}
+
+/* Let nomination rows size to their full cards; only the list viewport should scroll. */
+.nomination-list-modal>.nomination-grid{grid-auto-rows:max-content;align-content:start}
+.nomination-list-modal .nomination-tile{height:auto;min-height:0;overflow:hidden}
+.nomination-list-modal .nomination-card-body{position:relative;z-index:1;display:flex;flex:1 1 auto;min-height:170px;visibility:visible;opacity:1}
+.nomination-list-modal .nomination-tile-title{display:block;visibility:visible;opacity:1;color:#f2eee6}
+.nomination-list-modal .nomination-tile-description{display:-webkit-box;visibility:visible;opacity:1;color:#b4afa6}
+@media(max-width:975px){.nomination-list-modal .nomination-card-body{min-height:155px}}
+@media(max-width:600px){.nomination-list-modal .nomination-card-body{min-height:155px}}
+
+
+/* Align nomination copy with the top of its content column; no spacer or text backplate. */
+.nomination-list-modal .nomination-card-body{justify-content:flex-start}
+.nomination-list-modal .nomination-card-copy{display:grid;gap:6px;margin-top:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.nomination-list-modal .nomination-card-meta{margin-top:8px;padding-top:8px}
+.nominee-card.self:focus-visible::after{opacity:1}
+
+/* Separate organizer data into compact, keyboard-accessible tabs. */
+.admin-tabs{display:flex;flex:0 0 auto;gap:8px;padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(18,17,15,.98)}
+.admin-tab{position:relative;min-height:42px;padding:0 17px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#151412;color:#aaa397;font:600 12px var(--font);letter-spacing:.035em;cursor:pointer;transition:color .18s,border-color .18s,background .18s}
+.admin-tab:hover{border-color:rgba(255,193,7,.32);color:#f1d48e}
+.admin-tab.is-active{border-color:rgba(255,193,7,.42);background:linear-gradient(145deg,rgba(255,193,7,.14),rgba(255,132,20,.07));color:#ffdc83;box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.admin-tab:focus-visible{outline:2px solid #ffc107;outline-offset:2px}
+.admin-tab-panel[hidden]{display:none!important}
+.admin-modal>.admin-wrap{padding-top:22px}
+.admin-modal .admin-tab-panel{margin-top:22px}
+.admin-modal .admin-ballot-results{margin-top:22px}
+.admin-modal .admin-poll{margin-top:22px}
+.admin-statistics-panel{display:grid;gap:20px}
+.admin-stats-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.admin-stat-card{display:grid;gap:9px;min-width:0;padding:17px;border:1px solid rgba(255,193,7,.16);border-radius:13px;background:linear-gradient(145deg,rgba(33,29,21,.8),rgba(17,17,16,.95))}
+.admin-stat-card>span{color:#b5ad9f;font-size:11px;line-height:1.4}
+.admin-stat-card>strong{color:#ffdb82;font-size:27px;line-height:1;font-variant-numeric:tabular-nums}
+.admin-stat-lists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-stat-list-card{min-width:0;padding:16px;border:1px solid rgba(255,255,255,.085);border-radius:12px;background:rgba(255,255,255,.02)}
+.admin-stat-list-card:last-child{grid-column:1/-1}
+.admin-stat-list-card h3{margin:0 0 12px;color:#e7dfd0;font-size:14px}
+.admin-stat-list{display:flex;flex-wrap:wrap;gap:7px;margin:0;padding:0;list-style:none}
+.admin-stat-list li{padding:6px 9px;border:1px solid rgba(255,193,7,.13);border-radius:999px;background:rgba(255,193,7,.045);color:#d9d1c2;font-size:11px}
+.admin-stat-empty,.admin-stat-note{margin:0;color:#938b7e;font-size:12px;line-height:1.6}
+.admin-stat-note{padding:12px 14px;border:1px solid rgba(255,193,7,.19);border-radius:10px;background:rgba(255,193,7,.045);color:#d8c18b}
+@media(max-width:650px){
+  .admin-tabs{gap:6px;padding:10px 12px}
+  .admin-tab{flex:1 1 0;min-width:0;padding-inline:7px;font-size:10px}
+  .admin-stats-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .admin-stat-card{padding:12px 9px}
+  .admin-stat-card>span{font-size:9px}
+  .admin-stat-card>strong{font-size:22px}
+  .admin-stat-lists{grid-template-columns:minmax(0,1fr)}
+  .admin-stat-list-card:last-child{grid-column:auto}
+}
+@media(max-width:390px){.admin-tab{font-size:9px;padding-inline:5px}.admin-tabs{gap:4px}}
+
+/* The countdown should read as a hero element, comparable to the heading beside it. */
+.hero-topline{grid-template-columns:minmax(0,1fr) minmax(430px,520px);gap:clamp(24px,3.5vw,56px)}
+.vote-countdown{max-width:520px;width:100%;padding:8px 0}
+.countdown-label{font-size:16px;letter-spacing:.11em;line-height:1.25}
+.countdown-values{gap:9px;margin:14px 0 9px}
+.countdown-unit{min-width:78px;gap:5px}
+.countdown-unit strong{font-size:clamp(56px,4vw,76px);line-height:.94}
+.countdown-unit small{font-size:14px;letter-spacing:.02em}
+.countdown-separator{margin-top:-12px;font-size:34px}
+.countdown-deadline{font-size:16px;line-height:1.35}
+@media(max-width:900px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) minmax(320px,360px);gap:20px}
+  .vote-countdown{max-width:360px}
+  .countdown-label{font-size:13px}
+  .countdown-values{gap:6px;margin:13px 0 8px}
+  .countdown-unit{min-width:56px}
+  .countdown-unit strong{font-size:clamp(44px,5.5vw,54px)}
+  .countdown-unit small{font-size:11px}
+  .countdown-deadline{font-size:13px}
+}
+@media(max-width:700px){
+  .hero-topline{grid-template-columns:minmax(0,1fr);gap:12px}
+  .vote-countdown{width:100%;max-width:480px;margin:5px 0 20px;padding:8px 0}
+  .countdown-label{font-size:14px}
+  .countdown-unit{min-width:clamp(58px,15vw,78px)}
+  .countdown-unit strong{font-size:clamp(48px,8vw,60px)}
+  .countdown-unit small{font-size:12px}
+  .countdown-deadline{font-size:14px}
+}
+@media(max-width:430px){
+  .countdown-label{font-size:11px;letter-spacing:.08em}
+  .countdown-unit{min-width:clamp(48px,14vw,60px)}
+  .countdown-unit strong{font-size:clamp(38px,11vw,47px)}
+  .countdown-unit small{font-size:9px}
+  .countdown-separator{font-size:24px}
+  .countdown-deadline{font-size:12px}
+}
+
+/* Header tabs replace the organizer title; the close control remains in the same row. */
+.admin-modal>.admin-head{display:flex;align-items:center;gap:14px;min-height:76px;padding:12px 22px}
+.admin-modal>.admin-head .admin-tabs{flex:1 1 auto;min-width:0;gap:8px;padding:0;border:0;background:transparent;overflow-x:auto;scrollbar-width:none}
+.admin-modal>.admin-head .admin-tabs::-webkit-scrollbar{display:none}
+.admin-modal>.admin-head .admin-tab{flex:1 0 auto;min-width:0;padding-inline:14px;white-space:nowrap}
+.admin-modal>.admin-head>.close-button{flex:0 0 44px}
+@media(max-width:650px){
+  .admin-modal>.admin-head{gap:8px;min-height:68px;padding:10px 12px}
+  .admin-modal>.admin-head .admin-tabs{gap:5px}
+  .admin-modal>.admin-head .admin-tab{flex:1 1 0;padding-inline:6px;font-size:10px}
+  .admin-modal>.admin-head>.close-button{flex-basis:40px;width:40px;height:40px}
+}
+@media(max-width:390px){.admin-modal>.admin-head .admin-tab{padding-inline:4px;font-size:9px}}
+
+/* Local photo placeholders: every asset uses its own replaceable file and cover-fit crop. */
+.nomination-art{position:relative;display:block;overflow:hidden;padding:0!important;background:none!important}
+.nomination-art-photo{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.nomination-art::after{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(5,6,8,.02),rgba(5,6,8,.1) 52%,rgba(5,6,8,.42));content:"";pointer-events:none}
+.nomination-art .nomination-voted{position:relative;z-index:2}
+.visual{isolation:isolate;background:#111!important}
+.visual::before{display:none!important}
+.visual::after{inset:0;z-index:1;height:auto;left:0;right:0;bottom:0;border-radius:0;filter:none;background:linear-gradient(180deg,transparent 48%,rgba(3,4,5,.36));pointer-events:none}
+.visual-photo{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .35s ease}
+.nominee-card:hover .visual-photo{transform:scale(1.035)}
+.nominee-card.locked:hover .visual-photo,.nominee-card.video:hover .visual-photo{transform:none}
+.portrait{display:block;object-fit:cover;object-position:center 34%;color:transparent}
+
+/* Admin design library and per-photo controls. */
+.admin-design-panel{display:grid;gap:18px}
+.admin-design-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:16px;border:1px solid rgba(255,193,7,.14);border-radius:13px;background:linear-gradient(145deg,rgba(28,25,19,.75),rgba(17,17,16,.94))}
+.admin-design-intro h3{margin:0 0 8px;color:#f3eee4;font-size:17px}
+.admin-design-intro p{margin:0;color:#aaa397;font-size:12px;line-height:1.55}
+.admin-design-intro .admin-design-note{margin-top:7px;color:#d1b975}
+.admin-design-export{flex:0 0 auto;align-self:center;padding:12px 15px;font-size:11px;white-space:nowrap}
+.admin-design-toolbar{display:grid;gap:12px}
+.admin-design-filters{display:flex;flex-wrap:wrap;gap:7px}
+.admin-design-filters button{padding:8px 11px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:#151412;color:#aaa397;font-size:10px;cursor:pointer}
+.admin-design-filters button.is-active{border-color:rgba(255,193,7,.38);background:rgba(255,193,7,.1);color:#f7d37d}
+#admin-design-search{width:min(100%,360px);padding:10px 12px;border:1px solid rgba(255,255,255,.11);border-radius:9px;background:#10100f;color:#f5f0e7;font:12px var(--font)}
+#admin-design-search:focus-visible{outline:2px solid #ffc107;outline-offset:2px}
+.admin-design-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.admin-design-card{min-width:0;overflow:hidden;border:1px solid rgba(255,255,255,.085);border-radius:12px;background:linear-gradient(145deg,#191816,#111110)}
+.admin-design-card[hidden]{display:none!important}
+.admin-design-preview{position:relative;aspect-ratio:1.52;overflow:hidden;background:#090909}
+.admin-design-preview.is-avatar{aspect-ratio:1}
+.admin-design-preview>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.admin-design-info{display:grid;gap:5px;padding:10px 11px 5px}
+.admin-design-info h4{overflow:hidden;margin:0;color:#eee9e0;font-size:11px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
+.admin-design-info code{overflow:hidden;color:#9a907f;font:9px/1.4 ui-monospace,monospace;text-overflow:ellipsis;white-space:nowrap}
+.admin-design-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 10px 10px}
+.admin-design-upload,.admin-design-download,.admin-design-reset{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 8px;border:1px solid rgba(255,193,7,.22);border-radius:7px;background:rgba(255,193,7,.06);color:#e5c878;font-size:9px;cursor:pointer}
+.admin-design-upload:hover,.admin-design-download:hover,.admin-design-reset:hover:not(:disabled){border-color:rgba(255,193,7,.5);background:rgba(255,193,7,.13)}
+.admin-design-upload input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.admin-design-upload:focus-within{outline:2px solid #ffc107;outline-offset:2px}
+.admin-design-reset:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:850px){.admin-design-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+  .admin-design-intro{flex-direction:column}
+  .admin-design-export{align-self:stretch}
+  .admin-design-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .admin-design-info{padding:8px 8px 4px}
+  .admin-design-info h4{font-size:10px}
+  .admin-design-actions{gap:4px;padding:6px 7px 8px}
+  .admin-design-upload,.admin-design-download,.admin-design-reset{min-height:28px;padding:0 6px;font-size:8px}
+}
+@media(max-width:390px){.admin-design-grid{grid-template-columns:1fr}}
+@media(min-width:901px) and (max-width:1200px){
+  .countdown-label{font-size:13px}
+  .countdown-unit{min-width:65px}
+  .countdown-unit strong{font-size:clamp(46px,4.2vw,58px)}
+  .countdown-unit small{font-size:12px}
+  .countdown-deadline{font-size:14px}
+}
+@media(max-width:900px){
+  .countdown-label{font-size:12px}
+  .countdown-unit strong{font-size:clamp(40px,5vw,50px)}
+  .countdown-unit small,.countdown-deadline{font-size:11px}
+}
+
+/* These dialogs scroll in inner panes, so the outer modal must not reserve a fake scrollbar gutter. */
+.nomination-list-modal,.nomination-detail-modal,.admin-modal{scrollbar-gutter:auto}
