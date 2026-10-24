@@ -523,3 +523,63 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 .poll-option.selected.saved-choice .poll-choice-status{color:#f4cf72}
 .poll-option.selected.pending-choice .poll-choice-status{color:#d3a3ff}
 .poll-footer #save-event-poll:disabled{opacity:.48}
+
+
+/* Use a locally bundled, true display-black typeface for both FLARE wordmarks. */
+@font-face{
+  font-family:"Archivo Black";
+  src:url("assets/brand/ArchivoBlack-Regular.woff2?v=1") format("woff2");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+.intro-logo,.wordmark,.wordmark>span{font-family:"Archivo Black",sans-serif;font-weight:400;font-synthesis:none;letter-spacing:.035em}
+/* The text is painted once on the inner span; remove inherited parent paint/shadows. */
+.wordmark{background:none;-webkit-background-clip:border-box;background-clip:border-box;text-shadow:none}
+.wordmark>span{text-shadow:none}
+
+/* Give the countdown a wide column so larger digits have room instead of shrinking. */
+.hero-topline{grid-template-columns:minmax(0,1fr) minmax(420px,480px);gap:clamp(24px,3.5vw,56px)}
+.vote-countdown{max-width:480px;padding:8px 0}
+.countdown-label{font-size:12px;letter-spacing:.17em}
+.countdown-values{justify-content:center;gap:10px;margin:16px 0 11px}
+.countdown-unit{min-width:78px;gap:6px}
+.countdown-unit strong{font-family:"Archivo Black",sans-serif;font-size:clamp(48px,4.2vw,64px);font-weight:400;line-height:.98;letter-spacing:0}
+.countdown-unit small{font-size:11px}
+.countdown-separator{margin-top:-12px;font-size:31px}
+.countdown-deadline{font-size:14px}
+@media(max-width:900px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) minmax(320px,360px);gap:20px}
+  .vote-countdown{max-width:360px}
+  .countdown-values{gap:6px}
+  .countdown-unit{min-width:56px}
+  .countdown-unit strong{font-size:clamp(43px,5.4vw,54px)}
+}
+@media(max-width:700px){
+  .hero-topline{grid-template-columns:minmax(0,1fr);gap:12px}
+  .vote-countdown{width:100%;max-width:480px;margin:5px 0 20px;padding:8px 0}
+  .countdown-unit{min-width:clamp(58px,15vw,78px)}
+  .countdown-unit strong{font-size:clamp(44px,8vw,56px)}
+  .countdown-values{gap:clamp(6px,2.3vw,12px)}
+}
+@media(max-width:430px){
+  .countdown-label{font-size:10px}
+  .countdown-unit{min-width:clamp(48px,14vw,60px)}
+  .countdown-unit strong{font-size:clamp(38px,11vw,47px)}
+  .countdown-unit small{font-size:9px}
+  .countdown-separator{font-size:24px}
+  .countdown-deadline{font-size:12px}
+}
+
+/* Keep the winners viewport clipped to the same rounded silhouette as its cards. */
+.winner-window{overflow:hidden;border-radius:22px;isolation:isolate}
+@media(max-width:600px){.winner-window{border-radius:17px}}
+
+/* Let nomination rows size to their full cards; only the list viewport should scroll. */
+.nomination-list-modal>.nomination-grid{grid-auto-rows:max-content;align-content:start}
+.nomination-list-modal .nomination-tile{height:auto;min-height:0;overflow:hidden}
+.nomination-list-modal .nomination-card-body{position:relative;z-index:1;display:flex;flex:1 1 auto;min-height:170px;visibility:visible;opacity:1}
+.nomination-list-modal .nomination-tile-title{display:block;visibility:visible;opacity:1;color:#f2eee6}
+.nomination-list-modal .nomination-tile-description{display:-webkit-box;visibility:visible;opacity:1;color:#b4afa6}
+@media(max-width:975px){.nomination-list-modal .nomination-card-body{min-height:155px}}
+@media(max-width:600px){.nomination-list-modal .nomination-card-body{min-height:155px}}
