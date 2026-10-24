@@ -626,3 +626,123 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
   .admin-stat-list-card:last-child{grid-column:auto}
 }
 @media(max-width:390px){.admin-tab{font-size:9px;padding-inline:5px}.admin-tabs{gap:4px}}
+
+/* Keep nomination copy low, but remove the rejected text backplate entirely. */
+.nomination-list-modal .nomination-card-copy{margin-top:auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+
+/* The countdown should read as a hero element, comparable to the heading beside it. */
+.hero-topline{grid-template-columns:minmax(0,1fr) minmax(430px,520px);gap:clamp(24px,3.5vw,56px)}
+.vote-countdown{max-width:520px;width:100%;padding:8px 0}
+.countdown-label{font-size:16px;letter-spacing:.11em;line-height:1.25}
+.countdown-values{gap:9px;margin:14px 0 9px}
+.countdown-unit{min-width:78px;gap:5px}
+.countdown-unit strong{font-size:clamp(56px,4vw,76px);line-height:.94}
+.countdown-unit small{font-size:14px;letter-spacing:.02em}
+.countdown-separator{margin-top:-12px;font-size:34px}
+.countdown-deadline{font-size:16px;line-height:1.35}
+@media(max-width:900px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) minmax(320px,360px);gap:20px}
+  .vote-countdown{max-width:360px}
+  .countdown-label{font-size:13px}
+  .countdown-values{gap:6px;margin:13px 0 8px}
+  .countdown-unit{min-width:56px}
+  .countdown-unit strong{font-size:clamp(44px,5.5vw,54px)}
+  .countdown-unit small{font-size:11px}
+  .countdown-deadline{font-size:13px}
+}
+@media(max-width:700px){
+  .hero-topline{grid-template-columns:minmax(0,1fr);gap:12px}
+  .vote-countdown{width:100%;max-width:480px;margin:5px 0 20px;padding:8px 0}
+  .countdown-label{font-size:14px}
+  .countdown-unit{min-width:clamp(58px,15vw,78px)}
+  .countdown-unit strong{font-size:clamp(48px,8vw,60px)}
+  .countdown-unit small{font-size:12px}
+  .countdown-deadline{font-size:14px}
+}
+@media(max-width:430px){
+  .countdown-label{font-size:11px;letter-spacing:.08em}
+  .countdown-unit{min-width:clamp(48px,14vw,60px)}
+  .countdown-unit strong{font-size:clamp(38px,11vw,47px)}
+  .countdown-unit small{font-size:9px}
+  .countdown-separator{font-size:24px}
+  .countdown-deadline{font-size:12px}
+}
+
+/* Header tabs replace the organizer title; the close control remains in the same row. */
+.admin-modal>.admin-head{display:flex;align-items:center;gap:14px;min-height:76px;padding:12px 22px}
+.admin-modal>.admin-head .admin-tabs{flex:1 1 auto;min-width:0;gap:8px;padding:0;border:0;background:transparent;overflow-x:auto;scrollbar-width:none}
+.admin-modal>.admin-head .admin-tabs::-webkit-scrollbar{display:none}
+.admin-modal>.admin-head .admin-tab{flex:1 0 auto;min-width:0;padding-inline:14px;white-space:nowrap}
+.admin-modal>.admin-head>.close-button{flex:0 0 44px}
+@media(max-width:650px){
+  .admin-modal>.admin-head{gap:8px;min-height:68px;padding:10px 12px}
+  .admin-modal>.admin-head .admin-tabs{gap:5px}
+  .admin-modal>.admin-head .admin-tab{flex:1 1 0;padding-inline:6px;font-size:10px}
+  .admin-modal>.admin-head>.close-button{flex-basis:40px;width:40px;height:40px}
+}
+@media(max-width:390px){.admin-modal>.admin-head .admin-tab{padding-inline:4px;font-size:9px}}
+
+/* Local photo placeholders: every asset uses its own replaceable file and cover-fit crop. */
+.nomination-art{position:relative;display:block;overflow:hidden;padding:0!important;background:none!important}
+.nomination-art-photo{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.nomination-art::after{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(5,6,8,.02),rgba(5,6,8,.1) 52%,rgba(5,6,8,.42));content:"";pointer-events:none}
+.nomination-art .nomination-voted{position:relative;z-index:2}
+.visual{isolation:isolate;background:#111!important}
+.visual::before{display:none!important}
+.visual::after{inset:0;z-index:1;height:auto;left:0;right:0;bottom:0;border-radius:0;filter:none;background:linear-gradient(180deg,transparent 48%,rgba(3,4,5,.36));pointer-events:none}
+.visual-photo{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .35s ease}
+.nominee-card:hover .visual-photo{transform:scale(1.035)}
+.nominee-card.locked:hover .visual-photo,.nominee-card.video:hover .visual-photo{transform:none}
+.portrait{display:block;object-fit:cover;object-position:center 34%;color:transparent}
+
+/* Admin design library and per-photo controls. */
+.admin-design-panel{display:grid;gap:18px}
+.admin-design-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:16px;border:1px solid rgba(255,193,7,.14);border-radius:13px;background:linear-gradient(145deg,rgba(28,25,19,.75),rgba(17,17,16,.94))}
+.admin-design-intro h3{margin:0 0 8px;color:#f3eee4;font-size:17px}
+.admin-design-intro p{margin:0;color:#aaa397;font-size:12px;line-height:1.55}
+.admin-design-intro .admin-design-note{margin-top:7px;color:#d1b975}
+.admin-design-export{flex:0 0 auto;align-self:center;padding:12px 15px;font-size:11px;white-space:nowrap}
+.admin-design-toolbar{display:grid;gap:12px}
+.admin-design-filters{display:flex;flex-wrap:wrap;gap:7px}
+.admin-design-filters button{padding:8px 11px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:#151412;color:#aaa397;font-size:10px;cursor:pointer}
+.admin-design-filters button.is-active{border-color:rgba(255,193,7,.38);background:rgba(255,193,7,.1);color:#f7d37d}
+#admin-design-search{width:min(100%,360px);padding:10px 12px;border:1px solid rgba(255,255,255,.11);border-radius:9px;background:#10100f;color:#f5f0e7;font:12px var(--font)}
+#admin-design-search:focus-visible{outline:2px solid #ffc107;outline-offset:2px}
+.admin-design-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.admin-design-card{min-width:0;overflow:hidden;border:1px solid rgba(255,255,255,.085);border-radius:12px;background:linear-gradient(145deg,#191816,#111110)}
+.admin-design-card[hidden]{display:none!important}
+.admin-design-preview{position:relative;aspect-ratio:1.52;overflow:hidden;background:#090909}
+.admin-design-preview.is-avatar{aspect-ratio:1}
+.admin-design-preview>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.admin-design-info{display:grid;gap:5px;padding:10px 11px 5px}
+.admin-design-info h4{overflow:hidden;margin:0;color:#eee9e0;font-size:11px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
+.admin-design-info code{overflow:hidden;color:#9a907f;font:9px/1.4 ui-monospace,monospace;text-overflow:ellipsis;white-space:nowrap}
+.admin-design-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 10px 10px}
+.admin-design-upload,.admin-design-download,.admin-design-reset{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 8px;border:1px solid rgba(255,193,7,.22);border-radius:7px;background:rgba(255,193,7,.06);color:#e5c878;font-size:9px;cursor:pointer}
+.admin-design-upload:hover,.admin-design-download:hover,.admin-design-reset:hover:not(:disabled){border-color:rgba(255,193,7,.5);background:rgba(255,193,7,.13)}
+.admin-design-upload input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.admin-design-upload:focus-within{outline:2px solid #ffc107;outline-offset:2px}
+.admin-design-reset:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:850px){.admin-design-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+  .admin-design-intro{flex-direction:column}
+  .admin-design-export{align-self:stretch}
+  .admin-design-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .admin-design-info{padding:8px 8px 4px}
+  .admin-design-info h4{font-size:10px}
+  .admin-design-actions{gap:4px;padding:6px 7px 8px}
+  .admin-design-upload,.admin-design-download,.admin-design-reset{min-height:28px;padding:0 6px;font-size:8px}
+}
+@media(max-width:390px){.admin-design-grid{grid-template-columns:1fr}}
+@media(min-width:901px) and (max-width:1200px){
+  .countdown-label{font-size:13px}
+  .countdown-unit{min-width:65px}
+  .countdown-unit strong{font-size:clamp(46px,4.2vw,58px)}
+  .countdown-unit small{font-size:12px}
+  .countdown-deadline{font-size:14px}
+}
+@media(max-width:900px){
+  .countdown-label{font-size:12px}
+  .countdown-unit strong{font-size:clamp(40px,5vw,50px)}
+  .countdown-unit small,.countdown-deadline{font-size:11px}
+}
