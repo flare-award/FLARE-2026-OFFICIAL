@@ -585,9 +585,9 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 @media(max-width:600px){.nomination-list-modal .nomination-card-body{min-height:155px}}
 
 
-/* Lower the nomination copy into a subtle backplate and close the excessive dead space. */
+/* Align nomination copy with the top of its content column; no spacer or text backplate. */
 .nomination-list-modal .nomination-card-body{justify-content:flex-start}
-.nomination-list-modal .nomination-card-copy{display:grid;gap:6px;margin-top:auto;padding:13px 14px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:linear-gradient(145deg,rgba(24,23,21,.98),rgba(16,16,15,.96));box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.nomination-list-modal .nomination-card-copy{display:grid;gap:6px;margin-top:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
 .nomination-list-modal .nomination-card-meta{margin-top:8px;padding-top:8px}
 .nominee-card.self:focus-visible::after{opacity:1}
 
@@ -626,9 +626,6 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
   .admin-stat-list-card:last-child{grid-column:auto}
 }
 @media(max-width:390px){.admin-tab{font-size:9px;padding-inline:5px}.admin-tabs{gap:4px}}
-
-/* Keep nomination copy low, but remove the rejected text backplate entirely. */
-.nomination-list-modal .nomination-card-copy{margin-top:auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
 
 /* The countdown should read as a hero element, comparable to the heading beside it. */
 .hero-topline{grid-template-columns:minmax(0,1fr) minmax(430px,520px);gap:clamp(24px,3.5vw,56px)}
