@@ -10,7 +10,7 @@ body{background:#010101}
 .brand-intro{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:47.5px;width:100%;height:100vh;height:100svh;min-height:575px;overflow:hidden;background:#010101}
 .intro-rays{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left center;z-index:0;user-select:none;-webkit-user-drag:none}
 .brand-intro::before{content:"";position:absolute;inset:-2.5px;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(1,1,1,.4) 0%,rgba(1,1,1,.4) 67%,rgba(1,1,1,.2) 100%),linear-gradient(180deg,rgba(1,1,1,.2) 0%,rgba(1,1,1,.24) 66%,#010101 100%)}
-.intro-logo{position:relative;z-index:2;margin:0;font-family:var(--logo);font-size:clamp(90px,15vw,240px);font-weight:900;line-height:.92;letter-spacing:.08em;text-align:center;text-transform:uppercase;color:transparent;background:linear-gradient(180deg,#F5E02C 0%,#F76801 100%);-webkit-background-clip:text;background-clip:text;transform:scaleX(1.28);filter:drop-shadow(0 2.5px 4px rgba(0,0,0,.45)) drop-shadow(0 0 7px rgba(245,224,44,.2)) drop-shadow(0 0 14px rgba(247,104,1,.15));user-select:none}
+.intro-logo{position:relative;z-index:2;margin:0;font-family:"Rubik",var(--font),sans-serif;font-size:clamp(90px,15vw,240px);font-weight:700;line-height:.92;letter-spacing:.045em;text-align:center;text-transform:uppercase;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;transform:none;filter:var(--flare-logo-glow);user-select:none}
 .intro-links{position:relative;z-index:3;display:flex;flex-wrap:wrap;justify-content:center;gap:17.5px;padding:0 25px}
 .intro-link{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 28.75px;border:1.25px solid transparent;border-radius:1248.75px;background:linear-gradient(110deg,#FFD54F 0%,#FF9800 100%);box-shadow:0 6.25px 25px rgba(255,152,0,.18);color:#1b1005;font-family:var(--font);font-size:15px;font-weight:600;letter-spacing:.02em;text-align:center;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
 .intro-link:nth-child(2){background:linear-gradient(#0a080b,#0a080b) padding-box,linear-gradient(110deg,#FF4D9D 0%,#7B1FA2 100%) border-box;color:#fff0dd;box-shadow:0 5px 22.5px rgba(123,31,162,.16)}
@@ -24,8 +24,8 @@ body{background:#010101}
 .topbar.is-scrolled .wordmark{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:opacity .25s ease .16s,transform .25s ease .16s,visibility 0s linear .16s}
 .topbar.is-scrolled #account-status{max-width:600px;opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:max-width .25s ease .12s,opacity .25s ease .12s,transform .25s ease .12s,visibility 0s linear .12s}
 .topbar.is-faq-hidden{transform:translate3d(0,-105%,0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease,background-color .3s ease,border-color .3s ease,visibility 0s linear .32s}
-.wordmark{display:flex;flex:0 0 auto;align-items:center;line-height:1;color:transparent;font-family:var(--logo);font-size:31.25px;font-weight:900;letter-spacing:.06em;white-space:nowrap;filter:drop-shadow(0 0 5px rgba(247,104,1,.16))}
-.wordmark>span{font:inherit;letter-spacing:inherit;color:transparent;background:linear-gradient(180deg,#F5E02C 0%,#F76801 100%);-webkit-background-clip:text;background-clip:text}
+.wordmark{display:flex;flex:0 0 auto;align-items:center;line-height:1;color:transparent;font-family:"Rubik",var(--font),sans-serif;font-size:31.25px;font-weight:700;letter-spacing:.045em;white-space:nowrap;filter:none}
+.wordmark>span{font:inherit;letter-spacing:inherit;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;filter:var(--flare-logo-glow)}
 main{margin:0;background:linear-gradient(180deg,#010101 0%,#0a0a0a 850px)}
 .hero{padding-top:122.5px}
 .hero h1{max-width:775px;font-size:clamp(60px,5.8vw,90px)}
@@ -49,7 +49,7 @@ html{scrollbar-width:thin;scrollbar-color:#3a332a #080808;scrollbar-gutter:stabl
 .modal::-webkit-scrollbar-thumb:hover,.admin-wrap::-webkit-scrollbar-thumb:hover{background:#735832}
 @media(max-width:975px){
   .brand-intro{gap:40px}
-  .intro-logo{font-size:clamp(75px,17vw,150px);transform:scaleX(1.12)}
+  .intro-logo{font-size:clamp(75px,17vw,150px);transform:none}
   .intro-links{gap:12.5px}
   .intro-link{min-height:57.5px;padding-inline:23.75px;font-size:13.75px}
   .topbar{height:87.5px;padding-inline:27.5px}
@@ -58,7 +58,7 @@ html{scrollbar-width:thin;scrollbar-color:#3a332a #080808;scrollbar-gutter:stabl
 }
 @media(max-width:600px){
   .brand-intro{min-height:625px;gap:25px}
-  .intro-logo{font-size:clamp(60px,18vw,120px);transform:scaleX(1.05)}
+  .intro-logo{font-size:clamp(60px,18vw,120px);transform:none}
   .intro-links{flex-direction:column;width:min(100%,362.5px)}
   .intro-link{width:100%}
   .topbar{padding-inline:20px}
@@ -117,10 +117,10 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 @media(prefers-reduced-motion:reduce){.modal.is-view-entering{animation:none}.close-button{transition:none}}
 
 /* Refined 2026 interaction and typography pass. */
-:root{--flare-logo-gradient:linear-gradient(100deg,#ffd45c 0%,#ff8500 100%)}
-.intro-logo,.wordmark,.wordmark>span{font-family:"Rubik",var(--font),sans-serif;font-weight:900;font-synthesis:none}
+:root{--flare-logo-gradient:linear-gradient(180deg,#F0DB2C 0%,#FE6F01 100%);--flare-logo-glow:drop-shadow(0 0 7px rgba(240,219,44,.34)) drop-shadow(0 0 18px rgba(254,111,1,.3)) drop-shadow(0 0 32px rgba(254,111,1,.16))}
+.intro-logo,.wordmark,.wordmark>span{font-family:"Rubik",var(--font),sans-serif;font-weight:700;font-synthesis:none}
 .intro-logo,.wordmark>span{background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text}
-.intro-logo{letter-spacing:.035em}
+.intro-logo{letter-spacing:.045em}
 .wordmark{letter-spacing:.045em}
 .hero h1,.section-heading h2,.poll-copy h2,.faq-intro h2,.modal-header h2,.nom-detail-title,.admin-head h2,.auth-title,.category-title{letter-spacing:0}
 .hero h1{letter-spacing:.005em}
@@ -308,6 +308,7 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
   .portrait{margin-bottom:10px}
   .poll-option-top{gap:8px}
   .poll-result-badge{letter-spacing:.04em}
+  .poll-option-date strong{font-size:13px}
   .faq-answer{padding-right:12px}
 }
 @media(max-width:360px){
@@ -326,3 +327,120 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
   .faq-question:hover{color:inherit}
   .nominee-card.self::after{inset:auto 0 0;min-height:38px;padding:7px 8px;font-size:9px;opacity:1}
 }
+
+/* Final brand consistency: a shared vertical gradient, medium bold weight and glow. */
+:root{
+  --flare-logo-gradient:linear-gradient(180deg,#F0DB2C 0%,#FE6F01 100%);
+  --flare-logo-glow:drop-shadow(0 0 7px rgba(240,219,44,.34)) drop-shadow(0 0 18px rgba(254,111,1,.3)) drop-shadow(0 0 32px rgba(254,111,1,.16));
+}
+.intro-logo,.wordmark,.wordmark>span{font-family:"Rubik",var(--font),sans-serif;font-weight:700;font-synthesis:none;letter-spacing:.045em}
+.intro-logo,.wordmark>span{background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;filter:var(--flare-logo-glow)}
+.intro-logo{filter:var(--flare-logo-glow);transform:none}
+.wordmark{filter:none}
+
+/* Keep the floating header above page content while leaving modal layers above it. */
+.topbar{z-index:19}
+.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:16px}
+
+/* Every close control uses the same centered, dark square treatment. */
+.nom-detail-top .close-button,
+.nomination-list-modal>.modal-header .close-button,
+.admin-head .close-button{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:0;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:#171614;color:#d7d1c8;font-size:27px;line-height:1;text-align:center;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.nom-detail-top .close-button:hover,
+.nomination-list-modal>.modal-header .close-button:hover,
+.admin-head .close-button:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.13);color:#ff8585;transform:scale(1.04)}
+
+/* A subtle completion mark instead of a text pill on voted nominations. */
+.nomination-voted{display:grid;place-items:center;width:35px;height:35px;padding:0;border:1px solid rgba(197,244,181,.64);border-radius:50%;background:linear-gradient(145deg,rgba(23,70,37,.96),rgba(11,34,20,.96));color:#d4ffc5;font-size:20px;font-weight:800;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.38),0 0 16px rgba(124,219,129,.18)}
+
+/* Paired carousel arrows remain the same glyph; the previous arrow is mirrored. */
+.carousel-controls .icon-button{display:grid;place-items:center;padding:0;line-height:1}
+.carousel-arrow{display:block;font-family:"Segoe UI Symbol","Noto Sans Symbols 2","Apple Symbols",Arial,sans-serif;font-size:25px;font-weight:400;line-height:1;transform:translateY(-1px)}
+.carousel-arrow-left{transform:scaleX(-1) translateY(-1px)}
+
+/* Poll weekday is integrated with the date, with no dangling secondary label. */
+.poll-option-date{display:block;min-width:0}
+.poll-option-date strong{font-size:16px;line-height:1.35}
+.poll-option-date small{display:none}
+
+/* Requested emphasis colors. */
+.poll-copy h2 em{color:#7900B9}
+.faq-intro h2 em{color:transparent;background:linear-gradient(100deg,#FE613F 0%,#EE01C6 56%,#6801D7 100%);-webkit-background-clip:text;background-clip:text}
+
+/* Deadline countdown beside the hero heading. */
+.hero-topline{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,330px);align-items:center;gap:clamp(22px,4vw,64px)}
+.hero-topline h1{margin-right:0}
+.vote-countdown{justify-self:end;width:100%;max-width:330px;padding:18px 20px;border:1px solid rgba(255,193,7,.24);border-radius:16px;background:radial-gradient(ellipse at 100% 0%,rgba(255,175,43,.11),transparent 55%),linear-gradient(145deg,rgba(25,22,17,.94),rgba(14,14,13,.96));box-shadow:0 12px 34px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.035)}
+.countdown-label{display:block;color:#c8ae76;font-size:10px;font-weight:700;letter-spacing:.16em;line-height:1.45}
+.countdown-values{display:flex;align-items:center;justify-content:space-between;gap:5px;margin:12px 0 9px}
+.countdown-unit{display:grid;justify-items:center;gap:3px;min-width:0}
+.countdown-unit strong{color:#f4eee2;font-size:clamp(22px,2vw,29px);font-variant-numeric:tabular-nums;font-weight:700;line-height:1}
+.countdown-unit small{color:#938c80;font-size:9px;line-height:1.2}
+.countdown-separator{margin-top:-10px;color:#846d45;font-size:20px}
+.countdown-deadline{display:block;color:#a9a094;font-size:11px;line-height:1.4}
+.vote-countdown.is-finished{border-color:rgba(139,198,130,.35);background:linear-gradient(145deg,rgba(15,30,19,.94),rgba(14,14,13,.96))}
+.vote-countdown.is-finished .countdown-unit strong{color:#bde6ae}
+
+/* Dense, ranked admin results: winner, runner-up, third place and expandable voters. */
+.admin-ballot-results{margin-top:25px}
+.admin-results-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 13px}
+.admin-results-heading h3{margin:0}
+.admin-results-heading>span{color:#9a9488;font-size:12px;white-space:nowrap}
+.admin-nomination-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-nomination-card{min-width:0;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:linear-gradient(145deg,rgba(31,28,22,.72),rgba(17,17,16,.95));box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.admin-nomination-card>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.admin-nomination-category{display:block;margin-bottom:5px;color:#b49a65;font-size:9px;font-weight:700;letter-spacing:.13em}
+.admin-nomination-card h4{margin:0;color:#f3eee4;font-size:14px;line-height:1.35}
+.admin-nomination-total{flex:0 0 auto;padding:5px 8px;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#a8a195;font-size:10px;white-space:nowrap}
+.admin-rankings{display:grid;gap:6px}
+.admin-rank-row{display:grid;grid-template-columns:88px minmax(80px,1fr) auto;align-items:center;gap:9px;padding:9px;border:1px solid rgba(255,255,255,.055);border-radius:9px;background:rgba(255,255,255,.018)}
+.admin-rank-row.is-winner{border-color:rgba(255,193,7,.28);background:linear-gradient(100deg,rgba(255,193,7,.09),rgba(255,193,7,.025))}
+.admin-rank-row.is-second{border-color:rgba(201,208,218,.15);background:rgba(201,208,218,.035)}
+.admin-rank-row.is-third{border-color:rgba(195,128,78,.16);background:rgba(195,128,78,.035)}
+.admin-rank-badge{display:flex;align-items:center;gap:6px;min-width:0}
+.admin-rank-badge>strong{display:grid;place-items:center;width:23px;height:23px;flex:0 0 23px;border:1px solid rgba(255,255,255,.12);border-radius:50%;color:#ccc4b7;font-size:11px}
+.admin-rank-row.is-winner .admin-rank-badge>strong{border-color:rgba(255,193,7,.42);background:rgba(255,193,7,.13);color:#ffd770}
+.admin-rank-row.is-second .admin-rank-badge>strong{border-color:rgba(201,208,218,.34);color:#d4d9df}
+.admin-rank-row.is-third .admin-rank-badge>strong{border-color:rgba(195,128,78,.4);color:#dfa578}
+.admin-rank-badge>small{color:#aaa397;font-size:8px;font-weight:800;letter-spacing:.045em;line-height:1.2}
+.admin-rank-row.is-winner .admin-rank-badge>small{color:#f2cb69}
+.admin-rank-candidate{display:grid;gap:6px;min-width:0}
+.admin-rank-candidate>strong{overflow-wrap:anywhere;color:#e8e3da;font-size:12px;line-height:1.3}
+.admin-rank-track{display:block;height:4px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
+.admin-rank-track i{display:block;height:100%;border-radius:inherit;background:#aaa397}
+.admin-rank-row.is-winner .admin-rank-track i{background:linear-gradient(90deg,#ffe16c,#ff8a22)}
+.admin-rank-row.is-second .admin-rank-track i{background:linear-gradient(90deg,#cbd1d8,#7f8994)}
+.admin-rank-row.is-third .admin-rank-track i{background:linear-gradient(90deg,#d9a178,#85573f)}
+.admin-rank-count{color:#e6d5ad;font-size:10px;white-space:nowrap}
+.admin-voter-list{grid-column:2 / -1;color:#a39b8e;font-size:10px}
+.admin-voter-list summary{width:max-content;max-width:100%;cursor:pointer;list-style:none}
+.admin-voter-list summary::-webkit-details-marker{display:none}
+.admin-voter-list summary::before{content:"＋";display:inline-grid;place-items:center;width:15px;height:15px;margin-right:5px;border:1px solid rgba(255,255,255,.15);border-radius:50%;font-size:10px;vertical-align:middle}
+.admin-voter-list[open] summary::before{content:"−"}
+.admin-voter-list>div{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.admin-voter-list>div span{padding:4px 7px;border:1px solid rgba(255,193,7,.13);border-radius:999px;background:rgba(255,193,7,.045);color:#ddd3c1;font-size:10px}
+.admin-no-votes{margin:0;padding:12px;color:#888278;font-size:12px}
+@media(max-width:900px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) minmax(245px,290px);gap:20px}
+  .vote-countdown{padding:15px}
+  .admin-nomination-results{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:700px){
+  .hero-topline{grid-template-columns:minmax(0,1fr);gap:5px}
+  .vote-countdown{justify-self:start;max-width:380px;margin:5px 0 20px}
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:10px}
+  .admin-rank-row{grid-template-columns:82px minmax(70px,1fr) auto;gap:7px;padding:8px}
+}
+@media(max-width:430px){
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:6px}
+  .countdown-label{font-size:9px}
+  .vote-countdown{padding:13px 14px}
+  .countdown-unit strong{font-size:23px}
+  .admin-rank-row{grid-template-columns:73px minmax(60px,1fr) auto;gap:6px;padding:7px}
+  .admin-rank-badge{gap:4px}
+  .admin-rank-badge>small{font-size:7px}
+  .admin-rank-badge>strong{width:20px;height:20px;flex-basis:20px;font-size:10px}
+  .admin-rank-count{font-size:9px}
+  .admin-voter-list{font-size:9px}
+}
+@media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:5px}}

@@ -82,7 +82,7 @@ ALTER TABLE public.flare_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_event_choices ENABLE ROW LEVEL SECURITY;
 
 create or replace function public.flare_closed() returns boolean language sql stable as $$
-  select now() > timestamptz '2026-11-21 23:59:59+03'
+  select now() >= timestamptz '2026-11-22 00:00:00+03'
 $$;
 create or replace function public.flare_new_session(p_account uuid) returns text language plpgsql security definer set search_path=public,extensions,pg_temp as $$
 declare v_token text := encode(extensions.gen_random_bytes(32),'hex');
