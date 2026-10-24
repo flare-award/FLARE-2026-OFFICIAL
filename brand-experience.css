@@ -218,3 +218,111 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
   .poll-result-badge{font-size:8px;padding-inline:6px}
 }
 @media(prefers-reduced-motion:reduce){.pin-toggle,.nominee-card.self::after,.poll-result-track>span{transition:none}}
+
+/* Large desktop / QHD layout: use the canvas without stretching reading widths. */
+@media(min-width:1600px){
+  .wrap{width:min(1780px,calc(100% - 120px))}
+  .topbar{padding-inline:max(60px,calc((100vw - 1780px)/2))}
+  .hero{padding-top:clamp(320px,23vh,390px)}
+  .hero h1{max-width:980px;font-size:clamp(92px,5vw,122px);line-height:1.04}
+  .hero-copy{font-size:21px}
+  .hero-meta{font-size:12px}
+  .section-heading h2,.poll-copy h2,.faq-intro h2{font-size:clamp(64px,3.5vw,78px)}
+  .category-actions{gap:24px;margin-top:48px}
+  .category-card{height:360px;padding:40px 45px}
+  .category-title{max-width:64%;font-size:clamp(46px,2.5vw,58px);line-height:1.12}
+  .category-foot{left:45px;bottom:30px}
+  .category-count{min-height:43px;padding-inline:18px;font-size:14px}
+  .category-symbol{width:230px;height:230px;right:42px;font-size:210px}
+  .winners-section{margin-top:180px;padding-block:110px}
+  .winner-window{margin-top:42px}
+  .winner-track{gap:24px}
+  .winner-card{flex-basis:330px;min-height:285px;padding:30px}
+  .winner-name{font-size:23px}
+  .event-poll{column-gap:110px;padding-block:150px}
+  .poll-option{padding:20px 24px}
+  .poll-option.has-results{padding:18px 22px}
+  .faq-question{padding-block:28px;font-size:18px}
+  .nomination-list-modal{width:min(1640px,calc(100vw - 120px))}
+  .nomination-detail-modal{width:min(1480px,calc(100vw - 120px))}
+  .nomination-grid{gap:20px;padding:32px 38px 40px}
+  .nomination-tile-title{font-size:19px}
+  .nomination-tile-description{font-size:14px}
+  .nom-detail{padding-inline:48px}
+  .nominee-grid{gap:18px}
+  .modal-backdrop{padding:48px}
+}
+@media(min-width:1920px){
+  .category-card{height:385px}
+  .category-title{font-size:58px}
+  .category-symbol{width:250px;height:250px;font-size:228px}
+  .nomination-list-modal>.nomination-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .nomination-detail-modal .nominee-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+
+/* Touch-first layout and iOS safe areas. */
+@media(max-width:700px){
+  html,body{-webkit-text-size-adjust:100%;min-width:320px}
+  body{min-height:100vh;min-height:100dvh}
+  button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,193,7,.12)}
+  .wrap{width:calc(100% - 32px)}
+  .topbar{width:100%;height:calc(76px + env(safe-area-inset-top));padding:env(safe-area-inset-top) max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));margin-bottom:0}
+  .topbar.is-at-top .top-actions{gap:10px;min-width:0}
+  .topbar.is-at-top #account-status{max-width:min(55vw,260px);overflow:hidden;text-overflow:ellipsis}
+  .topbar.is-at-top .button-quiet{min-height:44px}
+  .brand-intro{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+  .modal-backdrop{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));align-items:center}
+  .modal{max-height:94vh;max-height:94dvh;scroll-padding-block:18px;-webkit-overflow-scrolling:touch}
+  .modal.auth-modal{max-height:94vh;max-height:94dvh;overflow-y:auto;overscroll-behavior:contain}
+  .admin-wrap{-webkit-overflow-scrolling:touch}
+  .nom-detail-top{gap:8px;padding-inline:10px}
+  .nom-detail-top .back-link{min-width:0;max-width:calc(100% - 50px);min-height:44px;gap:6px;padding-inline:9px;font-size:11.5px}
+  .nom-detail-top .back-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nom-detail-top .close-button{width:44px;height:44px;flex:0 0 44px}
+  .nomination-list-modal>.modal-header .close-button{flex-basis:44px;width:44px;height:44px}
+  .vote-actions{padding-bottom:max(14px,env(safe-area-inset-bottom))}
+  .admin-wrap{overflow:auto;overscroll-behavior:contain}
+  .admin-table{min-width:560px}
+  .toast{left:50%;right:auto;bottom:max(20px,calc(env(safe-area-inset-bottom) + 12px));width:max-content;max-width:calc(100vw - 32px);text-align:center}
+  .footer-bottom{row-gap:8px}
+}
+@media(max-width:430px){
+  .topbar.is-at-top .top-actions{gap:6px}
+  .topbar.is-at-top #account-status{max-width:52vw;font-size:11px}
+  .topbar.is-at-top .text-button{font-size:11px}
+  .topbar.is-at-top .button-quiet{padding-inline:10px;font-size:12px}
+  .hero h1{font-size:clamp(45px,12vw,53px);line-height:1.08}
+  .category-card{padding-inline:18px}
+  .category-title{max-width:100%;font-size:clamp(23px,7.2vw,28px);line-height:1.15}
+  .category-foot{left:18px}
+  .category-symbol{right:10px;width:112px;height:112px;font-size:105px;opacity:.58}
+  .category-count{min-height:35px;padding-inline:12px;font-size:11px}
+  .nomination-tile{grid-template-columns:minmax(105px,38%) minmax(0,1fr)}
+  .nomination-card-body{padding-inline:11px}
+  .nomination-tile-title{font-size:14px;line-height:1.3}
+  .nomination-tile-description{font-size:10.5px;line-height:1.4}
+  .nomination-card-meta{font-size:9px}
+  .nominee-grid{gap:8px}
+  .nominee-card{padding:9px}
+  .nominee-name{font-size:12px}
+  .portrait{margin-bottom:10px}
+  .poll-option-top{gap:8px}
+  .poll-result-badge{letter-spacing:.04em}
+  .faq-answer{padding-right:12px}
+}
+@media(max-width:360px){
+  .hero h1{font-size:44px}
+  .topbar.is-at-top .top-actions{gap:5px}
+  .topbar.is-at-top #account-status{font-size:10px}
+  .topbar.is-at-top .text-button{font-size:10px}
+  .topbar.is-at-top .button-quiet{padding-inline:8px;font-size:11px}
+  .nom-detail-top .back-link{font-size:10.5px;padding-inline:7px}
+  .poll-result-badge{padding-inline:4px;font-size:7px}
+}
+@media(hover:none){
+  .category-card:hover{transform:none}
+  .category-card:hover::after{animation:none}
+  .nomination-tile:hover,.nominee-card:hover{transform:none}
+  .faq-question:hover{color:inherit}
+  .nominee-card.self::after{inset:auto 0 0;min-height:38px;padding:7px 8px;font-size:9px;opacity:1}
+}
