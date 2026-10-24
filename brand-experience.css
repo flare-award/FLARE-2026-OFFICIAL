@@ -746,3 +746,6 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
   .countdown-unit strong{font-size:clamp(40px,5vw,50px)}
   .countdown-unit small,.countdown-deadline{font-size:11px}
 }
+
+/* These dialogs scroll in inner panes, so the outer modal must not reserve a fake scrollbar gutter. */
+.nomination-list-modal,.nomination-detail-modal,.admin-modal{scrollbar-gutter:auto}
