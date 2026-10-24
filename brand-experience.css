@@ -219,8 +219,8 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 }
 @media(prefers-reduced-motion:reduce){.pin-toggle,.nominee-card.self::after,.poll-result-track>span{transition:none}}
 
-/* Large desktop / QHD layout: use the canvas without stretching reading widths. */
-@media(min-width:1600px){
+/* QHD and wider: keep 1920x1080 Full HD on the original desktop layout. */
+@media(min-width:2000px){
   .wrap{width:min(1780px,calc(100% - 120px))}
   .topbar{padding-inline:max(60px,calc((100vw - 1780px)/2))}
   .hero{padding-top:clamp(320px,23vh,390px)}
@@ -252,7 +252,7 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
   .nominee-grid{gap:18px}
   .modal-backdrop{padding:48px}
 }
-@media(min-width:1920px){
+@media(min-width:2400px){
   .category-card{height:385px}
   .category-title{font-size:58px}
   .category-symbol{width:250px;height:250px;font-size:228px}
