@@ -4,25 +4,28 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090909"><meta name="description" content="FLARE 2026 — голосование за главные моменты года.">
   <title>FLARE 2026 — премия года</title>
+  <link rel="icon" type="image/svg+xml" href="assets/brand/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Michroma&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="ui-polish.css?v=4"><link rel="stylesheet" href="brand-experience.css?v=1">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=5"><link rel="stylesheet" href="ui-polish.css?v=4"><link rel="stylesheet" href="brand-experience.css?v=2">
 </head>
 <body>
   <section class="brand-intro" id="brand-intro" aria-label="FLARE 2026">
     <img class="intro-rays" src="assets/brand/flare-rays.png" alt="" aria-hidden="true">
-    <img class="intro-logo" src="assets/brand/flare-logo.png" alt="FLARE">
-    <span id="header-trigger" aria-hidden="true"></span>
+    <h1 class="intro-logo">FLARE</h1>
+    <nav class="intro-links" aria-label="Быстрый переход к номинациям">
+      <a class="intro-link" href="#category-primary">Основные номинации</a>
+      <a class="intro-link" href="#category-extra">Доп. номинации</a>
+    </nav>
   </section>
-  <header class="topbar" id="site-header"><a class="wordmark" href="#brand-intro" aria-label="На главную — FLARE"><img src="assets/brand/flare-logo.png" alt="FLARE"></a><div class="top-actions"><div id="account-status" class="account-status"></div><button class="button button-quiet" id="auth-button">Войти</button></div></header>
+  <header class="topbar" id="site-header"><a class="wordmark" href="#brand-intro" aria-label="На главную — FLARE"><span>FLARE</span></a><div class="top-actions"><div id="account-status" class="account-status"></div><button class="button button-quiet" id="auth-button">Войти</button></div></header>
   <main id="top">
-    <div class="ambient" aria-hidden="true"><img src="assets/brand/flare-rays.png" alt=""></div>
     <section class="hero wrap"><h1>Год, который<br><span>запомнится.</span></h1><p class="hero-copy">Голоса сообщества. Легендарные моменты.<br class="desktop"> Одна ночь, чтобы зажечь.</p><div class="hero-meta"><span>ГОЛОСОВАНИЕ ОТКРЫТО</span><b></b><span>ЗАКРЫТИЕ 21 НОЯБРЯ</span></div></section>
-    <section class="vote-hub wrap"><div class="section-heading"><div><div class="eyebrow">ВЫБЕРИ СВОИХ ПОБЕДИТЕЛЕЙ</div><h2>Твой голос — <em>часть истории.</em></h2></div><div id="overall-progress" class="overall-progress">Войди, чтобы голосовать</div></div><div class="category-actions"><button class="category-card primary-category" data-category="основная"><span class="card-index">01 / ОСНОВНОЕ</span><span class="category-title">Основные<br>номинации</span><span class="category-foot"><span class="category-count">12 номинаций</span></span><span class="category-symbol" aria-hidden="true">✦</span></button><button class="category-card extra-category" data-category="доп."><span class="card-index">02 / ДОПОЛНИТЕЛЬНЫЕ</span><span class="category-title">Дополнительные<br>номинации</span><span class="category-foot"><span class="category-count">6 номинаций</span></span><span class="category-symbol flower" aria-hidden="true">✿</span></button></div><div id="deadline-banner" class="deadline-banner" hidden>Голосование завершено. Выборы доступны только для просмотра.</div></section>
+    <section class="vote-hub wrap"><div class="section-heading"><div><div class="eyebrow">ВЫБЕРИ СВОИХ ПОБЕДИТЕЛЕЙ</div><h2>Твой голос — <em>часть истории.</em></h2></div><div id="overall-progress" class="overall-progress">Войди, чтобы голосовать</div></div><div class="category-actions"><button class="category-card primary-category" id="category-primary" data-category="основная"><span class="card-index">01 / ОСНОВНОЕ</span><span class="category-title">Основные<br>номинации</span><span class="category-foot"><span class="category-count">12 номинаций</span></span><span class="category-symbol" aria-hidden="true">✦</span></button><button class="category-card extra-category" id="category-extra" data-category="доп."><span class="card-index">02 / ДОПОЛНИТЕЛЬНЫЕ</span><span class="category-title">Дополнительные<br>номинации</span><span class="category-foot"><span class="category-count">6 номинаций</span></span><span class="category-symbol flower" aria-hidden="true">✿</span></button></div><div id="deadline-banner" class="deadline-banner" hidden>Голосование завершено. Выборы доступны только для просмотра.</div></section>
     <section class="winners-section"><div class="wrap"><div class="section-heading winners-heading"><div><div class="eyebrow">ИСТОРИЯ FLARE</div><h2>Победители <em>2025</em></h2></div><div class="carousel-controls"><button class="icon-button" id="winner-prev" aria-label="Предыдущие победители">←</button><button class="icon-button" id="winner-next" aria-label="Следующие победители">→</button></div></div><div class="winner-window"><div id="winner-track" class="winner-track"></div></div><div class="carousel-caption"><span>МГНОВЕНИЯ, КОТОРЫЕ ОСТАЛИСЬ С НАМИ</span><span id="winner-counter">01 / 18</span></div></div></section>
     <section class="event-poll wrap" id="event-poll"><div class="poll-copy"><div class="eyebrow">ПЛАНИРУЕМ ВСТРЕЧУ</div><h2>Когда тебе удобнее<br>посетить <em>премию?</em></h2><p>Помоги выбрать день для главного вечера сообщества.</p></div><div class="poll-options" id="event-options"></div><div class="poll-footer"><span id="event-poll-status">Войди в аккаунт, чтобы оставить ответ</span><button class="button button-outline" id="save-event-poll" disabled>Сохранить ответ <span>→</span></button></div></section>
   </main>
   <footer class="faq-section"><div class="wrap faq-layout"><div class="faq-intro"><div class="eyebrow">ЕСТЬ ВОПРОСЫ?</div><h2>Всё важное.<br><em>Без лишнего.</em></h2><p>Правила голосования и детали вечера FLARE 2026.</p></div><div class="faq-list" id="faq-list"></div></div><div class="footer-bottom wrap"><span>© FLARE AWARDS 2026</span><span>СДЕЛАНО СООБЩЕСТВОМ</span></div></footer>
   <div id="modal-root"></div>
-  <script src="config.js"></script><script src="data.js"></script><script src="app.js"></script>
+  <script src="config.js"></script><script src="data.js?v=2"></script><script src="app.js?v=3"></script>
 </body></html>
