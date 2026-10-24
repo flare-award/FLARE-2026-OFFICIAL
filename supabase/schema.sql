@@ -105,49 +105,81 @@ begin
   return jsonb_build_object('ok',true);
 end $$;
 
-create or replace function public.flare_register(p_email text,p_pin text,p_nickname text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_email text:=lower(trim(coalesce(p_email,''))); v_account uuid; v_token text; v_expected text; v_hash text;
-begin
-  if v_email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' or length(v_email)>254 then raise exception 'Укажи корректный email.'; end if;
-  if p_pin is null or p_pin !~ '^[A-Za-z0-9]{4,72}$' then raise exception 'PIN должен содержать от 4 до 72 латинских букв или цифр.'; end if;
-  perform pg_advisory_xact_lock(hashtext(v_email));
-  select account_id,expected_nickname into v_account,v_expected from flare_authorized_emails where email=v_email for update;
-  if not found then raise exception 'Этот email не добавлен организатором в список участников.'; end if;
-  if p_nickname is distinct from v_expected then raise exception 'Для этого email организатор закрепил другой ник.'; end if;
-  if v_account is not null then raise exception 'Аккаунт для этого email уже создан. Войди с PIN-кодом.'; end if;
-  -- A second authorized email for an already registered member is linked only with the same PIN.
-  select id,pin_hash into v_account,v_hash from flare_accounts where nickname=v_expected for update;
-  if v_account is not null then
-    if extensions.crypt(p_pin,v_hash)<>v_hash then raise exception 'У этого участника уже есть аккаунт. Войди с его PIN-кодом.'; end if;
-    update flare_authorized_emails set account_id=v_account where email=v_email;
-  else
-    insert into flare_accounts(nickname,pin_hash) values(v_expected,extensions.crypt(p_pin,extensions.gen_salt('bf',12))) returning id into v_account;
-    update flare_authorized_emails set account_id=v_account where email=v_email;
-  end if;
-  v_token:=flare_new_session(v_account);
-  return jsonb_build_object('token',v_token,'nickname',v_expected,'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account));
-end $$;
+-- Remove the former public entry points that accepted a client-selected nickname.
+drop function if exists public.flare_register(text,text,text);
+drop function if exists public.flare_login(text,text,text);
 
-create or replace function public.flare_login(p_email text,p_pin text,p_nickname text default null) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_email text:=lower(trim(coalesce(p_email,''))); v_account uuid; v_nickname text; v_hash text; v_token text; v_attempts integer; v_window timestamptz; v_block timestamptz;
+-- One email + PIN endpoint. The email allowlist silently supplies the nickname.
+create or replace function public.flare_access(p_email text,p_pin text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+  v_email text:=lower(trim(coalesce(p_email,'')));
+  v_expected text;
+  v_linked uuid;
+  v_account uuid;
+  v_nickname text;
+  v_pin_hash text;
+  v_token text;
+  v_attempts integer;
+  v_window timestamptz;
+  v_block timestamptz;
+  v_allowed boolean:=false;
+  v_create boolean:=false;
 begin
-  if length(v_email)>254 then return jsonb_build_object('error','Неверный email или PIN-код.'); end if;
-  perform pg_advisory_xact_lock(hashtext(v_email));
-  insert into flare_login_attempts(email) values(v_email) on conflict(email) do nothing;
-  select attempts,window_started_at,blocked_until into v_attempts,v_window,v_block from flare_login_attempts where email=v_email for update;
-  if v_block is not null and v_block>now() then return jsonb_build_object('error','Слишком много попыток. Попробуй снова через 15 минут.'); end if;
-  select a.id,a.nickname,a.pin_hash into v_account,v_nickname,v_hash from flare_authorized_emails e join flare_accounts a on a.id=coalesce(e.account_id,(select id from flare_accounts where nickname=e.expected_nickname)) where e.email=v_email;
-  if v_account is null or p_pin is null or extensions.crypt(p_pin,v_hash)<>v_hash then
-    if v_window<now()-interval '15 minutes' then v_attempts:=0; v_window:=now(); end if;
-    v_attempts:=v_attempts+1;
-    update flare_login_attempts set attempts=v_attempts,window_started_at=v_window,blocked_until=case when v_attempts>=5 then now()+interval '15 minutes' else null end where email=v_email;
-    if v_attempts>=5 then return jsonb_build_object('error','Слишком много попыток. Попробуй снова через 15 минут.'); end if;
-    return jsonb_build_object('error','Неверный email или PIN-код.');
+  if v_email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' or length(v_email)>254 or p_pin is null or p_pin !~ '^[A-Za-z0-9]{4,72}$' then
+    return jsonb_build_object('error','Не удалось войти. Проверь email и PIN-код.');
   end if;
-  update flare_authorized_emails set account_id=v_account where email=v_email and account_id is null;
-  delete from flare_login_attempts where email=v_email;
-  v_token:=flare_new_session(v_account);
-  return jsonb_build_object('token',v_token,'nickname',v_nickname,'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account));
+
+  perform pg_advisory_xact_lock(hashtext('email:'||v_email));
+  insert into flare_login_attempts(email) values(v_email) on conflict(email) do nothing;
+  select attempts,window_started_at,blocked_until into v_attempts,v_window,v_block
+    from flare_login_attempts where email=v_email for update;
+  if v_block is not null and v_block>now() then
+    return jsonb_build_object('error','Не удалось войти. Проверь email и PIN-код.');
+  end if;
+
+  select expected_nickname,account_id into v_expected,v_linked
+    from flare_authorized_emails where email=v_email for update;
+  v_allowed:=found and v_expected is not null;
+
+  if v_allowed then
+    perform pg_advisory_xact_lock(hashtext('member:'||v_expected));
+    select id,nickname,pin_hash into v_account,v_nickname,v_pin_hash
+      from flare_accounts where nickname=v_expected for update;
+    if found then
+      if (v_linked is not null and v_linked<>v_account)
+         or extensions.crypt(p_pin,v_pin_hash) is distinct from v_pin_hash then
+        v_allowed:=false;
+      end if;
+    else
+      if v_linked is not null then
+        v_allowed:=false;
+      else
+        v_create:=true;
+      end if;
+    end if;
+  end if;
+
+  if v_allowed then
+    if v_create then
+      insert into flare_accounts(nickname,pin_hash)
+        values(v_expected,extensions.crypt(p_pin,extensions.gen_salt('bf',12)))
+        returning id,nickname into v_account,v_nickname;
+    end if;
+    -- Every organizer-authorized alias for this member becomes the same account.
+    update flare_authorized_emails set account_id=v_account
+      where expected_nickname=v_expected and (account_id is null or account_id=v_account);
+    delete from flare_login_attempts where email=v_email;
+    v_token:=flare_new_session(v_account);
+    return jsonb_build_object('token',v_token,'nickname',v_nickname,
+      'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account));
+  end if;
+
+  if v_window<now()-interval '15 minutes' then v_attempts:=0; v_window:=now(); end if;
+  v_attempts:=v_attempts+1;
+  update flare_login_attempts set attempts=v_attempts,window_started_at=v_window,
+    blocked_until=case when v_attempts>=5 then now()+interval '15 minutes' else null end
+    where email=v_email;
+  return jsonb_build_object('error','Не удалось войти. Проверь email и PIN-код.');
 end $$;
 
 create or replace function public.get_my_ballot(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
@@ -200,17 +232,18 @@ end $$;
 revoke all on function public.flare_closed() from public,anon,authenticated;
 revoke all on function public.flare_new_session(uuid) from public,anon,authenticated;
 revoke all on function public.flare_session_account(text) from public,anon,authenticated;
-revoke all on function public.flare_register(text,text,text) from public,authenticated;
+revoke all on function public.flare_access(text,text) from public,authenticated;
+revoke all on function public.flare_access(text,text) from anon;
 revoke all on function public.flare_logout(text) from public,authenticated;
-revoke all on function public.flare_login(text,text,text) from public,authenticated;
+
 revoke all on function public.get_my_ballot(text) from public,authenticated;
 revoke all on function public.cast_vote(text,text,text) from public,authenticated;
 revoke all on function public.save_event_choice(text,text) from public,authenticated;
 revoke all on function public.finalize_ballot(text) from public,authenticated;
 revoke all on function public.admin_summary(text) from public,authenticated;
-grant execute on function public.flare_register(text,text,text) to anon;
+grant execute on function public.flare_access(text,text) to anon;
 grant execute on function public.flare_logout(text) to anon;
-grant execute on function public.flare_login(text,text,text) to anon;
+
 grant execute on function public.get_my_ballot(text) to anon;
 grant execute on function public.cast_vote(text,text,text) to anon;
 grant execute on function public.save_event_choice(text,text) to anon;
