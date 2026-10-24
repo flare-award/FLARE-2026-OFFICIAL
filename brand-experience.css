@@ -1,3 +1,11 @@
+@font-face{
+  font-family:"Roundo Cyrillic";
+  src:url("assets/brand/RoundoCyr-Regular.woff2?v=1") format("woff2"),url("assets/brand/RoundoCyr-Regular.woff?v=1") format("woff");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+:root{--logo:"Roundo Cyrillic",sans-serif}
 body{background:#010101}
 .brand-intro{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:47.5px;width:100%;height:100vh;height:100svh;min-height:575px;overflow:hidden;background:#010101}
 .intro-rays{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left center;z-index:0;user-select:none;-webkit-user-drag:none}
@@ -67,7 +75,8 @@ html{scrollbar-width:thin;scrollbar-color:#3a332a #080808;scrollbar-gutter:stabl
 /* Strong FLARE wordmark with typography shared by the site's primary actions. */
 .nomination-card-body{min-height:150px;padding:21.25px 18.75px 10px}
 .nomination-card-meta{padding-top:10px}
-.intro-logo,.wordmark{font-family:"Arial Black",Impact,var(--font),sans-serif;font-weight:900;font-synthesis:weight}
+h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomination-tile-title{font-family:var(--logo);font-weight:700;font-synthesis:weight}
+.hero h1,.section-heading h2,.poll-copy h2,.faq-intro h2,.modal-header h2,.nom-detail-title,.admin-head h2{font-family:var(--logo);font-weight:700;font-synthesis:weight}
 .intro-link{font-family:var(--font);font-size:13.75px;font-weight:700;letter-spacing:.045em;text-transform:uppercase}
 .intro-link:nth-child(2){font-weight:700}
 .close-button{display:grid;place-items:center;line-height:1;padding:0;transition:color .18s ease,background-color .18s ease,border-color .18s ease,transform .18s ease}
