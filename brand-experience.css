@@ -1,41 +1,45 @@
 @font-face{
-  font-family:"Orbitron FLARE";
-  src:url("assets/brand/orbitron-900.woff2") format("woff2");
+  font-family:"Russo One FLARE";
+  src:url("assets/brand/russo-one-400.woff2") format("woff2");
   font-style:normal;
-  font-weight:900;
+  font-weight:400;
   font-display:swap;
 }
-:root{--logo:"Orbitron FLARE",sans-serif}
-.brand-intro{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(22px,4vh,38px);width:100%;height:100vh;height:100svh;min-height:460px;overflow:hidden;background:#000}
+:root{--logo:"Russo One FLARE",sans-serif}
+body{background:#010101}
+.brand-intro{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(22px,4vh,38px);width:100%;height:100vh;height:100svh;min-height:460px;overflow:hidden;background:#010101}
 .intro-rays{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left center;z-index:-2;user-select:none;-webkit-user-drag:none}
-.brand-intro::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(0,0,0,.2)}
-.intro-logo{position:relative;z-index:1;margin:0;padding:0 .04em;font-family:var(--logo);font-size:clamp(62px,19vw,236px);font-weight:900;line-height:.92;letter-spacing:.025em;text-align:center;text-transform:uppercase;color:transparent;background:linear-gradient(180deg,#F5E02C 0%,#F76801 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:.008em rgba(247,118,1,.16);filter:drop-shadow(0 2px 9px rgba(247,118,1,.12));user-select:none}
-.intro-links{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:0 20px}
-.intro-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border:1px solid rgba(245,224,44,.52);border-radius:4px;background:rgba(7,7,7,.72);color:#f7e7a1;font-size:12px;font-weight:600;letter-spacing:.015em;text-align:center;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
-.intro-link:hover{background:rgba(30,20,7,.9);border-color:#f5c62c;color:#fff2bd}
-.topbar{position:fixed;z-index:15;top:0;left:0;right:0;width:100%;height:76px;margin:0;padding:0 max(32px,calc((100vw - 1160px)/2));display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,7,.96);border:0;border-bottom:1px solid rgba(255,255,255,.08);border-radius:0;transform:translate3d(0,-105%,0);visibility:hidden;pointer-events:none;transition:transform .24s ease,visibility 0s linear .24s;will-change:transform}
-.topbar.is-visible{transform:translate3d(0,0,0);visibility:visible;pointer-events:auto;transition:transform .24s ease,visibility 0s}
-.wordmark{display:inline-flex;align-items:center;background:none;text-shadow:none;line-height:1;color:transparent;font-family:var(--logo);font-size:27px;font-weight:900;letter-spacing:.035em;background-image:linear-gradient(180deg,#F5E02C 0%,#F76801 100%);-webkit-background-clip:text;background-clip:text}.wordmark>span{font:inherit;letter-spacing:inherit;color:transparent;margin:0}
-main{margin:0}
+.brand-intro::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(1,1,1,.22) 0%,rgba(1,1,1,.26) 66%,#010101 100%)}
+.intro-logo{position:relative;z-index:1;margin:0;padding:0 .04em;font-family:var(--logo);font-size:clamp(60px,14vw,160px);font-weight:400;line-height:.92;letter-spacing:.04em;text-align:center;text-transform:uppercase;color:transparent;background:linear-gradient(180deg,#F5E02C 0%,#F76801 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:.005em rgba(247,104,1,.35);paint-order:stroke fill;transform:scaleX(1.65);filter:drop-shadow(0 0 4px rgba(245,224,44,.24)) drop-shadow(0 0 12px rgba(247,104,1,.16));user-select:none}
+.intro-links{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;gap:14px;padding:0 20px}
+.intro-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 23px;border:1px solid transparent;border-radius:999px;background:linear-gradient(110deg,#FFD54F 0%,#FF9800 100%);box-shadow:0 5px 20px rgba(255,152,0,.18);color:#1b1005;font-size:12px;font-weight:700;letter-spacing:.015em;text-align:center;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
+.intro-link:nth-child(2){background:linear-gradient(#0a080b,#0a080b) padding-box,linear-gradient(110deg,#FF4D9D 0%,#7B1FA2 100%) border-box;color:#fff0dd;box-shadow:0 4px 18px rgba(123,31,162,.16)}
+.intro-link:hover{transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 7px 24px rgba(255,152,0,.27)}
+.intro-link:nth-child(2):hover{box-shadow:0 7px 24px rgba(240,98,146,.24)}
+.topbar{position:fixed;z-index:15;top:0;left:0;right:0;width:100%;height:76px;margin:0;padding:0 clamp(16px,3.2vw,44px);display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,7,.96);border:0;border-bottom:1px solid rgba(255,255,255,.08);border-radius:0;transform:translate3d(0,-105%,0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease,visibility 0s linear .32s;will-change:transform}
+.topbar.is-visible{transform:translate3d(0,0,0);opacity:1;visibility:visible;pointer-events:auto;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease,visibility 0s}
+.wordmark{display:inline-flex;align-items:center;background:none;text-shadow:none;line-height:1;color:transparent;font-family:var(--logo);font-size:25px;transform:scaleX(1.35);transform-origin:left center;font-weight:400;letter-spacing:.035em;white-space:nowrap}
+.wordmark>span{font:inherit;letter-spacing:inherit;color:transparent;margin:0;background:linear-gradient(180deg,#F5E02C 0%,#F76801 100%);-webkit-background-clip:text;background-clip:text;text-shadow:0 0 6px rgba(247,104,1,.17)}
+main{margin:0;background:linear-gradient(180deg,#010101 0%,#0a0a0a 680px)}
 .hero{padding-top:98px}
 .hero h1{max-width:620px;font-size:clamp(48px,5.8vw,72px)}
 #category-primary,#category-extra{scroll-margin-top:96px}
 @media(max-width:780px){
   .brand-intro{gap:clamp(20px,3.5vh,32px)}
-  .intro-logo{font-size:clamp(58px,19vw,145px)}
+  .intro-logo{font-size:clamp(58px,14vw,120px);transform:scaleX(1.5)}
   .intro-links{gap:10px}
-  .intro-link{min-height:44px;padding-inline:15px;font-size:11px}
-  .topbar{height:70px;padding-inline:20px}
-  .wordmark{font-size:24px}
+  .intro-link{min-height:46px;padding-inline:19px;font-size:11px}
+  .topbar{height:70px;padding-inline:22px}
+  .wordmark{font-size:23px;transform:scaleX(1.3)}
   .hero{padding-top:78px}
 }
 @media(max-width:480px){
   .brand-intro{min-height:500px}
-  .intro-logo{font-size:clamp(55px,19vw,92px)}
-  .intro-links{flex-direction:column;width:min(100%,270px)}
+  .intro-logo{font-size:clamp(52px,15vw,85px);transform:scaleX(1.45)}
+  .intro-links{flex-direction:column;width:min(100%,290px)}
   .intro-link{width:100%}
-  .topbar{padding-inline:15px}
-  .wordmark{font-size:22px}
+  .topbar{padding-inline:16px}
+  .wordmark{font-size:21px;transform:scaleX(1.3)}
   .hero{padding-top:70px}
 }
 @media(prefers-reduced-motion:reduce){
