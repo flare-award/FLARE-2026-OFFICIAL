@@ -1,26 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="rays" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f5e02c" stop-opacity=".95"/>
-      <stop offset=".45" stop-color="#f76801" stop-opacity=".8"/>
-      <stop offset="1" stop-color="#b21cff" stop-opacity=".5"/>
-    </linearGradient>
     <linearGradient id="flare" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#f5e02c"/>
       <stop offset="1" stop-color="#f76801"/>
     </linearGradient>
-    <radialGradient id="light">
-      <stop stop-color="#fff6a8" stop-opacity=".9"/>
-      <stop offset="1" stop-color="#ff6b00" stop-opacity="0"/>
-    </radialGradient>
   </defs>
   <rect width="64" height="64" rx="13" fill="#080706"/>
-  <g fill="url(#rays)" opacity=".72">
-    <path d="M28 36 0 12l35 17z"/><path d="M29 36 5 2l31 31z"/>
-    <path d="M30 36 25 0l13 34z"/><path d="M31 37 48 0l-9 37z"/>
-    <path d="M31 38 64 12 39 41z"/><path d="M30 39 64 34l-27 9z"/>
-    <path d="M29 40 55 64 33 44z"/>
-  </g>
-  <circle cx="30" cy="37" r="19" fill="url(#light)" opacity=".6"/>
   <path d="M20 14h32v9H30v8h17v9H30v17h-10z" fill="url(#flare)"/>
 </svg>

@@ -63,3 +63,46 @@ html{scrollbar-width:thin;scrollbar-color:#3a332a #080808;scrollbar-gutter:stabl
   html{scroll-behavior:auto}
   .topbar,.topbar.is-at-top,.topbar.is-scrolled,.topbar.is-faq-hidden,.intro-link,.footer-bottom .terms-link{transition:none}
 }
+
+/* Strong FLARE wordmark with typography shared by the site's primary actions. */
+.nomination-card-body{min-height:150px;padding:21.25px 18.75px 10px}
+.nomination-card-meta{padding-top:10px}
+.intro-logo,.wordmark{font-family:"Arial Black",Impact,var(--font),sans-serif;font-weight:900;font-synthesis:weight}
+.intro-link{font-family:var(--font);font-size:13.75px;font-weight:700;letter-spacing:.045em;text-transform:uppercase}
+.intro-link:nth-child(2){font-weight:700}
+.close-button{display:grid;place-items:center;line-height:1;padding:0;transition:color .18s ease,background-color .18s ease,border-color .18s ease,transform .18s ease}
+.close-button:hover{color:#ff7777;background:rgba(220,55,55,.12)}
+.nom-detail-top .close-button{border:1.25px solid rgba(255,255,255,.12);color:#bbb5ad}
+.nom-detail-top .close-button:hover{border-color:rgba(255,100,100,.62);color:#ff7777;background:rgba(220,55,55,.16);transform:scale(1.04)}
+.nom-detail{padding:43.75px 36.25px 16.25px}
+.nom-detail .description{margin:13.75px 0 16.25px}
+.nomination-list-modal.extra-category-list>.extra-list-header{justify-content:flex-start;min-height:82.5px;padding:16.25px 30px}
+.nomination-list-modal.extra-category-list>.extra-list-header h2{margin:0;color:#f6f1e7;font-size:35px;line-height:1.2;font-weight:700;letter-spacing:-.025em}
+.nomination-list-modal.primary-category-list>.primary-list-header{justify-content:flex-end;min-height:46.25px;padding:6.25px 18.75px;background:#0e0e0d;border-bottom:0}
+.nomination-list-modal.primary-category-list>.nomination-grid{padding-top:5px}
+.nomination-list-modal{clip-path:inset(0 round 21.25px)}
+.nomination-list-modal::-webkit-scrollbar-track{margin-block:22.5px;background:transparent;border-radius:1248.75px}
+.nomination-list-modal::-webkit-scrollbar-thumb{border-color:#0e0e0d}
+.modal.is-view-entering{animation:modalViewEnter .22s cubic-bezier(.2,.7,.25,1) both}
+@keyframes modalViewEnter{from{opacity:.35;transform:translateY(10px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:975px){
+  .intro-link{font-size:13px}
+  .nomination-card-body{min-height:155px;padding:20px 15px 10px}
+  .nom-detail{padding:38.75px 25px 15px}
+  .nomination-list-modal.extra-category-list>.extra-list-header{min-height:77.5px;padding:15px 23.75px}
+  .nomination-list-modal.extra-category-list>.extra-list-header h2{font-size:31.25px}
+}
+@media(max-width:600px){
+  .intro-link{font-size:12.5px;letter-spacing:.035em}
+  .nomination-tile{min-height:140px}
+  .nomination-art{min-height:140px}
+  .nomination-card-body{min-height:140px;padding:18.75px 15px 8.75px}
+  .nomination-card-meta{padding-top:7.5px}
+  .nom-detail{padding:31.25px 18.75px 12.5px}
+  .nom-detail .description{margin:10px 0 13.75px}
+  .nomination-list-modal.extra-category-list>.extra-list-header{min-height:70px;padding:12.5px 18.75px}
+  .nomination-list-modal.extra-category-list>.extra-list-header h2{font-size:27.5px}
+  .nomination-list-modal.primary-category-list>.primary-list-header{min-height:40px;padding:5px 13.75px}
+  .nomination-list-modal.primary-category-list>.nomination-grid{padding-top:2.5px}
+}
+@media(prefers-reduced-motion:reduce){.modal.is-view-entering{animation:none}.close-button{transition:none}}
