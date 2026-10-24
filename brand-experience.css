@@ -115,3 +115,106 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
   .nomination-list-modal.primary-category-list>.nomination-grid{padding-top:2.5px}
 }
 @media(prefers-reduced-motion:reduce){.modal.is-view-entering{animation:none}.close-button{transition:none}}
+
+/* Refined 2026 interaction and typography pass. */
+:root{--flare-logo-gradient:linear-gradient(100deg,#ffd45c 0%,#ff8500 100%)}
+.intro-logo,.wordmark,.wordmark>span{font-family:"Rubik",var(--font),sans-serif;font-weight:900;font-synthesis:none}
+.intro-logo,.wordmark>span{background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text}
+.intro-logo{letter-spacing:.035em}
+.wordmark{letter-spacing:.045em}
+.hero h1,.section-heading h2,.poll-copy h2,.faq-intro h2,.modal-header h2,.nom-detail-title,.admin-head h2,.auth-title,.category-title{letter-spacing:0}
+.hero h1{letter-spacing:.005em}
+.nom-detail-title{letter-spacing:0}
+.topbar.is-at-top .top-actions{gap:16px}
+.topbar.is-at-top #account-status{max-width:600px;overflow:visible;opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .2s ease}
+.account-status{white-space:nowrap}
+.nomination-card-meta{transform:translateY(-4px)}
+.toast{border-radius:14px;font-weight:700;line-height:1.45;box-shadow:0 12px 36px rgba(0,0,0,.38)}
+.nomination-list-modal>.modal-header.primary-list-header,.nomination-list-modal>.modal-header.extra-list-header{justify-content:space-between;min-height:82px;padding:17px 30px}
+.nomination-list-modal>.modal-header.primary-list-header h2,.nomination-list-modal>.modal-header.extra-list-header h2{display:block;margin:0;color:#f6f1e7;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:0}
+.nomination-list-modal>.modal-header.primary-list-header{border-bottom:1px solid rgba(255,255,255,.08)}
+.nomination-list-modal>.modal-header .close-button{flex:0 0 44px;width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:#171614;color:#d7d1c8;font-size:27px;line-height:1}
+.nomination-list-modal>.modal-header .close-button:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.13);color:#ff8585}
+.nomination-list-modal.primary-category-list>.nomination-grid{padding-top:19px}
+.nom-detail{padding-top:23px}
+.nom-detail-title{line-height:1.2}
+.nom-detail .description{margin-top:10px}
+.nom-detail-top .back-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;margin:0;padding:10px 15px;border:1px solid rgba(255,193,7,.26);border-radius:999px;background:rgba(255,193,7,.055);color:#e9c879;font-size:13px;font-weight:600;transition:transform .2s,border-color .2s,background .2s,color .2s}
+.nom-detail-top .back-link svg{width:17px;height:17px;flex:0 0 17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nom-detail-top .back-link:hover{transform:translateX(-2px);border-color:rgba(255,193,7,.52);background:rgba(255,193,7,.11);color:#ffe1a0}
+.modal.is-view-entering{animation:none}
+.faq-question span:first-child{font-weight:700}
+.faq-question span:last-child{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;font-size:20px;font-weight:500;line-height:1;text-align:center;transform-origin:50% 50%}
+.faq-item.open .faq-question span:last-child{transform:rotate(45deg)}
+.footer-credit-separator{color:#aa8c54;font-weight:700}
+
+/* Poll results appear only after the participant has saved a choice. */
+.poll-option.has-results{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:15px 18px}
+.poll-option-top{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0}
+.poll-option-date{display:grid;gap:2px;min-width:0}
+.poll-option-date strong{font-size:15px}
+.poll-option-date small{font-size:12px;color:#9b9790}
+.poll-result-badge{min-height:21px;padding:4px 8px;border:1px solid transparent;border-radius:999px;color:transparent;font-size:9px;font-weight:800;letter-spacing:.09em;white-space:nowrap}
+.poll-leader .poll-result-badge{border-color:rgba(255,193,7,.28);background:rgba(255,193,7,.1);color:#ffd574}
+.poll-leader{border-color:rgba(255,193,7,.55);background:linear-gradient(110deg,rgba(255,193,7,.09),rgba(255,132,0,.045))}
+.poll-result-track{display:block;width:100%;height:5px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
+.poll-result-track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffc83d,#ff7d20);transition:width .35s ease}
+.poll-leader .poll-result-track>span{background:linear-gradient(90deg,#ffe16c,#ff8a22);box-shadow:0 0 10px rgba(255,171,50,.32)}
+.poll-result-meta{display:flex;align-items:center;justify-content:space-between;color:#969087;font-size:11px;line-height:1.2}
+.poll-result-meta strong{color:#e9d7ac;font-size:13px}
+.poll-leader .poll-result-meta strong{color:#ffd574}
+.poll-option.has-results:disabled{opacity:1}
+
+/* Self-vote guidance without a persistent nickname label. */
+.nominee-card.self{overflow:hidden}
+.nominee-card.self.locked:hover{transform:none;border-color:rgba(255,76,76,.72);background:#241313;box-shadow:0 0 0 1px rgba(255,75,75,.18)}
+.nominee-card.self::after{content:"ЗА СЕБЯ НЕЛЬЗЯ ГОЛОСОВАТЬ";position:absolute;z-index:5;inset:0;display:grid;place-items:center;padding:14px;background:rgba(135,24,24,.88);color:#fff1ef;font-size:clamp(10px,1.4vw,13px);font-weight:800;letter-spacing:.08em;line-height:1.45;text-align:center;opacity:0;transition:opacity .18s ease}
+.nominee-card.self:hover::after,.nominee-card.self:focus-visible::after{opacity:1}
+
+/* PIN visibility control. */
+.form-field .pin-input-wrap{position:relative;display:block;margin:0;padding:0;color:inherit;letter-spacing:normal}
+.form-field .pin-input-wrap input{padding-right:54px}
+.pin-toggle{position:absolute;top:50%;right:10px;display:grid;place-items:center;width:36px;height:36px;padding:0;transform:translateY(-50%);border:0;border-radius:9px;background:transparent;color:#aaa397;cursor:pointer;transition:color .18s,background .18s}
+.pin-toggle:hover{background:rgba(255,193,7,.1);color:#ffd071}
+.pin-toggle:focus-visible{outline:2px solid #ffc107;outline-offset:1px}
+.pin-toggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pin-toggle svg[hidden]{display:none}
+
+/* Organizer poll summary: choice, percentage bar, then its voters. */
+.admin-poll{margin-top:35px}
+.admin-poll-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:15px}
+.admin-poll-heading h3{margin:0}
+.admin-poll-heading>span{color:#9a9488;font-size:12px;white-space:nowrap}
+.admin-poll-results{display:grid;gap:10px}
+.admin-poll-row{display:grid;grid-template-columns:minmax(135px,.7fr) minmax(180px,1fr) minmax(180px,1.15fr);align-items:center;gap:18px;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:linear-gradient(120deg,rgba(29,26,20,.74),rgba(17,17,16,.92))}
+.admin-poll-choice{display:grid;gap:4px}
+.admin-poll-choice strong{color:#f2ede4;font-size:15px}
+.admin-poll-choice span{color:#a49d91;font-size:12px}
+.admin-poll-meter{display:grid;grid-template-columns:minmax(50px,1fr) auto;align-items:center;gap:8px 12px}
+.admin-poll-track{height:7px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.09)}
+.admin-poll-track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffc83d,#ff7d20)}
+.admin-poll-stats{display:flex;align-items:center;gap:8px;color:#aaa397;font-size:11px;white-space:nowrap}
+.admin-poll-stats strong{color:#f5d17c;font-size:15px}
+.admin-poll-voters{display:flex;flex-wrap:wrap;gap:6px}
+.admin-poll-voters>span{padding:5px 8px;border:1px solid rgba(255,193,7,.16);border-radius:999px;background:rgba(255,193,7,.055);color:#ddd3c1;font-size:11px}
+.admin-poll-voters>.empty{padding:0;border:0;background:none;color:#888278}
+@media(max-width:700px){
+  .nomination-list-modal>.modal-header.primary-list-header,.nomination-list-modal>.modal-header.extra-list-header{min-height:70px;padding:13px 16px}
+  .nomination-list-modal>.modal-header.primary-list-header h2,.nomination-list-modal>.modal-header.extra-list-header h2{font-size:23px}
+  .nomination-list-modal>.modal-header .close-button{flex-basis:40px;width:40px;height:40px}
+  .nom-detail{padding-top:17px}
+  .nom-detail-top .back-link{gap:7px;padding-inline:11px;font-size:12px}
+  .poll-option.has-results{padding:14px}
+  .admin-poll-row{grid-template-columns:minmax(0,1fr);gap:10px}
+  .admin-poll-meter{grid-template-columns:minmax(70px,1fr) auto}
+  .admin-poll-voters{padding-top:2px}
+  .footer-credit-separator{display:inline-block}
+  .topbar.is-at-top .top-actions{gap:10px}
+}
+@media(max-width:430px){
+  .topbar.is-at-top .top-actions{gap:7px}
+  .topbar.is-at-top #account-status{font-size:11px}
+  .topbar.is-at-top .button-quiet{padding:9px 10px;font-size:12px}
+  .poll-result-badge{font-size:8px;padding-inline:6px}
+}
+@media(prefers-reduced-motion:reduce){.pin-toggle,.nominee-card.self::after,.poll-result-track>span{transition:none}}

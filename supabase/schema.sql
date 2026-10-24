@@ -183,10 +183,15 @@ begin
 end $$;
 
 create or replace function public.get_my_ballot(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_account uuid:=flare_session_account(p_token); v_votes jsonb;
+declare v_account uuid:=flare_session_account(p_token); v_votes jsonb; v_event_choice text; v_event_results jsonb;
 begin
   select coalesce(jsonb_object_agg(nomination_id,option_id),'{}'::jsonb) into v_votes from flare_votes where account_id=v_account;
-  return jsonb_build_object('votes',v_votes,'event_choice',(select choice_id from flare_event_choices where account_id=v_account),'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account));
+  select choice_id into v_event_choice from flare_event_choices where account_id=v_account;
+  if v_event_choice is not null then
+    select jsonb_build_object('total',coalesce(sum(votes),0),'counts',coalesce(jsonb_object_agg(choice_id,votes),'{}'::jsonb)) into v_event_results
+    from (select choice_id,count(*)::integer as votes from flare_event_choices group by choice_id) poll_counts;
+  end if;
+  return jsonb_build_object('votes',v_votes,'event_choice',v_event_choice,'event_results',v_event_results,'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account));
 end $$;
 
 create or replace function public.cast_vote(p_token text,p_nomination_id text,p_option_id text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
@@ -201,12 +206,14 @@ begin
 end $$;
 
 create or replace function public.save_event_choice(p_token text,p_choice_id text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_account uuid:=flare_session_account(p_token);
+declare v_account uuid:=flare_session_account(p_token); v_event_results jsonb;
 begin
   if flare_closed() then raise exception 'Голосование завершено.'; end if;
   if p_choice_id not in ('dec-4','dec-5','dec-6') then raise exception 'Выбери один из предложенных дней.'; end if;
   insert into flare_event_choices(account_id,choice_id,updated_at) values(v_account,p_choice_id,now()) on conflict(account_id) do update set choice_id=excluded.choice_id,updated_at=now();
-  return jsonb_build_object('ok',true);
+  select jsonb_build_object('total',coalesce(sum(votes),0),'counts',coalesce(jsonb_object_agg(choice_id,votes),'{}'::jsonb)) into v_event_results
+  from (select choice_id,count(*)::integer as votes from flare_event_choices group by choice_id) poll_counts;
+  return jsonb_build_object('ok',true,'event_results',v_event_results);
 end $$;
 
 create or replace function public.finalize_ballot(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
