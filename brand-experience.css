@@ -444,3 +444,82 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
   .admin-voter-list{font-size:9px}
 }
 @media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:5px}}
+
+
+/* Final pass: accessible page scroll below the floating navigation. */
+html::-webkit-scrollbar-track:vertical{margin-top:95px}
+@media(max-width:975px){html::-webkit-scrollbar-track:vertical{margin-top:87.5px}}
+
+/* Countdown typography is the focus; remove the enclosing plate and center its copy. */
+.vote-countdown{max-width:390px;padding:8px 0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.countdown-label,.countdown-deadline{text-align:center}
+.countdown-label{color:#d5bd80;font-size:11px;letter-spacing:.17em}
+.countdown-values{justify-content:center;gap:10px;margin:15px 0 10px}
+.countdown-unit{min-width:58px;gap:5px}
+.countdown-unit strong{font-family:"Rubik",var(--font),sans-serif;font-size:clamp(34px,3vw,43px);font-weight:700;letter-spacing:.015em;font-variant-numeric:tabular-nums;line-height:.98;text-shadow:0 0 22px rgba(255,191,58,.14)}
+.countdown-unit small{font-size:10px;letter-spacing:.035em}
+.countdown-separator{margin-top:-10px;font-size:26px}
+.countdown-deadline{font-size:12px}
+.vote-countdown.is-finished{border:0;background:transparent}
+.vote-countdown.is-finished .countdown-unit strong{color:#bde6ae}
+@media(max-width:700px){
+  .vote-countdown{max-width:420px}
+  .countdown-values{gap:clamp(5px,2vw,12px)}
+  .countdown-unit{min-width:clamp(48px,14vw,65px)}
+}
+
+/* Matching, slightly wider and flatter FLARE wordmarks in both positions. */
+.intro-logo{transform:scaleX(1.08) scaleY(.9)}
+.wordmark>span{display:inline-block;transform:scaleX(1.08) scaleY(.9)}
+
+/* Center the close glyph optically, and keep its size stable on hover. */
+.close-button{position:relative;font-size:0!important;transition:color .18s ease,background-color .18s ease,border-color .18s ease!important}
+.close-button::before,.close-button::after{position:absolute;top:50%;left:50%;width:16px;height:1.5px;border-radius:2px;background:currentColor;content:"";transform:translate(-50%,-50%) rotate(45deg)}
+.close-button::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.nom-detail-top .close-button:hover,
+.nomination-list-modal>.modal-header .close-button:hover,
+.admin-head .close-button:hover{transform:none!important}
+
+/* Keep nomination detail chrome fixed while its card grid owns the scrollbar. */
+.nomination-detail-modal{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.nom-detail-top{position:relative;top:auto;flex:0 0 auto}
+.nom-detail-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#463b2e #10100f}
+.nom-detail-scroll::-webkit-scrollbar{width:9px}
+.nom-detail-scroll::-webkit-scrollbar-track{margin-block:10px;background:#10100f;border-radius:999px}
+.nom-detail-scroll::-webkit-scrollbar-thumb{border:2px solid #10100f;border-radius:999px;background:#463b2e}
+.nomination-detail-modal>.vote-actions{position:relative;bottom:auto;flex:0 0 auto}
+
+/* Identical modal header geometry for both nomination lists. */
+.nomination-list-modal{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.nomination-list-modal>.modal-header.primary-list-header,
+.nomination-list-modal>.modal-header.extra-list-header{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;min-height:82px;padding:17px 30px;border-bottom:1px solid rgba(255,255,255,.08);background:#0e0e0d}
+.nomination-list-modal>.modal-header.primary-list-header h2,
+.nomination-list-modal>.modal-header.extra-list-header h2{margin:0;color:#f6f1e7;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:0}
+.nomination-list-modal>.nomination-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.nomination-list-modal>.nomination-grid::-webkit-scrollbar-track{margin-block:10px;background:#0e0e0d}
+@media(max-width:600px){
+  .nomination-list-modal>.modal-header.primary-list-header,
+  .nomination-list-modal>.modal-header.extra-list-header{min-height:70px;padding:13px 16px}
+  .nomination-list-modal>.modal-header.primary-list-header h2,
+  .nomination-list-modal>.modal-header.extra-list-header h2{font-size:23px}
+}
+
+/* Organizer dialog: a stationary title row and a genuinely scrollable results body. */
+.admin-modal{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.admin-modal>.admin-head{flex:0 0 auto}
+.admin-modal>.admin-wrap{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+
+/* Make the visible eye unmistakably indicate that the PIN is being revealed. */
+.pin-toggle[aria-pressed="true"]{color:#ffd12e;background:rgba(255,209,46,.1)}
+.pin-toggle[aria-pressed="true"]:hover{color:#ffe16b;background:rgba(255,209,46,.15)}
+
+/* Distinguish the stored poll answer from an unsaved replacement choice. */
+.poll-option-date .poll-choice-status{display:block;margin-top:5px;color:#a9a195;font-size:9px;font-weight:800;letter-spacing:.1em;line-height:1.25}
+.poll-option.pending-choice{border-color:rgba(186,117,255,.68);background:linear-gradient(110deg,rgba(111,45,154,.14),rgba(18,17,18,.92));box-shadow:inset 3px 0 #b875ff,0 0 20px rgba(156,82,213,.08)}
+.poll-option.pending-choice .radio{border-color:#c58cff;box-shadow:0 0 0 3px rgba(184,117,255,.11)}
+.poll-option.pending-choice .poll-choice-status{color:#d3a3ff}
+.poll-option.saved-choice:not(.selected){border-color:rgba(255,193,7,.29);background:linear-gradient(110deg,rgba(255,193,7,.055),rgba(17,17,16,.92))}
+.poll-option.saved-choice:not(.selected) .poll-choice-status{color:#cfb56f}
+.poll-option.selected.saved-choice .poll-choice-status{color:#f4cf72}
+.poll-option.selected.pending-choice .poll-choice-status{color:#d3a3ff}
+.poll-footer #save-event-poll:disabled{opacity:.48}
