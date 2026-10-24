@@ -228,12 +228,37 @@ begin
 end $$;
 
 create or replace function public.admin_summary(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_account uuid:=flare_session_account(p_token); v_votes jsonb; v_choices jsonb;
+declare
+  v_account uuid:=flare_session_account(p_token);
+  v_votes jsonb;
+  v_choices jsonb;
+  v_registered jsonb;
+  v_voted jsonb;
+  v_not_voted jsonb;
+  v_registered_count bigint;
+  v_voted_count bigint;
+  v_total_votes bigint;
 begin
   if not exists(select 1 from flare_accounts where id=v_account and nickname='Maronnix') then raise exception 'Нет доступа к панели организатора.'; end if;
   select coalesce(jsonb_agg(jsonb_build_object('nomination_title',n.title,'option_name',o.name,'nickname',a.nickname) order by n.title,a.nickname),'[]'::jsonb) into v_votes from flare_votes v join flare_accounts a on a.id=v.account_id join flare_nominations n on n.id=v.nomination_id join flare_options o on o.id=v.option_id;
   select coalesce(jsonb_agg(jsonb_build_object('nickname',a.nickname,'choice_label',case c.choice_id when 'dec-4' then '4 декабря · пятница' when 'dec-5' then '5 декабря · суббота' else '6 декабря · воскресенье' end) order by a.nickname),'[]'::jsonb) into v_choices from flare_event_choices c join flare_accounts a on a.id=c.account_id;
-  return jsonb_build_object('votes',v_votes,'event_preferences',v_choices);
+  select count(*) into v_registered_count from flare_accounts;
+  select count(distinct account_id),count(*) into v_voted_count,v_total_votes from flare_votes;
+  select coalesce(jsonb_agg(a.nickname order by a.nickname),'[]'::jsonb) into v_registered from flare_accounts a;
+  select coalesce(jsonb_agg(a.nickname order by a.nickname),'[]'::jsonb) into v_voted from flare_accounts a where exists(select 1 from flare_votes v where v.account_id=a.id);
+  select coalesce(jsonb_agg(m.nickname order by m.nickname),'[]'::jsonb) into v_not_voted from flare_members m where not exists(select 1 from flare_accounts a join flare_votes v on v.account_id=a.id where a.nickname=m.nickname);
+  return jsonb_build_object(
+    'votes',v_votes,
+    'event_preferences',v_choices,
+    'statistics',jsonb_build_object(
+      'registered_count',v_registered_count,
+      'registered_nicknames',v_registered,
+      'voted_count',v_voted_count,
+      'total_votes',v_total_votes,
+      'voted_nicknames',v_voted,
+      'not_voted_nicknames',v_not_voted
+    )
+  );
 end $$;
 
 revoke all on function public.flare_closed() from public,anon,authenticated;
