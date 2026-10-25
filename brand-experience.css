@@ -796,3 +796,8 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 .admin-load-error .button{min-height:42px;padding:0 18px;font-size:12px}
 @keyframes adminLoadingSpin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.admin-loading-spinner{animation:none}}
+
+/* Use one natural-height scroll surface for the organizer dialog; avoid a short inner pane leaving an empty modal. */
+.admin-modal{display:block;overflow:auto;min-height:0;overscroll-behavior:contain}
+.admin-modal>.admin-head{position:sticky;top:0;z-index:10;background:#10100f}
+.admin-modal>.admin-wrap{display:block;flex:none;min-height:auto;overflow:visible;overscroll-behavior:auto}

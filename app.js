@@ -101,7 +101,7 @@ function finishAvatarCrop(key){
   session.canvas.classList.remove('is-dragging');
 }
 function closeAllAvatarCrops(){for(const key of avatarCropSessions.keys())finishAvatarCrop(key)}
-function revealDesignCard(card){const wrap=card?.closest('.admin-wrap');if(!wrap)return;const item=card.getBoundingClientRect(),viewport=wrap.getBoundingClientRect();wrap.scrollTop+=item.top-viewport.top-(wrap.clientHeight-item.height)/2}
+function revealDesignCard(card){const modal=card?.closest('.admin-modal');if(!modal)return;const item=card.getBoundingClientRect(),viewport=modal.getBoundingClientRect(),head=$('.admin-head',modal)?.getBoundingClientRect(),headHeight=head?.height||0;modal.scrollTop+=item.top-(viewport.top+headHeight)-(modal.clientHeight-headHeight-item.height)/2}
 async function openAvatarCrop(card,source,ownedUrl=''){
   const key=card.dataset.designKey;finishAvatarCrop(key);
   const editor=card.querySelector('[data-avatar-editor]'),canvas=card.querySelector('[data-avatar-canvas]');
@@ -247,7 +247,7 @@ function setAdminTab(selected){
   const modal=$('.admin-modal');if(!modal)return;
   $$('[data-admin-tab]',modal).forEach(tab=>{const active=tab.dataset.adminTab===selected;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1});
   $$('.admin-tab-panel',modal).forEach(panel=>{panel.hidden=panel.id!==`admin-panel-${selected}`});
-  const wrap=$('.admin-wrap',modal);if(wrap)wrap.scrollTop=0;
+  modal.scrollTop=0;
 }
 function bindAdminTabs(){
   $$('[data-admin-tab]',$('.admin-modal')).forEach(tab=>tab.addEventListener('click',()=>setAdminTab(tab.dataset.adminTab)));
