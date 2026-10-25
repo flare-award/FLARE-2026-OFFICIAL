@@ -576,13 +576,11 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 @media(max-width:600px){.winner-window{border-radius:17px}}
 
 /* Let nomination rows size to their full cards; only the list viewport should scroll. */
-.nomination-list-modal>.nomination-grid{grid-auto-rows:max-content;align-content:start}
+.nomination-list-modal>.nomination-grid{grid-auto-rows:max-content;align-content:start;align-items:start}
 .nomination-list-modal .nomination-tile{height:auto;min-height:0;overflow:hidden}
-.nomination-list-modal .nomination-card-body{position:relative;z-index:1;display:flex;flex:1 1 auto;min-height:170px;visibility:visible;opacity:1}
+.nomination-list-modal .nomination-card-body{position:relative;z-index:1;display:flex;flex:1 1 auto;min-height:0;visibility:visible;opacity:1}
 .nomination-list-modal .nomination-tile-title{display:block;visibility:visible;opacity:1;color:#f2eee6}
 .nomination-list-modal .nomination-tile-description{display:-webkit-box;visibility:visible;opacity:1;color:#b4afa6}
-@media(max-width:975px){.nomination-list-modal .nomination-card-body{min-height:155px}}
-@media(max-width:600px){.nomination-list-modal .nomination-card-body{min-height:155px}}
 
 
 /* Align nomination copy with the top of its content column; no spacer or text backplate. */
@@ -746,3 +744,9 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
 /* These dialogs scroll in inner panes, so the outer modal must not reserve a fake scrollbar gutter. */
 .nomination-list-modal,.nomination-detail-modal,.admin-modal{scrollbar-gutter:auto}
+
+/* Compact nomination cards to their text instead of stretching empty bottoms. */
+@media(max-width:600px){
+  .nomination-list-modal .nomination-tile{min-height:0}
+  .nomination-list-modal .nomination-art{min-height:120px}
+}
