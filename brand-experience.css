@@ -818,6 +818,7 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 /* Show the complete source image in Picture and Video nominee cards, with a taller preview area. */
 .nomination-detail-modal .nominee-grid-media .visual{height:220px}
 .nomination-detail-modal .nominee-grid-media .nominee-name{font-weight:700}
+.nomination-detail-modal .nominee-grid-media .nominee-card:hover .visual-photo{transform:none}
 .nomination-detail-modal .nominee-grid-media .visual-photo{object-fit:cover;background:transparent}
 @media(max-width:700px){.nomination-detail-modal .nominee-grid-media .visual{height:clamp(165px,48vw,210px)}}
 
