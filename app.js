@@ -76,10 +76,66 @@ function resizePhoto(file){
     image.onerror=()=>{URL.revokeObjectURL(source);reject(new Error('Не удалось прочитать изображение.'))};image.src=source;
   });
 }
+const avatarCropSessions=new Map();
+const avatarCropSize=512;
+function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
+function drawAvatarCrop(session){
+  const {canvas,image}=session,context=canvas.getContext('2d'),size=avatarCropSize;
+  if(!context||!image.naturalWidth||!image.naturalHeight)return;
+  const scale=Math.max(size/image.naturalWidth,size/image.naturalHeight)*session.zoom;
+  const width=image.naturalWidth*scale,height=image.naturalHeight*scale;
+  const maxX=Math.max(0,(width-size)/2),maxY=Math.max(0,(height-size)/2);
+  session.panX=clamp(session.panX,-1,1);session.panY=clamp(session.panY,-1,1);
+  context.clearRect(0,0,size,size);
+  context.drawImage(image,(size-width)/2+session.panX*maxX,(size-height)/2+session.panY*maxY,width,height);
+  session.card.querySelector('[data-avatar-zoom]').value=String(Math.round(session.zoom*100));
+  session.card.querySelector('[data-avatar-zoom-value]').textContent=`${Math.round(session.zoom*100)}%`;
+  const panX=session.card.querySelector('[data-avatar-pan-x]'),panY=session.card.querySelector('[data-avatar-pan-y]');
+  panX.value=String(Math.round(session.panX*100));panY.value=String(Math.round(session.panY*100));
+  panX.disabled=maxX<1;panY.disabled=maxY<1;
+}
+function finishAvatarCrop(key){
+  const session=avatarCropSessions.get(key);if(!session)return;
+  avatarCropSessions.delete(key);if(session.ownedUrl)URL.revokeObjectURL(session.ownedUrl);
+  session.card.querySelector('[data-avatar-editor]').hidden=true;
+  session.canvas.classList.remove('is-dragging');
+}
+function closeAllAvatarCrops(){for(const key of avatarCropSessions.keys())finishAvatarCrop(key)}
+async function openAvatarCrop(card,source,ownedUrl=''){
+  const key=card.dataset.designKey;finishAvatarCrop(key);
+  const editor=card.querySelector('[data-avatar-editor]'),canvas=card.querySelector('[data-avatar-canvas]');
+  const image=new Image();
+  try{
+    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Не удалось открыть это фото для кадрирования.'));image.src=source});
+  }catch(error){if(ownedUrl)URL.revokeObjectURL(ownedUrl);throw error}
+  const session={key,card,canvas,image,zoom:1,panX:0,panY:.32,ownedUrl};
+  avatarCropSessions.set(key,session);editor.hidden=false;drawAvatarCrop(session);
+}
+function bindAvatarCropControls(grid){
+  $$('.admin-design-card[data-design-category="avatars"]',grid).forEach(card=>{
+    const key=card.dataset.designKey,canvas=card.querySelector('[data-avatar-canvas]');
+    card.querySelector('[data-design-crop]').onclick=async()=>{try{await openAvatarCrop(card,photoSource(key));}catch(error){toast(error.message)}};
+    card.querySelector('[data-avatar-zoom]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.zoom=Number(card.querySelector('[data-avatar-zoom]').value)/100;drawAvatarCrop(session)}};
+    card.querySelector('[data-avatar-pan-x]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.panX=Number(card.querySelector('[data-avatar-pan-x]').value)/100;drawAvatarCrop(session)}};
+    card.querySelector('[data-avatar-pan-y]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.panY=Number(card.querySelector('[data-avatar-pan-y]').value)/100;drawAvatarCrop(session)}};
+    canvas.addEventListener('pointerdown',event=>{const session=avatarCropSessions.get(key);if(!session)return;canvas.setPointerCapture(event.pointerId);session.drag={x:event.clientX,y:event.clientY,panX:session.panX,panY:session.panY};canvas.classList.add('is-dragging')});
+    canvas.addEventListener('pointermove',event=>{const session=avatarCropSessions.get(key);if(!session?.drag)return;const rect=canvas.getBoundingClientRect(),scale=avatarCropSize/rect.width;
+      const drawScale=Math.max(avatarCropSize/session.image.naturalWidth,avatarCropSize/session.image.naturalHeight)*session.zoom;
+      const maxX=Math.max(0,(session.image.naturalWidth*drawScale-avatarCropSize)/2),maxY=Math.max(0,(session.image.naturalHeight*drawScale-avatarCropSize)/2);
+      if(maxX)session.panX=clamp(session.drag.panX+(event.clientX-session.drag.x)*scale/maxX,-1,1);
+      if(maxY)session.panY=clamp(session.drag.panY+(event.clientY-session.drag.y)*scale/maxY,-1,1);
+      drawAvatarCrop(session);
+    });
+    const stopDrag=event=>{const session=avatarCropSessions.get(key);if(session?.drag){session.drag=null;canvas.classList.remove('is-dragging');if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}};
+    canvas.addEventListener('pointerup',stopDrag);canvas.addEventListener('pointercancel',stopDrag);
+    card.querySelector('[data-avatar-crop-save]').onclick=async event=>{const session=avatarCropSessions.get(key);if(!session)return;const button=event.currentTarget;button.disabled=true;try{const blob=await new Promise(resolve=>session.canvas.toBlob(resolve,'image/jpeg',.94));if(!blob)throw new Error('Не удалось сохранить кадр аватарки.');await savePhotoOverride(key,blob);finishAvatarCrop(key);card.querySelector(`[data-design-reset="${key}"]`).disabled=false;toast('Круглый кадр аватарки сохранён.')}catch(error){toast(error.message)}finally{button.disabled=false}};
+    card.querySelector('[data-avatar-crop-cancel]').onclick=()=>finishAvatarCrop(key);
+  });
+}
 async function savePhotoOverride(key,blob){
   const db=await openPhotoDatabase();
   await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put({key,blob});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Не удалось сохранить фотографию.'))});
-  photoOverrides[key]=URL.createObjectURL(blob);updatePhotoNodes(key);
+  const previous=photoOverrides[key];photoOverrides[key]=URL.createObjectURL(blob);updatePhotoNodes(key);if(previous)URL.revokeObjectURL(previous);
 }
 async function resetPhotoOverride(key){
   const db=await openPhotoDatabase();
@@ -92,8 +148,14 @@ async function resetAllPhotoOverrides(){
   for(const [key,url] of Object.entries(photoOverrides)){delete photoOverrides[key];updatePhotoNodes(key);URL.revokeObjectURL(url)}
 }
 function renderDesignPanel(){
-  const cards=photoSlots.map(slot=>`<article class="admin-design-card" data-design-category="${slot.groupKey}" data-design-search="${esc(`${slot.label} ${slot.path}`.toLowerCase())}"><div class="admin-design-preview ${slot.groupKey==='avatars'?'is-avatar':''}"><img src="${esc(photoSource(slot.key))}" data-photo-key="${esc(slot.key)}" alt="${esc(slot.label)}" loading="lazy"></div><div class="admin-design-info"><h4>${esc(slot.label)}</h4><code>${esc(slot.path)}</code></div><div class="admin-design-actions"><label class="admin-design-upload">Заменить<input type="file" accept="image/*" data-design-upload="${esc(slot.key)}" aria-label="Заменить фото: ${esc(slot.label)}"></label><button type="button" class="admin-design-download" data-design-download="${esc(slot.key)}">Скачать</button><button type="button" class="admin-design-reset" data-design-reset="${esc(slot.key)}" ${photoOverrides[slot.key]?'':'disabled'}>Сбросить</button></div></article>`).join('');
-  return `<section class="admin-tab-panel admin-design-panel" id="admin-panel-design" role="tabpanel" aria-labelledby="admin-tab-design" hidden><div class="admin-design-intro"><div><h3>Фото на сайте</h3><p>Загруженное фото автоматически уменьшается без искажения и кадрируется внутри своего блока.</p><p class="admin-design-note">Предпросмотр сохраняется только в этом браузере. Для публикации скачай набор фотографий и замени файлы в репозитории по тем же путям.</p></div><button type="button" class="button admin-design-export" id="export-design-photos">Скачать набор фотографий</button></div><div class="admin-design-toolbar"><div class="admin-design-filters" role="group" aria-label="Фильтр фотографий"><button type="button" class="is-active" data-design-filter="all">Все (${photoSlots.length})</button><button type="button" data-design-filter="covers">Обложки</button><button type="button" data-design-filter="avatars">Аватары</button><button type="button" data-design-filter="nominees">Картинки</button><button type="button" data-design-filter="videos">Видео</button></div><input id="admin-design-search" type="search" placeholder="Найти фото…" aria-label="Найти фото"></div><div class="admin-design-grid">${cards}</div></section>`;
+  const cards=photoSlots.map(slot=>{
+    const avatar=slot.groupKey==='avatars';
+    const image=`<img src="${esc(photoSource(slot.key))}" data-photo-key="${esc(slot.key)}" alt="${esc(slot.label)}" loading="lazy">`;
+    const preview=avatar?`<div class="admin-design-preview is-avatar"><div class="admin-design-avatar-sample"><div class="admin-design-avatar-circle">${image}</div><span class="admin-design-avatar-name">${esc(slot.label)}</span><small>Так будет выглядеть у номинанта</small></div></div>`:`<div class="admin-design-preview">${image}</div>`;
+    const cropEditor=avatar?`<section class="admin-avatar-editor" data-avatar-editor hidden><p>Перетащи фото в круге. Точная круглая обрезка сохранится и в карточке номинанта.</p><canvas class="admin-avatar-crop-canvas" data-avatar-canvas width="512" height="512" aria-label="Круглый предпросмотр кадра аватарки"></canvas><div class="admin-avatar-crop-controls"><label>Размер <output data-avatar-zoom-value>100%</output><input type="range" min="100" max="300" step="1" value="100" data-avatar-zoom aria-label="Размер кадра"></label><label>По горизонтали<input type="range" min="-100" max="100" step="1" value="0" data-avatar-pan-x aria-label="Положение по горизонтали"></label><label>По вертикали<input type="range" min="-100" max="100" step="1" value="0" data-avatar-pan-y aria-label="Положение по вертикали"></label></div><div class="admin-avatar-crop-actions"><button type="button" class="admin-avatar-crop-save" data-avatar-crop-save>Применить кадр</button><button type="button" class="admin-avatar-crop-cancel" data-avatar-crop-cancel>Отмена</button></div></section>`:'';
+    return `<article class="admin-design-card" data-design-key="${esc(slot.key)}" data-design-category="${slot.groupKey}" data-design-search="${esc(`${slot.label} ${slot.path}`.toLowerCase())}">${preview}<div class="admin-design-info"><h4>${esc(slot.label)}</h4><code>${esc(slot.path)}</code></div><div class="admin-design-actions"><label class="admin-design-upload">Заменить<input type="file" accept="image/*" data-design-upload="${esc(slot.key)}" aria-label="Заменить фото: ${esc(slot.label)}"></label>${avatar?`<button type="button" class="admin-design-crop" data-design-crop>Настроить кадр</button>`:''}<button type="button" class="admin-design-download" data-design-download="${esc(slot.key)}">Скачать</button><button type="button" class="admin-design-reset" data-design-reset="${esc(slot.key)}" ${photoOverrides[slot.key]?'':'disabled'}>Сбросить</button></div>${cropEditor}</article>`;
+  }).join('');
+  return `<section class="admin-tab-panel admin-design-panel" id="admin-panel-design" role="tabpanel" aria-labelledby="admin-tab-design" hidden><div class="admin-design-intro"><div><h3>Фото на сайте</h3><p>Загруженное фото уменьшается без искажения. Для аватаров настрой кадр в круглом предпросмотре — он совпадает с видом у номинанта.</p><p class="admin-design-note">Предпросмотр сохраняется только в этом браузере. Для публикации скачай набор фотографий и замени файлы в репозитории по тем же путям.</p></div><button type="button" class="button admin-design-export" id="export-design-photos">Скачать набор фотографий</button></div><div class="admin-design-toolbar"><div class="admin-design-filters" role="group" aria-label="Фильтр фотографий"><button type="button" class="is-active" data-design-filter="all">Все (${photoSlots.length})</button><button type="button" data-design-filter="covers">Обложки</button><button type="button" data-design-filter="avatars">Аватары</button><button type="button" data-design-filter="nominees">Картинки</button><button type="button" data-design-filter="videos">Видео</button></div><input id="admin-design-search" type="search" placeholder="Найти фото…" aria-label="Найти фото"></div><div class="admin-design-grid">${cards}</div></section>`;
 }
 function crc32(bytes){let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let bit=0;bit<8;bit++)crc=(crc>>>1)^(crc&1?0xedb88320:0)}return(crc^0xffffffff)>>>0}
 function createZip(files){
@@ -119,9 +181,10 @@ function bindDesignPanel(){
   const applyFilter=()=>{const category=$('.admin-design-filters .is-active')?.dataset.designFilter||'all',query=$('#admin-design-search').value.trim().toLowerCase();$$('.admin-design-card',grid).forEach(card=>{card.hidden=(category!=='all'&&card.dataset.designCategory!==category)||Boolean(query&&!card.dataset.designSearch.includes(query))})};
   $$('[data-design-filter]').forEach(button=>button.onclick=()=>{$$('.admin-design-filters button').forEach(item=>item.classList.toggle('is-active',item===button));applyFilter()});
   $('#admin-design-search').oninput=applyFilter;
-  $$('[data-design-upload]',grid).forEach(input=>input.onchange=async()=>{const file=input.files?.[0];if(!file)return;const key=input.dataset.designUpload;input.disabled=true;try{const blob=await resizePhoto(file);await savePhotoOverride(key,blob);$(`[data-design-reset="${key}"]`,grid).disabled=false;toast('Фото заменено для этого браузера.')}catch(error){toast(error.message)}finally{input.disabled=false;input.value=''}});
-  $$('[data-design-reset]',grid).forEach(button=>button.onclick=async()=>{try{await resetPhotoOverride(button.dataset.designReset);button.disabled=true;toast('Вернул исходную заглушку.')}catch(error){toast(error.message)}});
+  $$('[data-design-upload]',grid).forEach(input=>input.onchange=async()=>{const file=input.files?.[0];if(!file)return;const key=input.dataset.designUpload,slot=photoSlotByKey.get(key),card=input.closest('.admin-design-card');input.disabled=true;try{const blob=await resizePhoto(file);if(slot.groupKey==='avatars'){const url=URL.createObjectURL(blob);await openAvatarCrop(card,url,url);toast('Перетащи и настрой кадр в круглом предпросмотре.')}else{await savePhotoOverride(key,blob);card.querySelector(`[data-design-reset="${key}"]`).disabled=false;toast('Фото заменено для этого браузера.')}}catch(error){toast(error.message)}finally{input.disabled=false;input.value=''}});
+  $$('[data-design-reset]',grid).forEach(button=>button.onclick=async()=>{const key=button.dataset.designReset;finishAvatarCrop(key);try{await resetPhotoOverride(key);button.disabled=true;toast('Вернул исходную заглушку.')}catch(error){toast(error.message)}});
   $$('[data-design-download]',grid).forEach(button=>button.onclick=()=>{const slot=photoSlotByKey.get(button.dataset.designDownload);const link=document.createElement('a');link.href=photoSource(slot.key);link.download=slot.path.split('/').pop();link.click()});
+  bindAvatarCropControls(grid);
   $('#export-design-photos').onclick=exportPhotoPack;
 }
 function initCountdown(){const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes'),seconds:$('#countdown-seconds')},status=$('#countdown-status'),box=$('#vote-countdown');let timer;const pad=n=>String(n).padStart(2,'0');const tick=()=>{const remaining=Math.max(0,closing.getTime()-Date.now()),total=Math.floor(remaining/1000);units.days.textContent=pad(Math.floor(total/86400));units.hours.textContent=pad(Math.floor(total%86400/3600));units.minutes.textContent=pad(Math.floor(total%3600/60));units.seconds.textContent=pad(total%60);if(remaining<=0){box.classList.add('is-finished');status.textContent='Голосование завершено';clearInterval(timer);updateProgress()}};tick();if(!isClosed())timer=setInterval(tick,1000)}
@@ -132,7 +195,7 @@ $('#back-nominations').onclick=renderNominations;$$('[data-nominee]').forEach(el
 function bindModalClose(modal){$('.close-button',modal)?.addEventListener('click',closeModal)}
 function replaceModalView(content,kind=''){const root=$('#modal-root'),modal=$('.modal',root);if(!modal){openModal(content,kind);return}modal.className=`modal ${kind}`;modal.innerHTML=content;modal.scrollTop=0;bindModalClose(modal)}
 function openModal(content,kind=''){const root=$('#modal-root');root.innerHTML=`<div class="modal-backdrop"><section class="modal ${kind}" role="dialog" aria-modal="true">${content}</section></div>`;const backdrop=$('.modal-backdrop',root),modal=$('.modal',root);let pointerStartedInside=false;modal.addEventListener('pointerdown',()=>{pointerStartedInside=true},true);backdrop.addEventListener('pointerdown',e=>{if(e.target===backdrop)pointerStartedInside=false},true);backdrop.addEventListener('click',e=>{if(e.target!==backdrop)return;if(pointerStartedInside){pointerStartedInside=false;return}closeModal()});bindModalClose(modal);document.addEventListener('keydown',escClose,{once:true});function escClose(e){if(e.key==='Escape')closeModal();else document.addEventListener('keydown',escClose,{once:true})}}
-function closeModal(){$('#modal-root').innerHTML='';state.nomination=null}
+function closeModal(){closeAllAvatarCrops();$('#modal-root').innerHTML='';state.nomination=null}
 function renderAuth(){openModal(`<div class="eyebrow">FLARE AWARDS · 2026</div><h2 class="auth-title">Вход / регистрация</h2><form id="auth-form" class="auth-form"><label class="form-field"><span>EMAIL</span><input name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Твой email"></label><label class="form-field form-field-pin"><span>ЛИЧНЫЙ PIN-КОД</span><span class="pin-input-wrap"><input id="auth-pin" name="pin" type="password" autocomplete="current-password" required minlength="4" maxlength="72" pattern="[A-Za-z0-9]{4,72}" placeholder="Придумай PIN из букв и цифр"><button type="button" class="pin-toggle" id="toggle-pin" aria-label="Показать PIN" aria-pressed="false"><svg class="pin-eye-show" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6-3.2 6-9.2 6-9.2-6-9.2-6Z"/><circle cx="12" cy="12" r="2.8"/></svg><svg class="pin-eye-hide" aria-hidden="true" viewBox="0 0 24 24" hidden><path d="m3 3 18 18M10.6 6.2A9.8 9.8 0 0 1 12 6c6 0 9.2 6 9.2 6a15.8 15.8 0 0 1-2.4 3.1M6.2 6.3C4 7.7 2.8 12 2.8 12s3.2 6 9.2 6c1.3 0 2.5-.3 3.5-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></span></label><p class="auth-error" id="auth-error"></p><button class="button" type="submit">Войти в аккаунт</button></form>`, 'auth-modal');$('#toggle-pin').onclick=e=>{const button=e.currentTarget,input=$('#auth-pin'),visible=input.type==='password';input.type=visible?'text':'password';button.setAttribute('aria-pressed',String(visible));button.setAttribute('aria-label',visible?'Скрыть PIN':'Показать PIN');$('.pin-eye-show',button).hidden=visible;$('.pin-eye-hide',button).hidden=!visible};$('#auth-form').onsubmit=async e=>{e.preventDefault();const form=new FormData(e.target),email=String(form.get('email')).trim().toLowerCase(),pin=String(form.get('pin'));const error=$('#auth-error'),button=$('button[type="submit"]',e.target);button.disabled=true;error.textContent='';try{if(!clientReady())throw new Error('Сначала настрой Supabase и заполни URL и anon key в config.js.');const data=await rpc('flare_access',{p_email:email,p_pin:pin});if(data.error)throw new Error(data.error);saveSession(data);closeModal();toast(`Добро пожаловать, ${data.nickname}!`)}catch(err){error.textContent=err.message}finally{button.disabled=false}}}
 function renderWinners(){const track=$('#winner-track');track.innerHTML=previousWinners.map(([title,name],i)=>`<article class="winner-card"><div class="winner-icon">${String(i+1).padStart(2,'0')}</div><div><div class="winner-title">${esc(title)}</div><div class="winner-name">${esc(name)}</div></div></article>`).join('');updateCarousel();}
 function updateCarousel(){const track=$('#winner-track'),cards=$$('.winner-card',track);if(!cards.length)return;const gap=parseFloat(getComputedStyle(track).gap)||0,width=cards[0].getBoundingClientRect().width+gap;const maxOffset=Math.max(0,track.scrollWidth-track.parentElement.clientWidth),maxIndex=Math.ceil(maxOffset/width);state.carousel=Math.max(0,Math.min(state.carousel,maxIndex));const offset=Math.min(state.carousel*width,maxOffset);track.style.transform=`translate3d(${-offset}px,0,0)`;$('#winner-counter').textContent=`${String(state.carousel+1).padStart(2,'0')} / ${String(cards.length).padStart(2,'0')}`}
