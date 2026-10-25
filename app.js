@@ -88,19 +88,20 @@ function drawAvatarCrop(session){
   session.panX=clamp(session.panX,-1,1);session.panY=clamp(session.panY,-1,1);
   context.clearRect(0,0,size,size);
   context.drawImage(image,(size-width)/2+session.panX*maxX,(size-height)/2+session.panY*maxY,width,height);
-  session.card.querySelector('[data-avatar-zoom]').value=String(Math.round(session.zoom*100));
-  session.card.querySelector('[data-avatar-zoom-value]').textContent=`${Math.round(session.zoom*100)}%`;
-  const panX=session.card.querySelector('[data-avatar-pan-x]'),panY=session.card.querySelector('[data-avatar-pan-y]');
+  session.editor.querySelector('[data-avatar-zoom]').value=String(Math.round(session.zoom*100));
+  session.editor.querySelector('[data-avatar-zoom-value]').textContent=`${Math.round(session.zoom*100)}%`;
+  const panX=session.editor.querySelector('[data-avatar-pan-x]'),panY=session.editor.querySelector('[data-avatar-pan-y]');
   panX.value=String(Math.round(session.panX*100));panY.value=String(Math.round(session.panY*100));
   panX.disabled=maxX<1;panY.disabled=maxY<1;
 }
 function finishAvatarCrop(key){
   const session=avatarCropSessions.get(key);if(!session)return;
   avatarCropSessions.delete(key);if(session.ownedUrl)URL.revokeObjectURL(session.ownedUrl);
-  const editor=session.card.querySelector('[data-avatar-editor]');editor.hidden=true;editor.classList.remove('is-open');
+  const editor=session.editor;editor.hidden=true;editor.classList.remove('is-open');session.card.appendChild(editor);
   session.canvas.classList.remove('is-dragging');
 }
 function closeAllAvatarCrops(){for(const key of avatarCropSessions.keys())finishAvatarCrop(key)}
+function revealDesignCard(card){const wrap=card.closest('.admin-wrap');if(!wrap)return;const item=card.getBoundingClientRect(),viewport=wrap.getBoundingClientRect();wrap.scrollTop+=item.top-viewport.top-(wrap.clientHeight-item.height)/2}
 async function openAvatarCrop(card,source,ownedUrl=''){
   const key=card.dataset.designKey;finishAvatarCrop(key);
   const editor=card.querySelector('[data-avatar-editor]'),canvas=card.querySelector('[data-avatar-canvas]');
@@ -108,16 +109,18 @@ async function openAvatarCrop(card,source,ownedUrl=''){
   try{
     await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Не удалось открыть это фото для кадрирования.'));image.src=source});
   }catch(error){if(ownedUrl)URL.revokeObjectURL(ownedUrl);throw error}
-  const session={key,card,canvas,image,zoom:1,panX:0,panY:.32,ownedUrl};
+  if(!card.isConnected){if(ownedUrl)URL.revokeObjectURL(ownedUrl);return}
+  const session={key,card,canvas,editor,image,zoom:1,panX:0,panY:.32,ownedUrl};
+  document.body.appendChild(editor);
   avatarCropSessions.set(key,session);editor.hidden=false;editor.classList.add('is-open');editor.scrollTop=0;drawAvatarCrop(session);
 }
 function bindAvatarCropControls(grid){
   $$('.admin-design-card[data-design-category="avatars"]',grid).forEach(card=>{
     const key=card.dataset.designKey,canvas=card.querySelector('[data-avatar-canvas]');
     card.querySelector('[data-design-crop]').onclick=async()=>{try{await openAvatarCrop(card,photoSource(key));}catch(error){toast(error.message)}};
-    card.querySelector('[data-avatar-zoom]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.zoom=Number(card.querySelector('[data-avatar-zoom]').value)/100;drawAvatarCrop(session)}};
-    card.querySelector('[data-avatar-pan-x]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.panX=Number(card.querySelector('[data-avatar-pan-x]').value)/100;drawAvatarCrop(session)}};
-    card.querySelector('[data-avatar-pan-y]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.panY=Number(card.querySelector('[data-avatar-pan-y]').value)/100;drawAvatarCrop(session)}};
+    card.querySelector('[data-avatar-zoom]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.zoom=Number(session.editor.querySelector('[data-avatar-zoom]').value)/100;drawAvatarCrop(session)}};
+    card.querySelector('[data-avatar-pan-x]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.panX=Number(session.editor.querySelector('[data-avatar-pan-x]').value)/100;drawAvatarCrop(session)}};
+    card.querySelector('[data-avatar-pan-y]').oninput=()=>{const session=avatarCropSessions.get(key);if(session){session.panY=Number(session.editor.querySelector('[data-avatar-pan-y]').value)/100;drawAvatarCrop(session)}};
     canvas.addEventListener('pointerdown',event=>{const session=avatarCropSessions.get(key);if(!session)return;canvas.setPointerCapture(event.pointerId);session.drag={x:event.clientX,y:event.clientY,panX:session.panX,panY:session.panY};canvas.classList.add('is-dragging')});
     canvas.addEventListener('pointermove',event=>{const session=avatarCropSessions.get(key);if(!session?.drag)return;const rect=canvas.getBoundingClientRect(),scale=avatarCropSize/rect.width;
       const drawScale=Math.max(avatarCropSize/session.image.naturalWidth,avatarCropSize/session.image.naturalHeight)*session.zoom;
@@ -128,7 +131,7 @@ function bindAvatarCropControls(grid){
     });
     const stopDrag=event=>{const session=avatarCropSessions.get(key);if(session?.drag){session.drag=null;canvas.classList.remove('is-dragging');if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}};
     canvas.addEventListener('pointerup',stopDrag);canvas.addEventListener('pointercancel',stopDrag);
-    card.querySelector('[data-avatar-crop-save]').onclick=async event=>{const session=avatarCropSessions.get(key);if(!session)return;const button=event.currentTarget;button.disabled=true;try{const blob=await new Promise(resolve=>session.canvas.toBlob(resolve,'image/jpeg',.94));if(!blob)throw new Error('Не удалось сохранить кадр аватарки.');await savePhotoOverride(key,blob);finishAvatarCrop(key);card.querySelector(`[data-design-reset="${key}"]`).disabled=false;toast('Круглый кадр аватарки сохранён.')}catch(error){toast(error.message)}finally{button.disabled=false}};
+    card.querySelector('[data-avatar-crop-save]').onclick=async event=>{const session=avatarCropSessions.get(key);if(!session)return;const button=event.currentTarget;button.disabled=true;try{const blob=await new Promise(resolve=>session.canvas.toBlob(resolve,'image/jpeg',.94));if(!blob)throw new Error('Не удалось сохранить кадр аватарки.');await savePhotoOverride(key,blob);finishAvatarCrop(key);revealDesignCard(card);card.querySelector(`[data-design-reset="${key}"]`).disabled=false;toast('Круглый кадр аватарки сохранён.')}catch(error){toast(error.message)}finally{button.disabled=false}};
     card.querySelector('[data-avatar-crop-cancel]').onclick=()=>finishAvatarCrop(key);
   });
 }
