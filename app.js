@@ -102,19 +102,6 @@ function finishAvatarCrop(key){
 }
 function closeAllAvatarCrops(){for(const key of avatarCropSessions.keys())finishAvatarCrop(key)}
 function revealDesignCard(card){const wrap=card?.closest('.admin-wrap');if(!wrap)return;const item=card.getBoundingClientRect(),viewport=wrap.getBoundingClientRect();wrap.scrollTop+=item.top-viewport.top-(wrap.clientHeight-item.height)/2}
-function rebuildAdminAfterAvatarSave(key){
-  const oldPanel=$('#admin-panel-design'),oldWrap=$('.admin-wrap',$('.admin-modal'));if(!oldPanel||!oldWrap||!adminPanelMarkupCache)return;
-  const activeFilter=$('.admin-design-filters .is-active',oldPanel)?.dataset.designFilter||'all';
-  const search=$('#admin-design-search',oldPanel)?.value||'',scrollTop=oldWrap.scrollTop;
-  openModal(`${adminHeaderMarkup()}<div class="admin-wrap">${adminPanelMarkupCache}${renderDesignPanel()}</div>`,'admin-modal');
-  bindAdminTabs();setAdminTab('design');bindDesignPanel();
-  const panel=$('#admin-panel-design'),searchInput=$('#admin-design-search',panel);
-  if(searchInput)searchInput.value=search;
-  $(`[data-design-filter="${activeFilter}"]`,panel)?.click();
-  const wrap=$('.admin-wrap',$('.admin-modal'));wrap.scrollTop=scrollTop;
-  const card=$$('.admin-design-card',panel).find(item=>item.dataset.designKey===key);
-  revealDesignCard(card);
-}
 async function openAvatarCrop(card,source,ownedUrl=''){
   const key=card.dataset.designKey;finishAvatarCrop(key);
   const editor=card.querySelector('[data-avatar-editor]'),canvas=card.querySelector('[data-avatar-canvas]');
@@ -144,7 +131,7 @@ function bindAvatarCropControls(grid){
     });
     const stopDrag=event=>{const session=avatarCropSessions.get(key);if(session?.drag){session.drag=null;canvas.classList.remove('is-dragging');if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}};
     canvas.addEventListener('pointerup',stopDrag);canvas.addEventListener('pointercancel',stopDrag);
-    card.querySelector('[data-avatar-crop-save]').onclick=async event=>{const session=avatarCropSessions.get(key);if(!session)return;const button=event.currentTarget;button.disabled=true;try{const blob=await new Promise(resolve=>session.canvas.toBlob(resolve,'image/jpeg',.94));if(!blob)throw new Error('Не удалось сохранить кадр аватарки.');await savePhotoOverride(key,blob);finishAvatarCrop(key);rebuildAdminAfterAvatarSave(key);toast('Круглый кадр аватарки сохранён.')}catch(error){toast(error.message)}finally{button.disabled=false}};
+    card.querySelector('[data-avatar-crop-save]').onclick=async event=>{const session=avatarCropSessions.get(key);if(!session)return;const button=event.currentTarget;button.disabled=true;try{const blob=await new Promise(resolve=>session.canvas.toBlob(resolve,'image/jpeg',.94));if(!blob)throw new Error('Не удалось сохранить кадр аватарки.');await savePhotoOverride(key,blob);finishAvatarCrop(key);revealDesignCard(card);card.querySelector(`[data-design-reset="${key}"]`).disabled=false;toast('Круглый кадр аватарки сохранён.')}catch(error){toast(error.message)}finally{button.disabled=false}};
     card.querySelector('[data-avatar-crop-cancel]').onclick=()=>finishAvatarCrop(key);
   });
 }
@@ -254,7 +241,7 @@ function renderEventOptions(){
 function renderFaq(){$('#faq-list').innerHTML=faq.map(([q,a])=>`<div class="faq-item"><button class="faq-question"><span>${esc(q)}</span><span>+</span></button><div class="faq-answer">${esc(a)}</div></div>`).join('');$$('.faq-question').forEach(b=>b.onclick=()=>b.parentElement.classList.toggle('open'))}
 function initFloatingHeader(){const header=$('#site-header'),logo=$('.intro-logo'),faqSection=$('.faq-section');if(!header||!logo||!faqSection)return;let logoVisible=true,faqActive=false,scheduled=false,faqObserver;const refresh=()=>{const atTop=logoVisible&&!faqActive,scrolled=!logoVisible&&!faqActive;header.classList.toggle('is-at-top',atTop);header.classList.toggle('is-scrolled',scrolled);header.classList.toggle('is-faq-hidden',faqActive)};const observeFaqBoundary=()=>{if(!('IntersectionObserver'in window))return;faqObserver?.disconnect();const line=header.offsetHeight,bottom=Math.max(0,innerHeight-line-1);faqObserver=new IntersectionObserver(([entry])=>{faqActive=entry.isIntersecting;refresh()},{rootMargin:`-${line}px 0px -${bottom}px 0px`,threshold:0});faqObserver.observe(faqSection)};if('IntersectionObserver'in window){new IntersectionObserver(([entry])=>{logoVisible=entry.isIntersecting;refresh()},{threshold:0}).observe(logo);observeFaqBoundary();window.addEventListener('resize',observeFaqBoundary)}else{const update=()=>{scheduled=false;const l=logo.getBoundingClientRect(),f=faqSection.getBoundingClientRect(),line=header.offsetHeight;logoVisible=l.bottom>0&&l.top<innerHeight;faqActive=f.top<=line&&f.bottom>line;refresh()};const schedule=()=>{if(!scheduled){scheduled=true;requestAnimationFrame(update)}};window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);schedule()}}
 async function saveEvent(){try{const data=await rpc('save_event_choice',{p_token:state.session.token,p_choice_id:state.eventChoice});state.eventSaved=state.eventChoice;state.eventResults=data.event_results||state.eventResults;toast('Ответ сохранён.');renderEventOptions();updateProgress()}catch(e){toast(e.message)}}
-let adminRequestCounter=0,adminPanelMarkupCache='';
+let adminRequestCounter=0;
 function adminHeaderMarkup(){return `<div class="admin-head"><nav class="admin-tabs" role="tablist" aria-label="Разделы панели организатора"><button class="admin-tab is-active" id="admin-tab-voting" type="button" role="tab" aria-selected="true" aria-controls="admin-panel-voting" data-admin-tab="voting">Голосование</button><button class="admin-tab" id="admin-tab-poll" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-poll" data-admin-tab="poll">Опрос</button><button class="admin-tab" id="admin-tab-statistics" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-statistics" data-admin-tab="statistics">Статистика</button><button class="admin-tab" id="admin-tab-design" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-design" data-admin-tab="design">Дизайн</button></nav><button class="close-button" aria-label="Закрыть">×</button></div>`}
 function setAdminTab(selected){
   const modal=$('.admin-modal');if(!modal)return;
@@ -315,8 +302,7 @@ async function showAdmin(){
     const designPanel=renderDesignPanel();
     const adminWrap=$('.admin-wrap',$('.admin-modal'));
     if(requestId!==adminRequestCounter||!adminWrap)return;
-    adminPanelMarkupCache=`<section class="admin-tab-panel admin-ballot-results" id="admin-panel-voting" role="tabpanel" aria-labelledby="admin-tab-voting"><div class="admin-results-heading"><h3>Результаты голосования</h3><span>Рейтинг по текущим голосам</span></div><div class="admin-nomination-results">${nominationCards}</div></section><section class="admin-tab-panel admin-poll" id="admin-panel-poll" role="tabpanel" aria-labelledby="admin-tab-poll" hidden><div class="admin-poll-heading"><h3>Результаты опроса</h3><span>${countLabel(total,'ответ','ответа','ответов')}</span></div><div class="admin-poll-results">${pollRows}</div></section>${statisticsPanel}`;
-    adminWrap.innerHTML=`${adminPanelMarkupCache}${designPanel}`;
+    adminWrap.innerHTML=`<section class="admin-tab-panel admin-ballot-results" id="admin-panel-voting" role="tabpanel" aria-labelledby="admin-tab-voting"><div class="admin-results-heading"><h3>Результаты голосования</h3><span>Рейтинг по текущим голосам</span></div><div class="admin-nomination-results">${nominationCards}</div></section><section class="admin-tab-panel admin-poll" id="admin-panel-poll" role="tabpanel" aria-labelledby="admin-tab-poll" hidden><div class="admin-poll-heading"><h3>Результаты опроса</h3><span>${countLabel(total,'ответ','ответа','ответов')}</span></div><div class="admin-poll-results">${pollRows}</div></section>${statisticsPanel}${designPanel}`;
     const selectedTab=$('.admin-tab.is-active',$('.admin-modal'))?.dataset.adminTab||'voting';
     setAdminTab(selectedTab);
     bindDesignPanel();
