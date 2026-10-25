@@ -796,3 +796,8 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 .admin-load-error .button{min-height:42px;padding:0 18px;font-size:12px}
 @keyframes adminLoadingSpin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.admin-loading-spinner{animation:none}}
+
+/* Give the admin dialog a definite flex height so its inner scroller fills the panel. */
+.admin-modal{height:min(90vh,1125px);height:min(90dvh,1125px);max-height:min(90vh,1125px);max-height:min(90dvh,1125px);overflow:hidden}
+.admin-modal>.admin-wrap{height:0;flex:1 1 0;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+@media(max-width:600px){.admin-modal{height:94vh;height:94dvh;max-height:94vh;max-height:94dvh}}
