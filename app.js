@@ -101,7 +101,19 @@ function finishAvatarCrop(key){
   session.canvas.classList.remove('is-dragging');
 }
 function closeAllAvatarCrops(){for(const key of avatarCropSessions.keys())finishAvatarCrop(key)}
-function revealDesignCard(card){const wrap=card.closest('.admin-wrap');if(!wrap)return;const item=card.getBoundingClientRect(),viewport=wrap.getBoundingClientRect();wrap.scrollTop+=item.top-viewport.top-(wrap.clientHeight-item.height)/2}
+function revealDesignCard(card){const wrap=card?.closest('.admin-wrap');if(!wrap)return;const item=card.getBoundingClientRect(),viewport=wrap.getBoundingClientRect();wrap.scrollTop+=item.top-viewport.top-(wrap.clientHeight-item.height)/2}
+function refreshAdminDesignPanel(key){
+  const oldPanel=$('#admin-panel-design'),wrap=$('.admin-wrap',$('.admin-modal'));if(!oldPanel||!wrap)return null;
+  const activeFilter=$('.admin-design-filters .is-active',oldPanel)?.dataset.designFilter||'all';
+  const search=$('#admin-design-search',oldPanel)?.value||'',scrollTop=wrap.scrollTop;
+  const temporary=document.createElement('div');temporary.innerHTML=renderDesignPanel();
+  const freshPanel=temporary.firstElementChild;oldPanel.replaceWith(freshPanel);
+  const searchInput=$('#admin-design-search',freshPanel);if(searchInput)searchInput.value=search;
+  bindDesignPanel();
+  $(`[data-design-filter="${activeFilter}"]`,freshPanel)?.click();
+  setAdminTab('design');wrap.scrollTop=scrollTop;
+  return $$('.admin-design-card',freshPanel).find(card=>card.dataset.designKey===key)||null;
+}
 async function openAvatarCrop(card,source,ownedUrl=''){
   const key=card.dataset.designKey;finishAvatarCrop(key);
   const editor=card.querySelector('[data-avatar-editor]'),canvas=card.querySelector('[data-avatar-canvas]');
@@ -131,7 +143,7 @@ function bindAvatarCropControls(grid){
     });
     const stopDrag=event=>{const session=avatarCropSessions.get(key);if(session?.drag){session.drag=null;canvas.classList.remove('is-dragging');if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}};
     canvas.addEventListener('pointerup',stopDrag);canvas.addEventListener('pointercancel',stopDrag);
-    card.querySelector('[data-avatar-crop-save]').onclick=async event=>{const session=avatarCropSessions.get(key);if(!session)return;const button=event.currentTarget;button.disabled=true;try{const blob=await new Promise(resolve=>session.canvas.toBlob(resolve,'image/jpeg',.94));if(!blob)throw new Error('Не удалось сохранить кадр аватарки.');await savePhotoOverride(key,blob);finishAvatarCrop(key);revealDesignCard(card);card.querySelector(`[data-design-reset="${key}"]`).disabled=false;toast('Круглый кадр аватарки сохранён.')}catch(error){toast(error.message)}finally{button.disabled=false}};
+    card.querySelector('[data-avatar-crop-save]').onclick=async event=>{const session=avatarCropSessions.get(key);if(!session)return;const button=event.currentTarget;button.disabled=true;try{const blob=await new Promise(resolve=>session.canvas.toBlob(resolve,'image/jpeg',.94));if(!blob)throw new Error('Не удалось сохранить кадр аватарки.');await savePhotoOverride(key,blob);finishAvatarCrop(key);const refreshedCard=refreshAdminDesignPanel(key);revealDesignCard(refreshedCard||card);toast('Круглый кадр аватарки сохранён.')}catch(error){toast(error.message)}finally{button.disabled=false}};
     card.querySelector('[data-avatar-crop-cancel]').onclick=()=>finishAvatarCrop(key);
   });
 }
