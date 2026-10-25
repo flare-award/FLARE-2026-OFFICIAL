@@ -783,3 +783,7 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
   .admin-avatar-reference{right:8px;bottom:8px;padding:6px 7px}
   .admin-avatar-reference-circle{width:90px}
 }
+
+/* Keep the crop dialog above the scrollable Design list, even for avatars near its bottom. */
+.admin-avatar-editor.is-open{position:fixed;top:50%;left:50%;z-index:80;width:min(460px,calc(100vw - 28px));max-height:min(760px,calc(100vh - 28px));max-height:min(760px,calc(100dvh - 28px));overflow:auto;transform:translate(-50%,-50%);border:1px solid rgba(255,193,7,.24);border-radius:16px;background:#11110f;box-shadow:0 24px 90px rgba(0,0,0,.78)}
+.admin-avatar-editor h4{margin:0;color:#f1e7cf;font-size:15px;line-height:1.35}
