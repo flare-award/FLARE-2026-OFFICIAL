@@ -30,6 +30,7 @@ main{margin:0;background:linear-gradient(180deg,#010101 0%,#0a0a0a 850px)}
 .hero{padding-top:122.5px}
 .hero h1{max-width:775px;font-size:clamp(60px,5.8vw,90px)}
 #category-primary,#category-extra{scroll-margin-top:120px}
+.vote-hub .section-heading{scroll-margin-top:120px}
 .footer-bottom{align-items:center;justify-content:center;gap:7.5px 15px;flex-wrap:wrap;color:#77736d;font-size:11.25px;letter-spacing:.04em;text-align:center}
 .footer-credit-separator{color:#40382d}
 .footer-bottom .terms-link{color:#c1a679;white-space:nowrap;border-bottom:1.25px solid rgba(193,166,121,.45);cursor:pointer;transition:color .18s,border-color .18s}
