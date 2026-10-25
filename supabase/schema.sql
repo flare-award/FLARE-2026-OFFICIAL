@@ -56,6 +56,7 @@ create table if not exists public.flare_options (
   unique(nomination_id,id),
   check ((kind='person' and person_nickname is not null) or (kind<>'person' and person_nickname is null))
 );
+alter table public.flare_options add column if not exists video_url text;
 create table if not exists public.flare_votes (
   account_id uuid not null references public.flare_accounts(id) on delete cascade,
   nomination_id text not null references public.flare_nominations(id),
@@ -261,6 +262,26 @@ begin
   );
 end $$;
 
+create or replace function public.get_clip_options() returns jsonb language sql stable security definer set search_path=public,extensions,pg_temp as $$
+  select coalesce(jsonb_agg(jsonb_build_object('id',id,'name',name,'video_url',video_url) order by id),'[]'::jsonb)
+  from flare_options where nomination_id='clip-of-year' and kind='video';
+$$;
+
+create or replace function public.admin_update_clip_option(p_token text,p_option_id text,p_name text,p_video_url text default null) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+  v_account uuid:=flare_session_account(p_token);
+  v_name text:=trim(coalesce(p_name,''));
+  v_video_url text:=nullif(trim(coalesce(p_video_url,'')),'');
+  v_saved public.flare_options%rowtype;
+begin
+  if not exists(select 1 from flare_accounts where id=v_account and nickname='Maronnix') then raise exception 'Нет доступа к панели организатора.'; end if;
+  if p_option_id is null or not exists(select 1 from flare_options where id=p_option_id and nomination_id='clip-of-year' and kind='video') then raise exception 'Можно редактировать только номинантов «КЛИП ГОДА».'; end if;
+  if v_name='' or length(v_name)>120 then raise exception 'Название должно содержать от 1 до 120 символов.'; end if;
+  if v_video_url is not null and v_video_url !~* '^https?://[^[:space:]]+$' then raise exception 'Ссылка должна начинаться с http:// или https://.'; end if;
+  update flare_options set name=v_name,video_url=v_video_url where id=p_option_id and nomination_id='clip-of-year' returning * into v_saved;
+  return jsonb_build_object('id',v_saved.id,'name',v_saved.name,'video_url',v_saved.video_url);
+end $$;
+
 revoke all on function public.flare_closed() from public,anon,authenticated;
 revoke all on function public.flare_new_session(uuid) from public,anon,authenticated;
 revoke all on function public.flare_session_account(text) from public,anon,authenticated;
@@ -273,6 +294,8 @@ revoke all on function public.cast_vote(text,text,text) from public,authenticate
 revoke all on function public.save_event_choice(text,text) from public,authenticated;
 revoke all on function public.finalize_ballot(text) from public,authenticated;
 revoke all on function public.admin_summary(text) from public,authenticated;
+revoke all on function public.get_clip_options() from public,authenticated;
+revoke all on function public.admin_update_clip_option(text,text,text,text) from public,authenticated;
 grant execute on function public.flare_access(text,text) to anon;
 grant execute on function public.flare_logout(text) to anon;
 
@@ -281,6 +304,8 @@ grant execute on function public.cast_vote(text,text,text) to anon;
 grant execute on function public.save_event_choice(text,text) to anon;
 grant execute on function public.finalize_ballot(text) to anon;
 grant execute on function public.admin_summary(text) to anon;
+grant execute on function public.get_clip_options() to anon;
+grant execute on function public.admin_update_clip_option(text,text,text,text) to anon;
 
 INSERT INTO public.flare_nominations (id,title,category,display_type,allow_self) VALUES
 ('flare-king','FLARE KING','основная','Участник',false),
@@ -302,7 +327,7 @@ INSERT INTO public.flare_nominations (id,title,category,display_type,allow_self)
 ('chatter-of-year','ЧАТТЕР ГОДА','доп.','Участник',false),
 ('shame-of-year','ПОЗОР ГОДА','доп.','Участник',false)
 ON CONFLICT (id) DO UPDATE SET title=excluded.title, category=excluded.category, display_type=excluded.display_type, allow_self=excluded.allow_self;
-INSERT INTO public.flare_options (id,nomination_id,name,kind,person_nickname) VALUES
+INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,person_nickname) VALUES
 ('clip-1','clip-of-year','Клип 01 · скоро','video',NULL) ,
 ('clip-2','clip-of-year','Клип 02 · скоро','video',NULL) ,
 ('clip-3','clip-of-year','Клип 03 · скоро','video',NULL) ,
@@ -429,4 +454,4 @@ INSERT INTO public.flare_options (id,nomination_id,name,kind,person_nickname) VA
 ('squad-2','squad-of-year','Eozik, Flourin, Maronnix','group',NULL) ,
 ('squad-3','squad-of-year','Akirakume, Dony_zq, Maronnix, Nodben, Qusti','group',NULL) ,
 ('squad-4','squad-of-year','Akirakume, Dony_zq, Maronnix, Rezo1n','group',NULL)
-ON CONFLICT (id) DO UPDATE SET nomination_id=excluded.nomination_id, name=excluded.name, kind=excluded.kind, person_nickname=excluded.person_nickname;
+ON CONFLICT (id) DO UPDATE SET nomination_id=excluded.nomination_id, name=case when excluded.nomination_id='clip-of-year' then existing_option.name else excluded.name end, kind=excluded.kind, person_nickname=excluded.person_nickname;
