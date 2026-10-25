@@ -815,3 +815,6 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 @media(max-width:700px){.admin-clip-row{grid-template-columns:minmax(0,1fr)}.admin-clip-save{width:100%}}
 
 @media(min-width:976px){.nomination-detail-modal .nominee-grid.nominee-grid-media{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.admin-partial-voter-list li{display:flex;align-items:center;gap:9px}
+.admin-partial-voter-list li strong{margin-left:auto;color:#f5d17c;font-variant-numeric:tabular-nums;white-space:nowrap}
