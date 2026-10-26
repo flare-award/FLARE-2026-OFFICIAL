@@ -146,8 +146,9 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 .modal.is-view-entering{animation:none}
 .faq-question span:first-child{font-weight:700}
 .faq-question span:last-child{position:relative;display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;font-size:0;font-weight:500;line-height:1;text-align:center;transform:none}
-.faq-question span:last-child::before,.faq-question span:last-child::after{position:absolute;top:50%;left:50%;width:12px;height:1.5px;border-radius:2px;background:currentColor;content:"";transform:translate(-50%,-50%);transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.faq-question span:last-child::before,.faq-question span:last-child::after{position:absolute;top:50%;left:50%;width:12px;height:1.5px;border-radius:2px;background:currentColor;content:"";transform:translate(-50%,-50%);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
 .faq-question span:last-child::after{transform:translate(-50%,-50%) rotate(90deg)}
+.faq-item.open .faq-question span:last-child::before,.faq-item.open .faq-question span:last-child::after{transition-duration:.3s}
 .faq-item.open .faq-question span:last-child{transform:none}
 .faq-item.open .faq-question span:last-child::before{transform:translate(-50%,-50%) rotate(45deg)}
 .faq-item.open .faq-question span:last-child::after{transform:translate(-50%,-50%) rotate(135deg)}
