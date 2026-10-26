@@ -145,8 +145,12 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 .nom-detail-top .back-link:hover{transform:translateX(-2px);border-color:rgba(255,193,7,.52);background:rgba(255,193,7,.11);color:#ffe1a0}
 .modal.is-view-entering{animation:none}
 .faq-question span:first-child{font-weight:700}
-.faq-question span:last-child{display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;font-size:20px;font-weight:500;line-height:1;text-align:center;transform-origin:50% 50%}
-.faq-item.open .faq-question span:last-child{transform:rotate(45deg)}
+.faq-question span:last-child{position:relative;display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;font-size:0;font-weight:500;line-height:1;text-align:center;transform:none}
+.faq-question span:last-child::before,.faq-question span:last-child::after{position:absolute;top:50%;left:50%;width:12px;height:1.5px;border-radius:2px;background:currentColor;content:"";transform:translate(-50%,-50%);transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.faq-question span:last-child::after{transform:translate(-50%,-50%) rotate(90deg)}
+.faq-item.open .faq-question span:last-child{transform:none}
+.faq-item.open .faq-question span:last-child::before{transform:translate(-50%,-50%) rotate(45deg)}
+.faq-item.open .faq-question span:last-child::after{transform:translate(-50%,-50%) rotate(135deg)}
 .footer-credit-separator{color:#aa8c54;font-weight:700}
 
 /* Poll results appear only after the participant has saved a choice. */
