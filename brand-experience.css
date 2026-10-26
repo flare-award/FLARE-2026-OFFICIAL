@@ -867,8 +867,10 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
   .poll-footer span{text-align:center}
 }
 
-/* Give picture- and video-type nominations a full-width, square preview on portrait phones. */
+/* Keep picture- and video-type cards contained with a wide 16:9 preview on portrait phones. */
 @media(max-width:600px) and (orientation:portrait){
-  .nomination-detail-modal .nominee-grid.nominee-grid-media{grid-template-columns:minmax(0,1fr)}
-  .nomination-detail-modal .nominee-grid-media .visual{height:auto;aspect-ratio:1/1}
+  .nomination-detail-modal .nominee-grid.nominee-grid-media{grid-template-columns:minmax(0,1fr);width:100%;min-width:0}
+  .nomination-detail-modal .nominee-grid-media .nominee-card{min-width:0;overflow:hidden}
+  .nomination-detail-modal .nominee-grid-media .visual{height:auto;aspect-ratio:16/9;margin:-9px -9px 15px}
+  .nomination-detail-modal .nominee-grid-media .visual-photo{width:100%;height:100%;object-fit:cover;object-position:center}
 }
