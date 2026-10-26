@@ -152,6 +152,7 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 .faq-item.open .faq-question span:last-child{transform:none}
 .faq-item.open .faq-question span:last-child::before{transform:translate(-50%,-50%) rotate(45deg)}
 .faq-item.open .faq-question span:last-child::after{transform:translate(-50%,-50%) rotate(135deg)}
+.faq-item.open .faq-answer{transition:max-height .42s cubic-bezier(.35,0,.25,1),padding .32s ease,opacity .25s ease,transform .32s cubic-bezier(.35,0,.25,1)}
 .footer-credit-separator{color:#aa8c54;font-weight:700}
 
 /* Poll results appear only after the participant has saved a choice. */
