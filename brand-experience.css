@@ -146,12 +146,10 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 .modal.is-view-entering{animation:none}
 .faq-question span:first-child{font-weight:700}
 .faq-question span:last-child{position:relative;display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;font-size:0;font-weight:500;line-height:1;text-align:center;transform:none}
-.faq-question span:last-child::before,.faq-question span:last-child::after{position:absolute;top:50%;left:50%;width:12px;height:1.5px;border-radius:2px;background:currentColor;content:"";transform:translate(-50%,-50%);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
-.faq-question span:last-child::after{transform:translate(-50%,-50%) rotate(90deg)}
-.faq-item.open .faq-question span:last-child::before,.faq-item.open .faq-question span:last-child::after{transition-duration:.3s}
+.faq-question span:last-child svg{display:block;width:24px;height:24px;overflow:visible;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
 .faq-item.open .faq-question span:last-child{transform:none}
-.faq-item.open .faq-question span:last-child::before{transform:translate(-50%,-50%) rotate(45deg)}
-.faq-item.open .faq-question span:last-child::after{transform:translate(-50%,-50%) rotate(135deg)}
+.faq-item.open .faq-question span:last-child svg{transform:rotate(45deg);transition-duration:.3s}
+@media(prefers-reduced-motion:reduce){.faq-question span:last-child svg{transition:none}}
 .faq-item.open .faq-answer{transition:max-height .42s cubic-bezier(.35,0,.25,1),padding .32s ease,opacity .25s ease,transform .32s cubic-bezier(.35,0,.25,1)}
 .footer-credit-separator{color:#aa8c54;font-weight:700}
 
