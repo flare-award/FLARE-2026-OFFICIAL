@@ -824,3 +824,45 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
 .admin-partial-voter-list li{display:flex;align-items:center;gap:9px}
 .admin-partial-voter-list li strong{margin-left:auto;color:#f5d17c;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* Portrait phones only: constrain horizontal overflow and tune the mobile composition. */
+@media(max-width:600px) and (orientation:portrait){
+  html,body{width:100%;max-width:100%;overflow-x:clip}
+  html{scrollbar-gutter:auto}
+  body{font-size:17.5px}
+  .wrap{width:calc(100% - 32px)}
+
+  .brand-intro{width:100%;padding-inline:16px}
+  .intro-logo{font-size:clamp(72px,20vw,136px)}
+  .intro-links{width:min(100%,320px);gap:10px;padding-inline:0}
+  .intro-link{min-height:48px;padding-inline:18px;font-size:12px}
+
+  .hero{display:flex;flex-direction:column;padding:150px 0 65px}
+  .hero-topline{display:contents}
+  .hero h1{order:1;max-width:100%;margin:0 0 10px;font-size:clamp(43px,11.8vw,50px);line-height:1.05}
+  .hero-copy{order:2;margin:0;font-size:15.5px;line-height:1.6}
+  .vote-countdown{order:3;justify-self:stretch;width:100%;max-width:none;margin:17px 0 0;padding:12px 10px}
+  .countdown-label{font-size:10px;letter-spacing:.12em}
+  .countdown-values{justify-content:space-between;gap:4px;margin:12px 0 9px}
+  .countdown-unit{min-width:0;flex:1 1 0;gap:4px}
+  .countdown-unit strong{font-size:clamp(40px,12vw,49px)}
+  .countdown-unit small{font-size:10px}
+  .countdown-separator{margin-top:-8px;font-size:22px}
+  .countdown-deadline{font-size:12px}
+
+  .category-actions{gap:10px;margin-top:28px}
+  .category-card{height:225px;padding:21px}
+  .category-title{max-width:68%;margin-top:13px;font-size:30px}
+  .category-foot{left:21px;bottom:18px}
+  .category-symbol{right:15px;width:112px;height:112px;font-size:104px}
+
+  .winners-heading{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:10px}
+  .winners-heading h2{font-size:clamp(32px,8.6vw,36px);line-height:1.12}
+  .carousel-controls{justify-content:flex-end;gap:7px}
+  .carousel-controls .icon-button{width:42px;height:42px;flex:0 0 42px;font-size:19px}
+
+  .event-poll{row-gap:24px}
+  .poll-footer{flex-direction:column-reverse;align-items:stretch;gap:10px}
+  .poll-footer .button{width:100%}
+  .poll-footer span{text-align:center}
+}
