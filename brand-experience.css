@@ -866,3 +866,9 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
   .poll-footer .button{width:100%}
   .poll-footer span{text-align:center}
 }
+
+/* Give picture- and video-type nominations a full-width, square preview on portrait phones. */
+@media(max-width:600px) and (orientation:portrait){
+  .nomination-detail-modal .nominee-grid.nominee-grid-media{grid-template-columns:minmax(0,1fr)}
+  .nomination-detail-modal .nominee-grid-media .visual{height:auto;aspect-ratio:1/1}
+}
