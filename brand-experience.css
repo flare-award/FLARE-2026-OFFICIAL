@@ -692,7 +692,7 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 .visual-photo{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .35s ease}
 .nominee-card:hover .visual-photo{transform:scale(1.035)}
 .nominee-card.locked:hover .visual-photo,.nominee-card.video:hover .visual-photo{transform:none}
-.portrait{display:block;object-fit:cover;object-position:center 34%;color:transparent}
+.portrait{display:block;object-fit:cover;object-position:center 34%;color:transparent;border:0;outline:0;box-shadow:none}
 
 /* Admin design library and per-photo controls. */
 .admin-design-panel{display:grid;gap:18px}
