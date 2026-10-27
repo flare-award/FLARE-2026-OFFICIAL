@@ -861,8 +861,7 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
   .winners-heading{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:10px}
   .winners-heading h2{font-size:clamp(32px,8.6vw,36px);line-height:1.12}
-  .carousel-controls{justify-content:flex-end;gap:7px}
-  .carousel-controls .icon-button{width:42px;height:42px;flex:0 0 42px;font-size:19px}
+  .winners-heading .carousel-controls{display:none}
 
   .event-poll{row-gap:24px}
   .poll-footer{flex-direction:column-reverse;align-items:stretch;gap:10px}
@@ -881,4 +880,4 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 @media(hover:none) and (pointer:coarse){.winner-window{touch-action:pan-y}}
 
 /* Show more of the category buttons after jumping from the portrait-phone intro. */
-@media(max-width:600px) and (orientation:portrait){#vote-heading{scroll-margin-top:calc(88px + env(safe-area-inset-top))}}
+@media(max-width:600px) and (orientation:portrait){#vote-heading{scroll-margin-top:calc(60px + env(safe-area-inset-top))}}
