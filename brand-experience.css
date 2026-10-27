@@ -527,7 +527,6 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 .poll-option.saved-choice:not(.selected) .poll-choice-status{color:#cfb56f}
 .poll-option.selected.saved-choice .poll-choice-status{color:#f4cf72}
 .poll-option.selected.pending-choice .poll-choice-status{color:#d3a3ff}
-.poll-footer #save-event-poll:disabled{opacity:.48}
 
 
 /* Use a locally bundled, true display-black typeface for both FLARE wordmarks. */
@@ -867,7 +866,6 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
   .event-poll{row-gap:24px}
   .poll-footer{flex-direction:column-reverse;align-items:stretch;gap:10px}
-  .poll-footer .button{width:100%}
   .poll-footer span{text-align:center}
 }
 
