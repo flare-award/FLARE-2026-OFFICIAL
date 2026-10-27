@@ -219,8 +219,6 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 }
 @media(max-width:430px){
   .topbar.is-at-top .top-actions{gap:7px}
-  .topbar.is-at-top #account-status{font-size:11px}
-  .topbar.is-at-top .button-quiet{padding:9px 10px;font-size:12px}
   .poll-result-badge{font-size:8px;padding-inline:6px}
 }
 @media(prefers-reduced-motion:reduce){.pin-toggle,.nominee-card.self::after,.poll-result-track>span{transition:none}}
@@ -294,9 +292,7 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 }
 @media(max-width:430px){
   .topbar.is-at-top .top-actions{gap:6px}
-  .topbar.is-at-top #account-status{max-width:52vw;font-size:11px}
-  .topbar.is-at-top .text-button{font-size:11px}
-  .topbar.is-at-top .button-quiet{padding-inline:10px;font-size:12px}
+  .topbar.is-at-top #account-status{max-width:52vw}
   .hero h1{font-size:clamp(45px,12vw,53px);line-height:1.08}
   .category-card{padding-inline:18px}
   .category-title{max-width:100%;font-size:clamp(23px,7.2vw,28px);line-height:1.15}
@@ -320,9 +316,6 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 @media(max-width:360px){
   .hero h1{font-size:44px}
   .topbar.is-at-top .top-actions{gap:5px}
-  .topbar.is-at-top #account-status{font-size:10px}
-  .topbar.is-at-top .text-button{font-size:10px}
-  .topbar.is-at-top .button-quiet{padding-inline:8px;font-size:11px}
   .nom-detail-top .back-link{font-size:10.5px;padding-inline:7px}
   .poll-result-badge{padding-inline:4px;font-size:7px}
 }
