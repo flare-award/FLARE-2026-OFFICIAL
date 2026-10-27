@@ -21,8 +21,9 @@ body{background:#010101}
 .topbar.is-at-top .top-actions{gap:0}
 .topbar.is-at-top .wordmark{flex-basis:0;width:0;min-width:0;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,-6.25px,0);transition:opacity .18s ease,transform .18s ease,visibility 0s linear .18s}
 .topbar.is-at-top #account-status{max-width:0;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,-6.25px,0);transition:max-width .22s ease,opacity .18s ease,transform .18s ease,visibility 0s linear .18s}
-.topbar.is-scrolled .wordmark{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:opacity .25s ease .16s,transform .25s ease .16s,visibility 0s linear .16s}
-.topbar.is-scrolled #account-status{max-width:600px;opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:max-width .25s ease .12s,opacity .25s ease .12s,transform .25s ease .12s,visibility 0s linear .12s}
+.topbar.is-scrolled .wordmark{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:opacity .25s ease,transform .25s ease,visibility 0s}
+.topbar.is-scrolled #account-status{max-width:600px;opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);transition:max-width .25s ease,opacity .25s ease,transform .25s ease,visibility 0s}
+.topbar.is-faq-hidden.is-scrolled .wordmark,.topbar.is-faq-hidden.is-scrolled #account-status{opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,-6.25px,0);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
 .topbar.is-faq-hidden{transform:translate3d(0,-105%,0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease,background-color .3s ease,border-color .3s ease,visibility 0s linear .32s}
 .wordmark{display:flex;flex:0 0 auto;align-items:center;line-height:1;color:transparent;font-family:"Rubik",var(--font),sans-serif;font-size:31.25px;font-weight:700;letter-spacing:.045em;white-space:nowrap;filter:none}
 .wordmark>span{font:inherit;letter-spacing:inherit;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;filter:var(--flare-logo-glow)}
