@@ -517,13 +517,13 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
 /* Distinguish the stored poll answer from an unsaved replacement choice. */
 .poll-option-date .poll-choice-status{display:block;margin-top:5px;color:#a9a195;font-size:9px;font-weight:800;letter-spacing:.1em;line-height:1.25}
-.poll-option.pending-choice{border-color:rgba(186,117,255,.68);background:linear-gradient(110deg,rgba(111,45,154,.14),rgba(18,17,18,.92));box-shadow:inset 3px 0 #b875ff,0 0 20px rgba(156,82,213,.08)}
-.poll-option.pending-choice .radio{border-color:#c58cff;box-shadow:0 0 0 3px rgba(184,117,255,.11)}
-.poll-option.pending-choice .poll-choice-status{color:#d3a3ff}
+.poll-option.pending-choice{border-color:rgba(255,193,7,.62);background:linear-gradient(110deg,rgba(255,193,7,.08),rgba(18,17,18,.92));box-shadow:inset 3px 0 #ffc247,0 0 18px rgba(255,193,7,.07)}
+.poll-option.pending-choice .radio{border-color:#ffc247;box-shadow:0 0 0 3px rgba(255,193,7,.1)}
+.poll-option.pending-choice .poll-choice-status{color:#f4cf72}
 .poll-option.saved-choice:not(.selected){border-color:rgba(255,193,7,.29);background:linear-gradient(110deg,rgba(255,193,7,.055),rgba(17,17,16,.92))}
 .poll-option.saved-choice:not(.selected) .poll-choice-status{color:#cfb56f}
 .poll-option.selected.saved-choice .poll-choice-status{color:#f4cf72}
-.poll-option.selected.pending-choice .poll-choice-status{color:#d3a3ff}
+.poll-option.selected.pending-choice .poll-choice-status{color:#f4cf72}
 
 
 /* Use a locally bundled, true display-black typeface for both FLARE wordmarks. */
