@@ -291,6 +291,26 @@ begin
   return jsonb_build_object('id',v_saved.id,'name',v_saved.name,'video_url',v_saved.video_url);
 end $$;
 
+create or replace function public.get_video_options() returns jsonb language sql stable security definer set search_path=public,extensions,pg_temp as $$
+  select coalesce(jsonb_agg(jsonb_build_object('id',id,'nomination_id',nomination_id,'name',name,'video_url',video_url) order by nomination_id,id),'[]'::jsonb)
+  from flare_options where kind='video';
+$$;
+
+create or replace function public.admin_update_video_option(p_token text,p_option_id text,p_name text,p_video_url text default null) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+  v_account uuid:=flare_session_account(p_token);
+  v_name text:=trim(coalesce(p_name,''));
+  v_video_url text:=nullif(trim(coalesce(p_video_url,'')),'');
+  v_saved public.flare_options%rowtype;
+begin
+  if not exists(select 1 from flare_accounts where id=v_account and nickname='Maronnix') then raise exception 'Нет доступа к панели организатора.'; end if;
+  if p_option_id is null or not exists(select 1 from flare_options where id=p_option_id and kind='video') then raise exception 'Можно редактировать только номинантов с типом «Видео».'; end if;
+  if v_name='' or length(v_name)>120 then raise exception 'Название должно содержать от 1 до 120 символов.'; end if;
+  if v_video_url is not null and v_video_url !~* '^https?://[^[:space:]]+$' then raise exception 'Ссылка должна начинаться с http:// или https://.'; end if;
+  update flare_options set name=v_name,video_url=v_video_url where id=p_option_id and kind='video' returning * into v_saved;
+  return jsonb_build_object('id',v_saved.id,'nomination_id',v_saved.nomination_id,'name',v_saved.name,'video_url',v_saved.video_url);
+end $$;
+
 revoke all on function public.flare_closed() from public,anon,authenticated;
 revoke all on function public.flare_new_session(uuid) from public,anon,authenticated;
 revoke all on function public.flare_session_account(text) from public,anon,authenticated;
@@ -305,6 +325,8 @@ revoke all on function public.finalize_ballot(text) from public,authenticated;
 revoke all on function public.admin_summary(text) from public,authenticated;
 revoke all on function public.get_clip_options() from public,authenticated;
 revoke all on function public.admin_update_clip_option(text,text,text,text) from public,authenticated;
+revoke all on function public.get_video_options() from public,authenticated;
+revoke all on function public.admin_update_video_option(text,text,text,text) from public,authenticated;
 grant execute on function public.flare_access(text,text) to anon;
 grant execute on function public.flare_logout(text) to anon;
 
@@ -315,6 +337,8 @@ grant execute on function public.finalize_ballot(text) to anon;
 grant execute on function public.admin_summary(text) to anon;
 grant execute on function public.get_clip_options() to anon;
 grant execute on function public.admin_update_clip_option(text,text,text,text) to anon;
+grant execute on function public.get_video_options() to anon;
+grant execute on function public.admin_update_video_option(text,text,text,text) to anon;
 
 INSERT INTO public.flare_nominations (id,title,category,display_type,allow_self) VALUES
 ('flare-king','FLARE KING','основная','Участник',false),
@@ -344,7 +368,7 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('clip-5','clip-of-year','Клип 05 · скоро','video',NULL) ,
 ('clip-6','clip-of-year','Клип 06 · скоро','video',NULL) ,
 ('conflict-1','conflict-of-year','Akirakume, Dony_zq, Nodben vs Maronnix','conflict',NULL) ,
-('conflict-2','conflict-of-year','Eozik, Flourin, Maronnix vs Denis_185, Fines Stark','conflict',NULL) ,
+('conflict-2','conflict-of-year','Eozik, Flourin, Maronnix vs Denis_185, Fines Stark','video',NULL) ,
 ('conflict-3','conflict-of-year','Flourin vs Qusti','conflict',NULL) ,
 ('event-1','event-of-year','Akirakume получил права','image',NULL) ,
 ('event-2','event-of-year','Выживание в Minecraft','video',NULL) ,

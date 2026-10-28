@@ -894,3 +894,71 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
 /* Show more of the category buttons after jumping from the portrait-phone intro. */
 @media(max-width:600px) and (orientation:portrait){#vote-heading{scroll-margin-top:calc(60px + env(safe-area-inset-top))}}
+
+/* Remove the preview gradient only in the three requested nomination dialogs. */
+.nomination-no-photo-shade .visual::after{display:none!important}
+
+/* Make the Design library easier to scan and keep its search/filter tools reachable. */
+.admin-design-intro p{font-size:13px;line-height:1.65}
+.admin-design-note{font-size:12px!important}
+.admin-design-sync strong{font-size:13px}
+.admin-design-sync p{font-size:12px;line-height:1.6}
+.admin-design-sync details{font-size:11px}
+.admin-design-sync li code{font-size:10px}
+.admin-design-local-badge{font-size:9px}
+.admin-design-toolbar{position:sticky;top:76px;z-index:8;grid-template-columns:minmax(0,1fr) minmax(230px,340px);align-items:center;padding:11px 10px;border:1px solid rgba(255,193,7,.15);border-radius:12px;background:rgba(16,16,15,.97);box-shadow:0 8px 22px rgba(0,0,0,.3);backdrop-filter:blur(9px)}
+.admin-design-filters{gap:8px}
+.admin-design-filters button{min-height:42px;padding:0 15px;font-size:12px}
+#admin-design-search{width:100%;min-height:44px;padding:0 13px;font-size:14px}
+.admin-design-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.admin-design-info h4{font-size:13px;line-height:1.45}
+.admin-design-info code{font-size:10px}
+.admin-design-actions{gap:8px}
+.admin-design-upload,.admin-design-download,.admin-design-reset{min-height:40px;padding-inline:10px;font-size:11px}
+.admin-video-editor{overflow:hidden;border:1px solid rgba(255,193,7,.2);border-radius:14px;background:linear-gradient(145deg,rgba(31,27,19,.7),rgba(17,17,16,.96))}
+.admin-video-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:68px;padding:15px 18px;cursor:pointer;list-style:none}
+.admin-video-summary::-webkit-details-marker{display:none}
+.admin-video-summary>span{display:grid;gap:4px}
+.admin-video-summary strong{color:#f3eee4;font-size:15px}
+.admin-video-summary small{color:#b8ad98;font-size:12px;line-height:1.4}
+.admin-video-summary>b{flex:0 0 auto;padding:6px 9px;border:1px solid rgba(255,193,7,.25);border-radius:999px;color:#efcd78;font-size:11px;font-weight:600}
+.admin-video-summary:after{content:'⌄';color:#e5c878;font-size:19px;transition:transform .18s}
+.admin-video-editor details[open]>.admin-video-summary:after{transform:rotate(180deg)}
+.admin-video-editor-body{display:grid;gap:13px;padding:0 15px 15px}
+.admin-video-editor-body>p{margin:0;padding:12px 13px;border-radius:9px;background:rgba(255,193,7,.055);color:#c4b99f;font-size:12px;line-height:1.55}
+.admin-video-editor-body code{color:#edcf7c;font-size:11px}
+.admin-video-list{display:grid;gap:9px}
+.admin-video-row{display:grid;grid-template-columns:minmax(175px,.9fr) minmax(155px,.8fr) minmax(230px,1.25fr) auto;align-items:end;gap:10px;padding:11px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(0,0,0,.2)}
+.admin-video-identity{display:grid;gap:5px;min-width:0;padding-bottom:8px}
+.admin-video-identity span{color:#c1aa74;font-size:10px;font-weight:700;letter-spacing:.04em;line-height:1.35}
+.admin-video-identity strong{color:#eee9e0;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.admin-video-field{display:grid;gap:6px;min-width:0;color:#d9d1c2;font-size:11px;font-weight:700}
+.admin-video-field input{width:100%;min-width:0;height:42px;padding:0 11px;border:1px solid rgba(255,255,255,.13);border-radius:8px;background:#0c0c0b;color:#f5f0e7;font:13px var(--font)}
+.admin-video-field input:focus-visible{outline:2px solid #ffc107;outline-offset:1px}
+.admin-video-save{min-height:42px;padding:0 15px;font-size:11px}
+@media(max-width:950px){.admin-video-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.admin-video-identity{grid-column:1/-1}.admin-video-save{width:100%}}
+@media(max-width:700px){
+  .admin-design-grid{grid-template-columns:minmax(0,1fr)}
+  .admin-design-toolbar{top:68px;grid-template-columns:minmax(0,1fr);gap:10px;padding:10px}
+  .admin-design-filters{gap:6px}
+  .admin-design-filters button{min-height:40px;padding-inline:11px;font-size:11px}
+  .admin-design-grid{gap:9px}
+  .admin-design-info h4{font-size:12px}
+  .admin-design-actions{gap:6px;padding-inline:8px}
+  .admin-design-upload,.admin-design-download,.admin-design-reset{min-height:40px;padding-inline:9px;font-size:10px}
+  .admin-video-summary{min-height:64px;padding:13px}
+  .admin-video-summary strong{font-size:14px}
+  .admin-video-summary small{font-size:11px}
+  .admin-video-editor-body{padding:0 10px 10px}
+  .admin-video-row{grid-template-columns:minmax(0,1fr);gap:9px;padding:10px}
+  .admin-video-identity{grid-column:auto;padding-bottom:1px}
+  .admin-video-identity strong{font-size:13px}
+  .admin-video-field{font-size:12px}
+  .admin-video-save{min-height:44px}
+}
+@media(max-width:390px){
+  .admin-design-grid{grid-template-columns:1fr}
+  .admin-design-info h4{font-size:13px}
+  .admin-design-actions{gap:8px}
+  .admin-design-upload,.admin-design-download,.admin-design-reset{min-height:42px;font-size:11px}
+}
