@@ -255,7 +255,7 @@ function renderEventOptions(){
     const saved=state.eventSaved===id;
     const selected=state.eventChoice===id;
     const pending=Boolean(state.eventSaved&&selected&&!saved);
-    const choiceStatus=saved?(selected?'ТВОЙ ОТВЕТ':'СОХРАНЁННЫЙ ОТВЕТ'):pending?'НОВЫЙ ВЫБОР':'';
+    const choiceStatus=selected?(saved?'ТВОЙ ОТВЕТ':pending?'НОВЫЙ ВЫБОР':''):'';
     const badge=leader?(leaders.length===1?'ЛИДИРУЕТ':'НИЧЬЯ'):'';
     return `<button class="poll-option ${selected?'selected':''} ${saved?'saved-choice':''} ${pending?'pending-choice':''} ${showResults?'has-results':''} ${leader?'poll-leader':''}" data-event-choice="${id}" ${isClosed()?'disabled':''}><span class="poll-option-top"><span class="radio"></span><span class="poll-option-date"><strong>${date} (${day[0].toUpperCase()+day.slice(1)})</strong>${choiceStatus?`<small class="poll-choice-status">${choiceStatus}</small>`:''}</span>${showResults?`<span class="poll-result-badge">${badge}</span>`:''}</span>${showResults?`<span class="poll-result-track" aria-hidden="true"><span style="width:${percent}%"></span></span><span class="poll-result-meta"><span>${countLabel(count,'голос','голоса','голосов')}</span><strong>${percent}%</strong></span>`:''}</button>`
   }).join('');
