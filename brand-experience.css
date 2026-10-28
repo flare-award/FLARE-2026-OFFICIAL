@@ -965,6 +965,5 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
 /* Make the video play control feel interactive only while the pointer is on the control itself. */
 .nominee-card.video:hover .video-play{opacity:.85}
-.nominee-card.video .video-play{transition:opacity .18s,transform .18s,background-color .18s,border-color .18s,box-shadow .18s}
-.nominee-card.video .video-play:hover,.nominee-card.video .video-play:focus-visible{opacity:1;transform:translate(-50%,-50%) scale(1.12);border-color:#ffd36e;background:rgba(255,174,34,.88);box-shadow:0 0 0 5px rgba(255,193,7,.17),0 0 24px rgba(255,174,34,.48)}
-.nominee-card.video .video-play:active{transform:translate(-50%,-50%) scale(.97)}
+.nominee-card.video .video-play{transition:opacity .18s,background-color .18s,border-color .18s,box-shadow .18s}
+.nominee-card.video .video-play:hover,.nominee-card.video .video-play:focus-visible{opacity:1;border-color:rgba(255,211,110,.9);background:rgba(255,193,7,.2);box-shadow:0 0 0 3px rgba(255,193,7,.09),0 0 11px rgba(255,193,7,.19)}
