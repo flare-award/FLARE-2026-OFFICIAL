@@ -4,6 +4,8 @@ function saveNomineeViewPreference(view){try{localStorage.setItem('flare-nominee
 const state={session:JSON.parse(localStorage.getItem('flare-session')||'null'),votes:{},eventChoice:null,eventSaved:null,eventResults:null,eventSaving:false,eventChoiceRevision:0,category:'основная',nomination:null,selected:null,carousel:0,busy:false,nominationListScrollTop:0,nomineeView:loadNomineeViewPreference()};
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const closing=new Date('2026-11-22T00:00:00+03:00');
+const ceremonyDate=new Date('2026-12-05T00:00:00+03:00');
+const winnersReleaseDate=new Date('2026-12-06T00:00:00+03:00');
 const selfHoverMessages=['ЗА СЕБЯ НЕЛЬЗЯ ГОЛОСОВАТЬ','УБЕРИ КУРСОР','МНОГО ХОЧЕШЬ','КУДА ЛЕЗЕШЬ?','ЧИТАЙ ПРАВИЛА','ИДИ НАХУЙ','ТЫ СЛУЧАЕМ НЕ АХУЕЛ?','ДОСТУП ОТКЛОНЁН','СПАСИБО ЗА ПОНИМАНИЕ','НЕ ПОЛУЧАЕТСЯ?','ЭГОИСТ','ПИДОРАС ОБНАРУЖЕН','НЕ СЕЙЧАС','Я СКАЗАЛ НЕЛЬЗЯ','ПОПРОБУЙ ЕЩЁ РАЗ','ЩА ПОЧИНЮ, ПОДОЖДИ'];
 const isClosed=()=>Date.now()>=closing.getTime();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -220,7 +222,28 @@ function bindDesignPanel(){
   $('#export-design-changes').onclick=()=>exportPhotoPack(true);$('#export-design-photos').onclick=()=>exportPhotoPack(false);updatePhotoSyncStatus();
 }
 function scrollToVoteHeading(){const heading=$('.vote-hub .section-heading');if(!heading)return;const header=$('#site-header'),headerHeight=header?.getBoundingClientRect().height||95,portraitPhone=matchMedia('(max-width:600px) and (orientation:portrait)').matches,topOffset=portraitPhone?Math.max(0,headerHeight-16):Math.max(170,headerHeight+70),target=window.scrollY+heading.getBoundingClientRect().top-topOffset;window.scrollTo({top:Math.max(0,target),behavior:'smooth'})}
-function initCountdown(){const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes'),seconds:$('#countdown-seconds')},status=$('#countdown-status'),box=$('#vote-countdown');let timer;const pad=n=>String(n).padStart(2,'0');const tick=()=>{const remaining=Math.max(0,closing.getTime()-Date.now()),total=Math.floor(remaining/1000);units.days.textContent=pad(Math.floor(total/86400));units.hours.textContent=pad(Math.floor(total%86400/3600));units.minutes.textContent=pad(Math.floor(total%3600/60));units.seconds.textContent=pad(total%60);if(remaining<=0){box.classList.add('is-finished');status.textContent='Голосование завершено';clearInterval(timer);updateProgress()}};tick();if(!isClosed())timer=setInterval(tick,1000)}
+function initCountdown(){
+  const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes'),seconds:$('#countdown-seconds')},status=$('#countdown-status'),label=$('.countdown-label',$('#vote-countdown')),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
+  const phases=[
+    {target:closing,label:'ДО ОКОНЧАНИЯ ГОЛОСОВАНИЯ',status:'Закрытие: 21 ноября · 23:59 МСК'},
+    {target:ceremonyDate,label:'ДО ЦЕРЕМОНИИ',status:'Церемония состоится 5 декабря'},
+    {target:winnersReleaseDate,label:'ДО ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ',status:'Победители появятся 6 декабря'}
+  ];
+  let timer,currentPhase=-1;
+  const pad=n=>String(n).padStart(2,'0');
+  const tick=()=>{
+    const now=Date.now();
+    if(now>=winnersReleaseDate.getTime()){
+      values.hidden=true;label.textContent='ДЕНЬ ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Загружаем победителей…';box.classList.add('is-finished');box.setAttribute('aria-label','День публикации результатов FLARE 2026');
+      clearInterval(timer);loadPublishedWinners2026();return;
+    }
+    const phaseIndex=now<closing.getTime()?0:now<ceremonyDate.getTime()?1:2,phase=phases[phaseIndex],remaining=Math.max(0,phase.target.getTime()-now),total=Math.floor(remaining/1000);
+    values.hidden=false;box.classList.remove('is-finished');
+    if(currentPhase!==phaseIndex){currentPhase=phaseIndex;label.textContent=phase.label;status.textContent=phase.status;box.setAttribute('aria-label',phase.label.toLowerCase());if(phaseIndex===1)updateProgress()}
+    units.days.textContent=pad(Math.floor(total/86400));units.hours.textContent=pad(Math.floor(total%86400/3600));units.minutes.textContent=pad(Math.floor(total%3600/60));units.seconds.textContent=pad(total%60);
+  };
+  tick();if(Date.now()<winnersReleaseDate.getTime())timer=setInterval(tick,1000);
+}
 function renderNominations(){const selected=nominations.filter(n=>n.category===state.category);const html=selected.map(n=>{const done=state.votes[n.id],photoKey=`nomination:${n.id}`;return `<button class="nomination-tile" data-open-nomination="${n.id}"><span class="nomination-art" aria-hidden="true"><img class="nomination-art-photo" src="${esc(photoSource(photoKey))}" data-photo-key="${esc(photoKey)}" alt="" loading="lazy">${done?'<span class="nomination-voted" role="img" aria-label="Голос учтён" title="Голос учтён">✓</span>':''}</span><span class="nomination-card-body"><span class="nomination-card-copy"><span class="nomination-tile-title">${esc(n.title)}</span><span class="nomination-tile-description">${esc(n.description)}</span></span><span class="nomination-card-meta"><span>${nomineeCountLabel(n.nominees.length)}</span><span class="nomination-card-dot" aria-hidden="true">●</span></span></span></button>`}).join('');const isExtra=state.category!=='основная';const heading=`<h2>${isExtra?'Дополнительные номинации':'Основные номинации'}</h2>`;const content=`<div class="modal-header ${isExtra?'extra-list-header':'primary-list-header'}">${heading}<button class="close-button" aria-label="Закрыть">×</button></div><div class="nomination-grid">${html}</div>`;replaceModalView(content,`nomination-list-modal ${isExtra?'extra-category-list':'primary-category-list'}`);const nominationGrid=$('.nomination-grid');if(nominationGrid)nominationGrid.scrollTop=state.nominationListScrollTop;$$('[data-open-nomination]').forEach(b=>b.onclick=()=>showNomination(b.dataset.openNomination));}
 function visualClass(n){if(n.type==='game')return'visual-game';if(n.type==='group')return'visual-group';if(n.type==='conflict')return'visual-conflict';if(n.type==='video')return'visual-event';return''}
 function parseYouTubeVideoUrl(value){
@@ -326,6 +349,50 @@ function openModal(content,kind=''){
 }
 function closeModal(){if(typeof adminRequestCounter!=='undefined')adminRequestCounter++;if(modalEscapeHandler){document.removeEventListener('keydown',modalEscapeHandler);modalEscapeHandler=null}closeNomineeViewMenu();closeAllAvatarCrops();$('#modal-root').innerHTML='';state.nomination=null}
 function renderAuth(){openModal(`<div class="eyebrow">FLARE AWARDS · 2026</div><h2 class="auth-title">Вход / регистрация</h2><form id="auth-form" class="auth-form"><label class="form-field"><span>EMAIL</span><input name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Твой email"></label><label class="form-field form-field-pin"><span>ЛИЧНЫЙ PIN-КОД</span><span class="pin-input-wrap"><input id="auth-pin" name="pin" type="password" autocomplete="current-password" required minlength="4" maxlength="72" pattern="[A-Za-z0-9]{4,72}" placeholder="Придумай PIN из букв и цифр"><button type="button" class="pin-toggle" id="toggle-pin" aria-label="Показать PIN" aria-pressed="false"><svg class="pin-eye-show" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6-3.2 6-9.2 6-9.2-6-9.2-6Z"/><circle cx="12" cy="12" r="2.8"/></svg><svg class="pin-eye-hide" aria-hidden="true" viewBox="0 0 24 24" hidden><path d="m3 3 18 18M10.6 6.2A9.8 9.8 0 0 1 12 6c6 0 9.2 6 9.2 6a15.8 15.8 0 0 1-2.4 3.1M6.2 6.3C4 7.7 2.8 12 2.8 12s3.2 6 9.2 6c1.3 0 2.5-.3 3.5-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></span></label><p class="auth-error" id="auth-error"></p><button class="button" type="submit">Войти в аккаунт</button></form>`, 'auth-modal');$('#toggle-pin').onclick=e=>{const button=e.currentTarget,input=$('#auth-pin'),visible=input.type==='password';input.type=visible?'text':'password';button.setAttribute('aria-pressed',String(visible));button.setAttribute('aria-label',visible?'Скрыть PIN':'Показать PIN');$('.pin-eye-show',button).hidden=visible;$('.pin-eye-hide',button).hidden=!visible};$('#auth-form').onsubmit=async e=>{e.preventDefault();const form=new FormData(e.target),email=String(form.get('email')).trim().toLowerCase(),pin=String(form.get('pin'));const error=$('#auth-error'),button=$('button[type="submit"]',e.target);button.disabled=true;error.textContent='';try{if(!clientReady())throw new Error('Сначала настрой Supabase и заполни URL и anon key в config.js.');const data=await rpc('flare_access',{p_email:email,p_pin:pin});if(data.error)throw new Error(data.error);saveSession(data);closeModal();toast(`Добро пожаловать, ${data.nickname}!`)}catch(err){error.textContent=err.message}finally{button.disabled=false}}}
+let publishedWinners2026Promise=null;
+function renderPublishedWinners2026(rows){
+  const byNomination=new Map((Array.isArray(rows)?rows:[]).map(row=>[row.nomination_id,row]));
+  ['основная','доп.'].forEach(category=>{
+    const grid=$(`[data-winners-category="${category}"] .winner-2026-grid`);
+    if(!grid)return;
+    grid.innerHTML=nominations.filter(nom=>nom.category===category).map(nom=>{
+      const result=byNomination.get(nom.id),winners=Array.isArray(result?.winners)?result.winners:[];
+      if(!winners.length)return `<article class="winner-2026-empty"><span>${esc(nom.title)}</span><strong>Нет голосов</strong></article>`;
+      return winners.map(winner=>{
+        const nominee=nom.nominees.find(item=>item.id===winner.id),photoKey=nominee?.type==='person'?`avatar:${slugPhotoName(nominee.name)}`:`nominee:${nom.id}:${winner.id}`,imageUrl=photoSource(photoKey),votes=Number(winner.votes)||0;
+        return `<article class="winner-2026-card"><div class="winner-2026-photo winner-2026-photo-${esc(winner.kind)}">${imageUrl?`<img class="winner-2026-image" src="${esc(imageUrl)}" alt="" aria-hidden="true" loading="lazy">`:''}<span class="winner-2026-badge">${winners.length>1?'НИЧЬЯ · ПОБЕДИТЕЛЬ':'ПОБЕДИТЕЛЬ'}</span></div><div class="winner-2026-copy"><span class="winner-2026-nomination">${esc(nom.title)}</span><h4>${esc(winner.name)}</h4><span class="winner-2026-votes">${countLabel(votes,'голос','голоса','голосов')}</span></div></article>`;
+      }).join('');
+    }).join('');
+  });
+  $$('.winner-2026-image').forEach(image=>{
+    const applyRatio=()=>{const frame=image.closest('.winner-2026-photo');if(frame?.isConnected&&image.naturalWidth&&image.naturalHeight)frame.style.aspectRatio=`${image.naturalWidth} / ${image.naturalHeight}`};
+    image.addEventListener('load',applyRatio,{once:true});
+    image.addEventListener('error',()=>image.remove(),{once:true});
+    if(image.complete){if(image.naturalWidth)applyRatio();else image.remove()}
+  });
+  $('#winners-2026-teaser').hidden=true;$('#winners-2026-results').hidden=false;
+  const countdown=$('#vote-countdown');$('.countdown-label',countdown).textContent='ПОБЕДИТЕЛИ FLARE 2026';$('#countdown-status').textContent='Карточки победителей ниже';countdown.setAttribute('aria-label','Победители FLARE 2026 опубликованы');
+}
+function setWinners2026Retry(message){
+  const status=$('#winners-2026-status');if(!status)return;
+  status.textContent=message;
+  const retry=document.createElement('button');retry.type='button';retry.className='text-button winners-2026-retry';retry.textContent='Повторить';
+  retry.onclick=()=>{publishedWinners2026Promise=null;loadPublishedWinners2026()};status.append(' ',retry);
+}
+async function loadPublishedWinners2026(){
+  if(Date.now()<winnersReleaseDate.getTime()||publishedWinners2026Promise)return publishedWinners2026Promise;
+  const status=$('#winners-2026-status');
+  publishedWinners2026Promise=(async()=>{
+    if(status)status.textContent='Загружаем победителей…';
+    try{
+      const result=await rpc('get_public_winners');
+      if(!result?.published){setWinners2026Retry('Результаты ещё не опубликованы. Попробуй чуть позже.');return}
+      renderPublishedWinners2026(result.winners);
+      if(status)status.textContent='';
+    }catch(error){console.info('Победители 2026 пока не загружены:',error.message);setWinners2026Retry('Не удалось загрузить результаты. Попробуй ещё раз.')}
+  })();
+  return publishedWinners2026Promise;
+}
 function renderWinners(){const track=$('#winner-track');track.innerHTML=previousWinners.map(([title,name],i)=>`<article class="winner-card"><div class="winner-icon">${String(i+1).padStart(2,'0')}</div><div><div class="winner-title">${esc(title)}</div><div class="winner-name">${esc(name)}</div></div></article>`).join('');updateCarousel();}
 function updateCarousel(){const track=$('#winner-track'),cards=$$('.winner-card',track);if(!cards.length)return;const gap=parseFloat(getComputedStyle(track).gap)||0,width=cards[0].getBoundingClientRect().width+gap;const maxOffset=Math.max(0,track.scrollWidth-track.parentElement.clientWidth),maxIndex=Math.ceil(maxOffset/width);state.carousel=Math.max(0,Math.min(state.carousel,maxIndex));const offset=Math.min(state.carousel*width,maxOffset);track.style.transform=`translate3d(${-offset}px,0,0)`;$('#winner-counter').textContent=`${String(state.carousel+1).padStart(2,'0')} / ${String(cards.length).padStart(2,'0')}`}
 let carouselDebounce=false;function moveCarousel(dir){if(carouselDebounce)return;carouselDebounce=true;state.carousel+=dir;updateCarousel();setTimeout(()=>carouselDebounce=false,360)}

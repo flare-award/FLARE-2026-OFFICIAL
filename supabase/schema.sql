@@ -206,6 +206,28 @@ begin
   return jsonb_build_object('ok',true);
 end $$;
 
+-- Public endpoint reveals aggregate winners only from 6 December 2026; it never returns voter identities.
+create or replace function public.get_public_winners() returns jsonb language plpgsql stable security definer set search_path=public,extensions,pg_temp as $$
+declare v_winners jsonb;
+begin
+  if now()<timestamptz '2026-12-06 00:00:00+03' then return jsonb_build_object('published',false,'winners','[]'::jsonb); end if;
+  select coalesce(jsonb_agg(jsonb_build_object('nomination_id',n.id,'title',n.title,'category',n.category,'winners',coalesce(w.winners,'[]'::jsonb)) order by case n.category when 'основная' then 0 else 1 end,n.title),'[]'::jsonb)
+  into v_winners
+  from public.flare_nominations n
+  left join lateral (
+    select jsonb_agg(jsonb_build_object('id',ranked.id,'name',ranked.name,'kind',ranked.kind,'votes',ranked.vote_count) order by ranked.name) as winners
+    from (
+      select o.id,o.name,o.kind,count(v.account_id)::integer as vote_count
+      from public.flare_options o
+      left join public.flare_votes v on v.nomination_id=o.nomination_id and v.option_id=o.id
+      where o.nomination_id=n.id
+      group by o.id,o.name,o.kind
+    ) ranked
+    where ranked.vote_count=(select max(tally.vote_count) from (select count(*)::integer as vote_count from public.flare_votes where nomination_id=n.id group by option_id) tally)
+  ) w on true;
+  return jsonb_build_object('published',true,'winners',v_winners);
+end $$;
+
 create or replace function public.save_event_choice(p_token text,p_choice_id text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
 declare v_account uuid:=flare_session_account(p_token); v_event_results jsonb;
 begin
@@ -323,6 +345,7 @@ revoke all on function public.cast_vote(text,text,text) from public,authenticate
 revoke all on function public.save_event_choice(text,text) from public,authenticated;
 revoke all on function public.finalize_ballot(text) from public,authenticated;
 revoke all on function public.admin_summary(text) from public,authenticated;
+revoke all on function public.get_public_winners() from public,anon,authenticated;
 revoke all on function public.get_clip_options() from public,authenticated;
 revoke all on function public.admin_update_clip_option(text,text,text,text) from public,authenticated;
 revoke all on function public.get_video_options() from public,authenticated;
@@ -335,6 +358,7 @@ grant execute on function public.cast_vote(text,text,text) to anon;
 grant execute on function public.save_event_choice(text,text) to anon;
 grant execute on function public.finalize_ballot(text) to anon;
 grant execute on function public.admin_summary(text) to anon;
+grant execute on function public.get_public_winners() to anon;
 grant execute on function public.get_clip_options() to anon;
 grant execute on function public.admin_update_clip_option(text,text,text,text) to anon;
 grant execute on function public.get_video_options() to anon;
