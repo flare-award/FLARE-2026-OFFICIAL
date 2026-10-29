@@ -1012,17 +1012,17 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
   .nomination-detail-modal .nominee-grid.nominee-grid-compact:not(.nominee-grid-media){grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 }
 
-/* List view keeps one full-width, selectable nominee per row without shrinking the cards. */
-.nomination-detail-modal .nominee-grid.nominee-grid-list{grid-template-columns:minmax(0,1fr);gap:13px;align-content:start}
-.nomination-detail-modal .nominee-grid-list .nominee-card{display:flex;flex-direction:row;align-items:center;gap:20px;min-height:138px;padding:14px;text-align:left}
+/* Compact list rows and match each photo frame to its source image ratio to avoid cropping and bars. */
+.nomination-detail-modal .nominee-grid.nominee-grid-list{grid-template-columns:minmax(0,1fr);gap:11px;align-content:start}
+.nomination-detail-modal .nominee-grid-list .nominee-card{display:flex;flex-direction:row;align-items:center;gap:16px;min-height:128px;padding:12px;text-align:left}
 .nomination-detail-modal .nominee-grid-list .portrait{width:min(100%,150px);height:auto;flex:0 0 150px;margin:0}
 .nomination-detail-modal .nominee-grid-list .nominee-name{flex:1 1 auto;min-width:0;font-size:16px;line-height:1.5;text-align:left}
-.nomination-detail-modal .nominee-grid-list .visual{width:min(36%,360px);height:220px;flex:0 0 min(36%,360px);margin:0;border-radius:10px}
+.nomination-detail-modal .nominee-grid-list .visual{width:min(34%,320px);height:auto;aspect-ratio:16/9;flex:0 0 min(34%,320px);margin:0;border-radius:10px}
 .nomination-detail-modal .nominee-grid-list .visual-photo{border-radius:inherit}
 @media(max-width:700px){
-  .nomination-detail-modal .nominee-grid-list .nominee-card{gap:14px;min-height:120px;padding:12px}
+  .nomination-detail-modal .nominee-grid-list .nominee-card{gap:12px;min-height:110px;padding:10px}
   .nomination-detail-modal .nominee-grid-list .portrait{width:min(100%,120px);flex-basis:120px}
-  .nomination-detail-modal .nominee-grid-list .visual{width:min(40%,300px);height:180px;flex-basis:min(40%,300px)}
+  .nomination-detail-modal .nominee-grid-list .visual{width:min(38%,260px);height:auto;aspect-ratio:16/9;flex-basis:min(38%,260px)}
   .nomination-detail-modal .nominee-grid-list .nominee-name{font-size:14px}
 }
 @media(max-width:600px) and (orientation:portrait){
