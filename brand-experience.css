@@ -1035,3 +1035,21 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 .nominee-view-menu{right:-54px}
 .nominee-card.video .video-play{width:50px;height:50px}
 @media(max-width:700px){.nominee-view-menu{right:-51px}}
+
+/* Inline YouTube player layered over the still-open nominee dialog. */
+.youtube-player-backdrop{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));background:rgba(0,0,0,.88);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);animation:youtubePlayerFadeIn .18s ease}
+.youtube-player-dialog{width:min(100%,1100px,112vh);width:min(100%,1100px,112dvh);overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:#10100f;box-shadow:0 28px 100px rgba(0,0,0,.78)}
+.youtube-player-header{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:66px;padding:10px 14px 10px 21px;border-bottom:1px solid rgba(255,255,255,.09);background:#111110}
+.youtube-player-header h2{min-width:0;margin:0;color:#f4f0e7;font:600 clamp(15px,1.7vw,20px)/1.35 var(--font);overflow-wrap:anywhere}
+.youtube-player-close{flex:0 0 42px;width:42px;height:42px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:#1a1917;color:#d5d0c7}
+.youtube-player-close:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.12);color:#ff8585}
+.youtube-player-screen{width:100%;aspect-ratio:16/9;background:#000}
+.youtube-player-screen iframe{display:block;width:100%;height:100%;border:0;background:#000}
+@keyframes youtubePlayerFadeIn{from{opacity:0}to{opacity:1}}
+@media(max-width:600px){
+  .youtube-player-backdrop{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+  .youtube-player-dialog{border-radius:12px}
+  .youtube-player-header{min-height:56px;padding:8px 9px 8px 14px;gap:10px}
+  .youtube-player-close{flex-basis:40px;width:40px;height:40px}
+}
+@media(prefers-reduced-motion:reduce){.youtube-player-backdrop{animation:none}}
