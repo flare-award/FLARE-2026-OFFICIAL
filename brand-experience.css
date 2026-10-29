@@ -1056,3 +1056,10 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
   .youtube-player-close{flex-basis:40px;width:40px;height:40px}
 }
 @media(prefers-reduced-motion:reduce){.youtube-player-backdrop{animation:none}}
+
+/* Give the countdown digits more visual weight and prevent selecting them. */
+.countdown-unit strong{font-size:clamp(64px,4.5vw,84px);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.countdown-separator{font-size:38px}
+@media(max-width:1200px) and (min-width:901px){.countdown-unit strong{font-size:clamp(52px,5.2vw,66px)}}
+@media(max-width:900px) and (min-width:601px){.countdown-unit strong{font-size:clamp(48px,6vw,58px)}}
+@media(max-width:600px){.countdown-unit strong{font-size:clamp(44px,13vw,54px)}.countdown-separator{font-size:25px}}
