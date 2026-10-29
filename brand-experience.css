@@ -126,6 +126,7 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 .wordmark{letter-spacing:.045em}
 .hero h1,.section-heading h2,.poll-copy h2,.faq-intro h2,.modal-header h2,.nom-detail-title,.admin-head h2,.auth-title,.category-title{letter-spacing:0}
 .hero h1{letter-spacing:.005em}
+.hero h1 .hero-comma{margin-left:.035em;color:inherit}
 .nom-detail-title{letter-spacing:0}
 .topbar.is-at-top .top-actions{gap:16px}
 .topbar.is-at-top #account-status{max-width:600px;overflow:visible;opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .2s ease}
