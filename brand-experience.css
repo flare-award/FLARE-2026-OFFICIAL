@@ -967,3 +967,71 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 .nominee-card.video:hover .video-play{opacity:.85}
 .nominee-card.video .video-play{transition:opacity .18s,background-color .18s,border-color .18s,box-shadow .18s}
 .nominee-card.video .video-play:hover,.nominee-card.video .video-play:focus-visible{opacity:1;border-color:rgba(255,211,110,.9);background:rgba(255,193,7,.2);box-shadow:0 0 0 3px rgba(255,193,7,.09),0 0 11px rgba(255,193,7,.19)}
+
+/* Nominee view picker: an accessible, small popover with inline vector icons. */
+.nom-detail-actions{display:flex;align-items:center;gap:9px;margin-left:auto}
+.nominee-view-control{position:relative;z-index:12;flex:0 0 auto}
+.nominee-view-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:80px;min-height:44px;padding:0 11px;border:1px solid rgba(255,193,7,.22);border-radius:11px;background:rgba(255,193,7,.045);color:#e7d19a;font:600 12px var(--font);cursor:pointer;transition:background .18s,border-color .18s,color .18s}
+.nominee-view-toggle:hover,.nominee-view-toggle[aria-expanded=true]{border-color:rgba(255,193,7,.45);background:rgba(255,193,7,.1);color:#ffe1a0}
+.nominee-view-toggle-icon,.nominee-view-chevron{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nominee-view-chevron{width:14px;height:14px;flex-basis:14px;transition:transform .18s}
+.nominee-view-toggle[aria-expanded=true] .nominee-view-chevron{transform:rotate(180deg)}
+.nominee-view-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:30;display:grid;gap:4px;width:min(320px,calc(100vw - 32px));padding:7px;border:1px solid rgba(255,193,7,.2);border-radius:14px;background:#151412;box-shadow:0 16px 42px rgba(0,0,0,.58)}
+.nominee-view-menu[hidden]{display:none!important}
+.nominee-view-option{display:grid;grid-template-columns:38px minmax(0,1fr) 18px;align-items:center;gap:10px;width:100%;min-height:60px;padding:8px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:#e8e2d8;text-align:left;cursor:pointer;transition:background .16s,border-color .16s,color .16s}
+.nominee-view-option:hover,.nominee-view-option.is-selected{border-color:rgba(255,193,7,.18);background:rgba(255,193,7,.075)}
+.nominee-view-option:focus-visible{outline:2px solid #ffc107;outline-offset:1px}
+.nominee-view-option-icon{display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#1d1b17;color:#d7bb73}
+.nominee-view-option-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.nominee-view-option-copy{display:grid;gap:3px;min-width:0}
+.nominee-view-option-copy strong{font-size:12px;font-weight:700}
+.nominee-view-option-copy small{color:#aaa397;font-size:10px;line-height:1.35}
+.nominee-view-check{width:17px;height:17px;fill:none;stroke:#e5c878;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.nominee-view-option.is-selected .nominee-view-check{opacity:1}
+
+/* Compact view: five readable participant cards on desktop and slightly shorter media previews. */
+.nomination-detail-modal .nominee-grid.nominee-grid-compact:not(.nominee-grid-media){grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.nomination-detail-modal .nominee-grid-compact:not(.nominee-grid-media) .nominee-card{padding:9px}
+.nomination-detail-modal .nominee-grid-compact:not(.nominee-grid-media) .portrait{width:min(100%,138px);margin:4px auto 10px}
+.nomination-detail-modal .nominee-grid-compact:not(.nominee-grid-media) .nominee-name{font-size:12px}
+.nomination-detail-modal .nominee-grid.nominee-grid-compact.nominee-grid-media{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.nomination-detail-modal .nominee-grid-compact.nominee-grid-media .nominee-card{padding:9px}
+.nomination-detail-modal .nominee-grid-compact.nominee-grid-media .visual{height:200px;margin:-9px -9px 11px}
+@media(max-width:700px){
+  .nom-detail-top{gap:8px}
+  .nom-detail-actions{gap:7px}
+  .nomination-detail-modal .nominee-grid.nominee-grid-compact:not(.nominee-grid-media){grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  .nomination-detail-modal .nominee-grid.nominee-grid-compact.nominee-grid-media{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .nomination-detail-modal .nominee-grid-compact.nominee-grid-media .visual{height:clamp(145px,38vw,185px)}
+  .nominee-view-toggle{min-width:74px;min-height:44px;gap:6px;padding-inline:9px}
+  .nominee-view-menu{width:min(300px,calc(100vw - 24px))}
+}
+@media(max-width:600px){
+  .nom-detail-top .back-link{max-width:calc(100% - 138px)}
+  .nomination-detail-modal .nominee-grid.nominee-grid-compact:not(.nominee-grid-media){grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+}
+
+/* List view keeps one full-width, selectable nominee per row without shrinking the cards. */
+.nomination-detail-modal .nominee-grid.nominee-grid-list{grid-template-columns:minmax(0,1fr);gap:13px;align-content:start}
+.nomination-detail-modal .nominee-grid-list .nominee-card{display:flex;flex-direction:row;align-items:center;gap:20px;min-height:138px;padding:14px;text-align:left}
+.nomination-detail-modal .nominee-grid-list .portrait{width:min(100%,150px);height:auto;flex:0 0 150px;margin:0}
+.nomination-detail-modal .nominee-grid-list .nominee-name{flex:1 1 auto;min-width:0;font-size:16px;line-height:1.5;text-align:left}
+.nomination-detail-modal .nominee-grid-list .visual{width:min(36%,360px);height:220px;flex:0 0 min(36%,360px);margin:0;border-radius:10px}
+.nomination-detail-modal .nominee-grid-list .visual-photo{border-radius:inherit}
+@media(max-width:700px){
+  .nomination-detail-modal .nominee-grid-list .nominee-card{gap:14px;min-height:120px;padding:12px}
+  .nomination-detail-modal .nominee-grid-list .portrait{width:min(100%,120px);flex-basis:120px}
+  .nomination-detail-modal .nominee-grid-list .visual{width:min(40%,300px);height:180px;flex-basis:min(40%,300px)}
+  .nomination-detail-modal .nominee-grid-list .nominee-name{font-size:14px}
+}
+@media(max-width:600px) and (orientation:portrait){
+  .nomination-detail-modal .nominee-grid.nominee-grid-compact.nominee-grid-media{grid-template-columns:minmax(0,1fr)}
+  .nomination-detail-modal .nominee-grid-compact.nominee-grid-media .visual{height:auto;aspect-ratio:16/9}
+  .nomination-detail-modal .nominee-grid-list.nominee-grid-media .nominee-card{flex-direction:column;align-items:stretch;gap:12px}
+  .nomination-detail-modal .nominee-grid-list.nominee-grid-media .visual{width:100%;height:auto;aspect-ratio:16/9;flex-basis:auto;margin:0}
+}
+
+/* Align the mode popover with the full control group; slightly enlarge Play without moving its glyph. */
+.nominee-view-menu{right:-54px}
+.nominee-card.video .video-play{width:50px;height:50px}
+@media(max-width:700px){.nominee-view-menu{right:-51px}}
