@@ -1037,7 +1037,9 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 @media(max-width:700px){.nominee-view-menu{right:-51px}}
 
 /* Inline YouTube player layered over the still-open nominee dialog. */
-.youtube-player-backdrop{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));background:rgba(0,0,0,.88);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);animation:youtubePlayerFadeIn .18s ease}
+.youtube-player-backdrop{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));background:rgba(0,0,0,.88);animation:youtubePlayerFadeIn .18s ease}
+body.youtube-player-open .ambient{visibility:hidden!important}
+body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-play-state:paused!important}
 .youtube-player-dialog{width:min(100%,1100px,112vh);width:min(100%,1100px,112dvh);overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:#10100f;box-shadow:0 28px 100px rgba(0,0,0,.78)}
 .youtube-player-header{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:66px;padding:10px 14px 10px 21px;border-bottom:1px solid rgba(255,255,255,.09);background:#111110}
 .youtube-player-header h2{min-width:0;margin:0;color:#f4f0e7;font:600 clamp(15px,1.7vw,20px)/1.35 var(--font);overflow-wrap:anywhere}
