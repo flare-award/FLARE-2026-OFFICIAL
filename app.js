@@ -245,11 +245,12 @@ function openYouTubePlayer(title,video){
   const root=$('#modal-root');if(!root)return;
   const previousFocus=document.activeElement,backdrop=document.createElement('div'),start=video.start?`&start=${video.start}`:'';
   backdrop.className='youtube-player-backdrop';
-  backdrop.innerHTML=`<section class="youtube-player-dialog" role="dialog" aria-modal="true" aria-labelledby="youtube-player-title"><header class="youtube-player-header"><h2 id="youtube-player-title">${esc(title)}</h2><button type="button" class="close-button youtube-player-close" aria-label="Закрыть плеер">×</button></header><div class="youtube-player-screen"><iframe title="Видео: ${esc(title)}" src="https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&amp;playsinline=1&amp;rel=0${start}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></section>`;
+  backdrop.innerHTML=`<section class="youtube-player-dialog" role="dialog" aria-modal="true" aria-labelledby="youtube-player-title"><header class="youtube-player-header"><h2 id="youtube-player-title">${esc(title)}</h2><button type="button" class="close-button youtube-player-close" aria-label="Закрыть плеер">×</button></header><div class="youtube-player-screen"><iframe title="Видео: ${esc(title)}" src="about:blank" data-player-src="https://www.youtube-nocookie.com/embed/${video.id}?autoplay=0&amp;playsinline=1&amp;rel=0${start}" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></section>`;
   root.append(backdrop);
   const frame=$('iframe',backdrop),closeButton=$('.youtube-player-close',backdrop);
   let closed=false;
-  const close=()=>{if(closed)return;closed=true;document.removeEventListener('keydown',onKeyDown,true);frame.src='about:blank';backdrop.remove();try{previousFocus?.focus({preventScroll:true})}catch{previousFocus?.focus()}};
+  const embedTimer=setTimeout(()=>{if(!closed)frame.src=frame.dataset.playerSrc},180);
+  const close=()=>{if(closed)return;closed=true;clearTimeout(embedTimer);document.removeEventListener('keydown',onKeyDown,true);frame.src='about:blank';backdrop.remove();try{previousFocus?.focus({preventScroll:true})}catch{previousFocus?.focus()}};
   const onKeyDown=event=>{if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close()}};
   closeButton.addEventListener('click',close);
   backdrop.addEventListener('click',event=>{if(event.target===backdrop)close()});
