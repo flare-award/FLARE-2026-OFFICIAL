@@ -967,7 +967,7 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 /* Make the video play control feel interactive only while the pointer is on the control itself. */
 .nominee-card.video:hover .video-play{opacity:.85}
 .nominee-card.video .video-play{transition:opacity .18s,background-color .18s,border-color .18s,box-shadow .18s}
-.nominee-card.video .video-play:hover,.nominee-card.video .video-play:focus-visible{opacity:1;border-color:rgba(255,211,110,.9);background:rgba(255,193,7,.2);box-shadow:0 0 0 3px rgba(255,193,7,.09),0 0 11px rgba(255,193,7,.19)}
+.nominee-card.video .video-play:hover,.nominee-card.video .video-play:focus-visible{opacity:1;border-color:rgba(255,211,110,.9);background:rgba(255,193,7,.2);box-shadow:0 0 0 3px rgba(255,193,7,.09),0 0 11px rgba(255,193,7,.19),0 7px 12px rgba(0,0,0,.58)}
 
 /* Nominee view picker: an accessible, small popover with inline vector icons. */
 .nom-detail-actions{display:flex;align-items:center;gap:9px;margin-left:auto}
