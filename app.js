@@ -1,5 +1,7 @@
 const CONFIG=window.FLARE_CONFIG||{};
-const state={session:JSON.parse(localStorage.getItem('flare-session')||'null'),votes:{},eventChoice:null,eventSaved:null,eventResults:null,eventSaving:false,eventChoiceRevision:0,category:'основная',nomination:null,selected:null,carousel:0,busy:false,nominationListScrollTop:0,nomineeView:'standard'};
+function loadNomineeViewPreference(){try{const saved=localStorage.getItem('flare-nominee-view');return saved==='compact'||saved==='list'?saved:'standard'}catch{return 'standard'}}
+function saveNomineeViewPreference(view){try{localStorage.setItem('flare-nominee-view',view)}catch{}}
+const state={session:JSON.parse(localStorage.getItem('flare-session')||'null'),votes:{},eventChoice:null,eventSaved:null,eventResults:null,eventSaving:false,eventChoiceRevision:0,category:'основная',nomination:null,selected:null,carousel:0,busy:false,nominationListScrollTop:0,nomineeView:loadNomineeViewPreference()};
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const closing=new Date('2026-11-22T00:00:00+03:00');
 const selfHoverMessages=['ЗА СЕБЯ НЕЛЬЗЯ ГОЛОСОВАТЬ','УБЕРИ КУРСОР','МНОГО ХОЧЕШЬ','КУДА ЛЕЗЕШЬ?','ЧИТАЙ ПРАВИЛА','ИДИ НАХУЙ','ТЫ СЛУЧАЕМ НЕ АХУЕЛ?','ДОСТУП ОТКЛОНЁН','СПАСИБО ЗА ПОНИМАНИЕ','НЕ ПОЛУЧАЕТСЯ?','ЭГОИСТ','ПИДОРАС ОБНАРУЖЕН','НЕ СЕЙЧАС','Я СКАЗАЛ НЕЛЬЗЯ','ПОПРОБУЙ ЕЩЁ РАЗ','ЩА ПОЧИНЮ, ПОДОЖДИ'];
@@ -285,6 +287,7 @@ function bindNomineeViewControl(){
   };
   $$('[data-nominee-view]',menu).forEach(option=>option.onclick=()=>{
     state.nomineeView=option.dataset.nomineeView;
+    saveNomineeViewPreference(state.nomineeView);
     grid.classList.toggle('nominee-grid-compact',state.nomineeView==='compact');
     grid.classList.toggle('nominee-grid-list',state.nomineeView==='list');
     $$('[data-nominee-view]',menu).forEach(item=>{const selected=item.dataset.nomineeView===state.nomineeView;item.classList.toggle('is-selected',selected);item.setAttribute('aria-pressed',String(selected))});
