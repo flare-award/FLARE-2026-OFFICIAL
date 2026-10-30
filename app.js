@@ -4,6 +4,7 @@ function saveNomineeViewPreference(view){try{localStorage.setItem('flare-nominee
 const state={session:JSON.parse(localStorage.getItem('flare-session')||'null'),votes:{},eventChoice:null,eventSaved:null,eventResults:null,eventSaving:false,eventChoiceRevision:0,category:'основная',nomination:null,selected:null,carousel:0,busy:false,nominationListScrollTop:0,nomineeView:loadNomineeViewPreference()};
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const closing=new Date('2026-11-22T00:00:00+03:00');
+const winnersTeaserReleaseDate=new Date('2026-11-23T00:00:00+03:00');
 const ceremonyDates={
   'dec-4':new Date('2026-12-04T00:00:00+03:00'),
   'dec-5':new Date('2026-12-05T00:00:00+03:00'),
@@ -257,6 +258,7 @@ function initCountdown(){
   const tick=()=>{
     const now=Date.now();
     const winnersTitle=$('#winners-2026-title');if(winnersTitle)winnersTitle.hidden=now<winnersReleaseDate.getTime();
+    const winnersTeaser=$('#winners-2026-teaser');if(winnersTeaser)winnersTeaser.hidden=now<winnersTeaserReleaseDate.getTime()||now>=winnersReleaseDate.getTime();
     if(now>=winnersReleaseDate.getTime()){
       values.hidden=true;label.textContent='ДЕНЬ ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Загружаем победителей…';box.classList.add('is-finished');box.setAttribute('aria-label','День публикации результатов FLARE 2026');
       clearInterval(timer);loadPublishedWinners2026();return;
