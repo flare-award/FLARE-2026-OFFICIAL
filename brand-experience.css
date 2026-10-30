@@ -131,6 +131,7 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 .topbar.is-at-top .top-actions{gap:16px}
 .topbar.is-at-top #account-status{max-width:600px;overflow:visible;opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .2s ease}
 .account-status{white-space:nowrap}
+.nickname-hop-trigger{display:inline-block;margin:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;line-height:inherit;letter-spacing:inherit;vertical-align:baseline;cursor:inherit;appearance:none;-webkit-appearance:none}
 .nomination-card-meta{transform:translateY(-4px)}
 .toast{border-radius:14px;font-weight:700;line-height:1.45;box-shadow:0 12px 36px rgba(0,0,0,.38)}
 .nomination-list-modal>.modal-header.primary-list-header,.nomination-list-modal>.modal-header.extra-list-header{justify-content:space-between;min-height:82px;padding:17px 30px}
