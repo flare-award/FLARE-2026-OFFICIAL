@@ -256,6 +256,7 @@ function initCountdown(){
   };
   const tick=()=>{
     const now=Date.now();
+    const winnersTitle=$('#winners-2026-title');if(winnersTitle)winnersTitle.hidden=now<winnersReleaseDate.getTime();
     if(now>=winnersReleaseDate.getTime()){
       values.hidden=true;label.textContent='ДЕНЬ ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Загружаем победителей…';box.classList.add('is-finished');box.setAttribute('aria-label','День публикации результатов FLARE 2026');
       clearInterval(timer);loadPublishedWinners2026();return;
