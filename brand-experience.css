@@ -1205,3 +1205,14 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
   .admin-design-sync details{max-width:none}
 }
 @media(max-width:390px){.admin-design-export-actions{grid-template-columns:minmax(0,1fr)}}
+
+/* A small winner-carousel easter egg, armed only by sustained rapid Next clicks. */
+.winner-track.is-easter-egg-spinning{will-change:transform}
+.winner-card-clone{pointer-events:none}
+.winner-card{transition:border-color .35s ease,box-shadow .35s ease}
+.winner-card .winner-icon{transition:border-color .35s ease,color .35s ease,box-shadow .35s ease}
+.winners-section .carousel-controls .icon-button:disabled{border-color:rgba(255,255,255,.07);color:#77736b;opacity:.46;cursor:not-allowed}
+.winner-card.is-easter-egg-selected{position:relative;z-index:1;border-color:rgba(255,204,105,.88);box-shadow:0 0 0 1px rgba(255,193,7,.2),0 0 28px rgba(255,183,55,.16);animation:winnerEggSelected 1.15s ease-in-out 2}
+.winner-card.is-easter-egg-selected .winner-icon{border-color:rgba(255,214,137,.82);color:#ffe4a4;box-shadow:0 0 18px rgba(255,190,73,.2)}
+@keyframes winnerEggSelected{0%,100%{box-shadow:0 0 0 1px rgba(255,193,7,.12),0 0 15px rgba(255,183,55,.1)}50%{box-shadow:0 0 0 2px rgba(255,193,7,.27),0 0 34px rgba(255,183,55,.24)}}
+@media(prefers-reduced-motion:reduce){.winner-card.is-easter-egg-selected{animation:none}}

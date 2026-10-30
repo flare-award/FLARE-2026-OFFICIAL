@@ -463,9 +463,156 @@ async function loadPublishedWinners2026(){
   })();
   return publishedWinners2026Promise;
 }
+const winnerEasterEgg={active:false,clickTimes:[],frame:null,highlightTimer:null,phase:null,track:null,cards:null,step:0,sequenceWidth:0,startOffset:0,travelled:0,maxIndex:0,maxOffset:0,targetPosition:null,targetCard:null};
+function getWinnerCarouselMetrics(){
+  const track=$('#winner-track');if(!track||!track.parentElement)return null;
+  const cards=$$('.winner-card:not(.winner-card-clone)',track);if(!cards.length)return null;
+  const computed=getComputedStyle(track),gap=parseFloat(computed.columnGap)||parseFloat(computed.gap)||0,width=cards[0].getBoundingClientRect().width,step=width+gap;
+  if(!width||!step)return null;
+  const maxOffset=Math.max(0,track.scrollWidth-track.parentElement.clientWidth),maxIndex=Math.ceil(maxOffset/step),sequenceWidth=cards.reduce((sum,card)=>sum+card.getBoundingClientRect().width,0)+gap*cards.length;
+  return{track,cards,gap,width,step,maxOffset,maxIndex,sequenceWidth,viewportWidth:track.parentElement.clientWidth};
+}
+function updateWinnerCounter(index,total){const counter=$('#winner-counter');if(counter)counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`}
 function renderWinners(){const track=$('#winner-track');track.innerHTML=previousWinners.map(([title,name],i)=>`<article class="winner-card"><div class="winner-icon">${String(i+1).padStart(2,'0')}</div><div><div class="winner-title">${esc(title)}</div><div class="winner-name">${esc(name)}</div></div></article>`).join('');updateCarousel();}
-function updateCarousel(){const track=$('#winner-track'),cards=$$('.winner-card',track);if(!cards.length)return;const gap=parseFloat(getComputedStyle(track).gap)||0,width=cards[0].getBoundingClientRect().width+gap;const maxOffset=Math.max(0,track.scrollWidth-track.parentElement.clientWidth),maxIndex=Math.ceil(maxOffset/width);state.carousel=Math.max(0,Math.min(state.carousel,maxIndex));const offset=Math.min(state.carousel*width,maxOffset);track.style.transform=`translate3d(${-offset}px,0,0)`;$('#winner-counter').textContent=`${String(state.carousel+1).padStart(2,'0')} / ${String(cards.length).padStart(2,'0')}`}
-let carouselDebounce=false;function moveCarousel(dir){if(carouselDebounce)return;carouselDebounce=true;state.carousel+=dir;updateCarousel();setTimeout(()=>carouselDebounce=false,360)}
+function updateCarousel(){
+  if(winnerEasterEgg.active)cancelWinnerEasterEgg(false);
+  const metrics=getWinnerCarouselMetrics();if(!metrics)return;
+  state.carousel=Math.max(0,Math.min(state.carousel,metrics.maxIndex));
+  const offset=Math.min(state.carousel*metrics.step,metrics.maxOffset);
+  metrics.track.style.transform=`translate3d(${-offset}px,0,0)`;
+  updateWinnerCounter(state.carousel,metrics.cards.length);
+}
+let carouselDebounce=false,carouselDebounceTimer=null;
+function moveCarousel(dir){if(winnerEasterEgg.active||carouselDebounce)return;carouselDebounce=true;state.carousel+=dir;updateCarousel();clearTimeout(carouselDebounceTimer);carouselDebounceTimer=setTimeout(()=>{carouselDebounce=false;carouselDebounceTimer=null},360)}
+function setWinnerCarouselControlsDisabled(disabled){['#winner-prev','#winner-next'].forEach(selector=>{const button=$(selector);if(button)button.disabled=disabled})}
+function readWinnerTrackOffset(track,step,maxOffset){
+  const transform=getComputedStyle(track).transform;if(!transform||transform==='none')return Math.max(0,Math.min(state.carousel*step,maxOffset));
+  const values=transform.slice(transform.indexOf('(')+1,-1).split(',').map(Number),translate=transform.startsWith('matrix3d')?values[12]:values[4];
+  return Math.max(0,Math.min(-translate||0,maxOffset));
+}
+function winnerCardRangeAt(offset,metrics){
+  const first=Math.max(0,Math.min(metrics.cards.length-1,Math.floor(offset/metrics.step)));
+  const last=Math.max(first,Math.min(metrics.cards.length-1,Math.floor((offset+metrics.viewportWidth-1)/metrics.step)));
+  return{first,last};
+}
+function chooseVisibleWinnerCard(position,metrics){
+  const offset=Math.min(position*metrics.step,metrics.maxOffset),range=winnerCardRangeAt(offset,metrics);
+  return range.first+Math.floor(Math.random()*(range.last-range.first+1));
+}
+function registerRapidWinnerClick(){
+  const now=performance.now(),times=winnerEasterEgg.clickTimes,last=times[times.length-1];
+  if(last&&now-last>850)times.length=0;
+  times.push(now);
+  while(times.length&&now-times[0]>5800)times.shift();
+  if(times.length>=10&&now-times[0]>=3000){winnerEasterEgg.clickTimes=[];return startWinnerEasterEgg()}
+  return false;
+}
+function startWinnerEasterEgg(){
+  const metrics=getWinnerCarouselMetrics();if(!metrics||metrics.maxIndex<1)return false;
+  if(carouselDebounceTimer){clearTimeout(carouselDebounceTimer);carouselDebounceTimer=null}carouselDebounce=false;
+  winnerEasterEgg.active=true;winnerEasterEgg.phase='preparing';winnerEasterEgg.targetPosition=null;winnerEasterEgg.targetCard=null;winnerEasterEgg.counterIndex=null;
+  winnerEasterEgg.track=metrics.track;winnerEasterEgg.cards=metrics.cards;winnerEasterEgg.step=metrics.step;winnerEasterEgg.sequenceWidth=metrics.sequenceWidth;winnerEasterEgg.maxIndex=metrics.maxIndex;winnerEasterEgg.maxOffset=metrics.maxOffset;
+  if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
+    setWinnerCarouselControlsDisabled(true);
+    const position=Math.floor(Math.random()*(metrics.maxIndex+1)),selected=chooseVisibleWinnerCard(position,metrics);
+    winnerEasterEgg.active=false;state.carousel=position;updateCarousel();
+    revealWinnerEasterEgg(position,selected);
+    return true;
+  }
+  setWinnerCarouselControlsDisabled(false);$('#winner-prev').disabled=true;
+  const track=metrics.track,offset=readWinnerTrackOffset(track,metrics.step,metrics.maxOffset),before=document.createDocumentFragment(),after=document.createDocumentFragment();
+  metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.setAttribute('aria-hidden','true');before.append(clone)});
+  metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.setAttribute('aria-hidden','true');after.append(clone)});
+  track.prepend(before);track.append(after);track.classList.add('is-easter-egg-spinning');track.style.transition='none';
+  winnerEasterEgg.startOffset=offset;winnerEasterEgg.travelled=0;winnerEasterEgg.manualBoost=0;winnerEasterEgg.phase='accelerate';winnerEasterEgg.phaseStart=performance.now();winnerEasterEgg.phaseTravelled=0;winnerEasterEgg.fastSpeed=Math.max(1050,Math.min(2450,metrics.sequenceWidth/2.1));
+  track.style.transform=`translate3d(${-metrics.sequenceWidth-offset}px,0,0)`;
+  winnerEasterEgg.frame=requestAnimationFrame(runWinnerEasterEggFrame);
+  return true;
+}
+function boostWinnerEasterEgg(){
+  const egg=winnerEasterEgg;if(!egg.active||!['accelerate','lap'].includes(egg.phase))return;
+  egg.manualBoost=(egg.manualBoost||0)+egg.step;paintWinnerEasterEgg();
+}
+function paintWinnerEasterEgg(){
+  const egg=winnerEasterEgg,offset=(egg.startOffset+egg.travelled)%egg.sequenceWidth;
+  egg.track.style.transform=`translate3d(${-egg.sequenceWidth-offset}px,0,0)`;
+  const current=Math.min(egg.cards.length-1,Math.floor(offset/egg.step));
+  if(current!==egg.counterIndex){egg.counterIndex=current;updateWinnerCounter(current,egg.cards.length)}
+}
+function beginWinnerEasterEggDeceleration(now){
+  const egg=winnerEasterEgg,currentOffset=(egg.startOffset+egg.travelled)%egg.sequenceWidth,candidates=[];
+  for(let position=0;position<=egg.maxIndex;position++){
+    const offset=Math.min(position*egg.step,egg.maxOffset),distance=(offset-currentOffset+egg.sequenceWidth)%egg.sequenceWidth;
+    if(distance>=egg.fastSpeed&&distance<=egg.fastSpeed*2)candidates.push({position,offset,distance});
+  }
+  let target;
+  if(candidates.length)target=candidates[Math.floor(Math.random()*candidates.length)];
+  else{
+    const fallback=[];
+    for(let position=0;position<=egg.maxIndex;position++){
+      const offset=Math.min(position*egg.step,egg.maxOffset),distance=(offset-currentOffset+egg.sequenceWidth)%egg.sequenceWidth||egg.sequenceWidth;
+      fallback.push({position,offset,distance});
+    }
+    target=fallback.reduce((best,item)=>!best||Math.abs(item.distance-egg.fastSpeed*1.5)<Math.abs(best.distance-egg.fastSpeed*1.5)?item:best,null);
+  }
+  if(!target){cancelWinnerEasterEgg();return}
+  egg.targetPosition=target.position;egg.targetOffset=target.offset;egg.targetDistance=target.distance;
+  if(egg.targetDistance<egg.fastSpeed)egg.targetDistance+=egg.sequenceWidth;
+  egg.targetDuration=Math.max(2000,Math.min(4000,2000*egg.targetDistance/egg.fastSpeed));egg.decelerationPower=egg.fastSpeed*(egg.targetDuration/1000)/egg.targetDistance;
+  egg.targetCardIndex=chooseVisibleWinnerCard(target.position,{cards:egg.cards,step:egg.step,maxOffset:egg.maxOffset,viewportWidth:egg.track.parentElement.clientWidth});
+  egg.phase='decelerate';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;
+}
+function runWinnerEasterEggFrame(now){
+  const egg=winnerEasterEgg;if(!egg.active||!egg.track)return;
+  if(egg.phase==='accelerate'){
+    const duration=1.2,elapsed=Math.min(duration,Math.max(0,(now-egg.phaseStart)/1000)),startSpeed=egg.fastSpeed*.12,deltaSpeed=egg.fastSpeed-startSpeed;
+    egg.travelled=startSpeed*elapsed+deltaSpeed*(elapsed**3)/(3*duration**2)+(egg.manualBoost||0);
+    if(elapsed>=duration){egg.phase='lap';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;egg.manualBoost=0}
+  }else if(egg.phase==='lap'){
+    const duration=egg.sequenceWidth/egg.fastSpeed*1000,progress=Math.min(1,Math.max(0,(now-egg.phaseStart)/duration));
+    egg.travelled=egg.phaseTravelled+egg.sequenceWidth*progress+(egg.manualBoost||0);
+    if(progress>=1){egg.phase='hold';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;egg.manualBoost=0;setWinnerCarouselControlsDisabled(true)}
+  }else if(egg.phase==='hold'){
+    const duration=2700,elapsed=Math.min(duration,Math.max(0,(now-egg.phaseStart)/1000));
+    egg.travelled=egg.phaseTravelled+egg.fastSpeed*elapsed;
+    if(elapsed>=duration)beginWinnerEasterEggDeceleration(now);
+  }else if(egg.phase==='decelerate'){
+    const progress=Math.min(1,Math.max(0,(now-egg.phaseStart)/egg.targetDuration)),eased=1-(1-progress)**egg.decelerationPower;
+    egg.travelled=egg.phaseTravelled+egg.targetDistance*eased;
+    if(progress>=1){egg.travelled=egg.phaseTravelled+egg.targetDistance;paintWinnerEasterEgg();revealWinnerEasterEgg(egg.targetPosition,egg.targetCardIndex);return}
+  }
+  paintWinnerEasterEgg();egg.frame=requestAnimationFrame(runWinnerEasterEggFrame);
+}
+function revealWinnerEasterEgg(position,cardIndex){
+  const egg=winnerEasterEgg,track=egg.track||$('#winner-track');
+  if(egg.frame!==null){cancelAnimationFrame(egg.frame);egg.frame=null}
+  if(track){track.style.transition='none';$$('.winner-card-clone',track).forEach(clone=>clone.remove());track.classList.remove('is-easter-egg-spinning')}
+  egg.active=false;egg.phase=null;state.carousel=position;updateCarousel();
+  const card=egg.cards?.[cardIndex]||$$('.winner-card:not(.winner-card-clone)',track||document)[cardIndex];
+  if(card){card.classList.add('is-easter-egg-selected');egg.targetCard=card}
+  egg.active=true;egg.phase='reveal';egg.targetPosition=position;setWinnerCarouselControlsDisabled(true);
+  requestAnimationFrame(()=>{if(track)track.style.transition=''})
+  egg.highlightTimer=setTimeout(()=>finishWinnerEasterEgg(),2350);
+}
+function finishWinnerEasterEgg(){
+  const egg=winnerEasterEgg;if(egg.frame!==null){cancelAnimationFrame(egg.frame);egg.frame=null}
+  if(egg.highlightTimer!==null){clearTimeout(egg.highlightTimer);egg.highlightTimer=null}
+  egg.targetCard?.classList.remove('is-easter-egg-selected');egg.targetCard=null;egg.active=false;egg.phase=null;
+  if(egg.track){egg.track.classList.remove('is-easter-egg-spinning');egg.track.style.transition=''}
+  setWinnerCarouselControlsDisabled(false);updateCarousel();egg.track=null;egg.cards=null;egg.clickTimes=[];
+}
+function cancelWinnerEasterEgg(refresh=true){
+  const egg=winnerEasterEgg;if(!egg.active)return;
+  if(egg.frame!==null){cancelAnimationFrame(egg.frame);egg.frame=null}
+  if(egg.highlightTimer!==null){clearTimeout(egg.highlightTimer);egg.highlightTimer=null}
+  let position=egg.targetPosition;
+  if(position===null){const offset=(egg.startOffset+egg.travelled)%egg.sequenceWidth;position=Math.max(0,Math.min(egg.maxIndex,Math.round(offset/egg.step)))}
+  egg.active=false;egg.phase=null;egg.targetCard?.classList.remove('is-easter-egg-selected');egg.targetCard=null;
+  if(egg.track){egg.track.style.transition='none';$$('.winner-card-clone',egg.track).forEach(clone=>clone.remove());egg.track.classList.remove('is-easter-egg-spinning')}
+  state.carousel=position;setWinnerCarouselControlsDisabled(false);
+  if(refresh)updateCarousel();else if(egg.track){const track=egg.track;requestAnimationFrame(()=>{track.style.transition=''})}
+  egg.track=null;egg.cards=null;egg.clickTimes=[];
+}
 function initWinnerSwipe(){const viewport=$('.winner-window');if(!viewport)return;let start=null;viewport.addEventListener('touchstart',event=>{if(event.touches.length!==1){start=null;return}const touch=event.touches[0];start={x:touch.clientX,y:touch.clientY}},{passive:true});viewport.addEventListener('touchend',event=>{if(!start)return;const touch=event.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;start=null;if(Math.abs(dx)>=42&&Math.abs(dx)>Math.abs(dy)*1.2)moveCarousel(dx<0?1:-1)},{passive:true});viewport.addEventListener('touchcancel',()=>{start=null},{passive:true})}
 function renderEventOptions(){
   const box=$('#event-options');
@@ -579,7 +726,7 @@ async function showAdmin(){
 async function initializeSite(){
   await loadPhotoOverrides();
   $('#auth-button').onclick=async()=>{if(state.session){const current=state.session;state.session=null;localStorage.removeItem('flare-session');updateAccount();rpc('flare_logout',{p_token:current.token}).catch(()=>{});toast('Ты вышел из аккаунта.')}else{renderAuth()}};
-  $$('.category-card').forEach(b=>b.onclick=()=>{b.blur();scrollToVoteHeading();state.category=b.dataset.category;state.nominationListScrollTop=0;renderNominations()});$('#winner-prev').onclick=()=>moveCarousel(-1);$('#winner-next').onclick=()=>moveCarousel(1);renderFaq();renderWinners();initWinnerSwipe();renderEventOptions();updateAccount();initCountdown();initFloatingHeader();window.addEventListener('resize',updateCarousel);loadVideoCatalog();
+  $$('.category-card').forEach(b=>b.onclick=()=>{b.blur();scrollToVoteHeading();state.category=b.dataset.category;state.nominationListScrollTop=0;renderNominations()});$('#winner-prev').onclick=()=>moveCarousel(-1);$('#winner-next').onclick=()=>{if(winnerEasterEgg.active){boostWinnerEasterEgg();return}if(!registerRapidWinnerClick())moveCarousel(1)};renderFaq();renderWinners();initWinnerSwipe();renderEventOptions();updateAccount();initCountdown();initFloatingHeader();window.addEventListener('resize',updateCarousel);loadVideoCatalog();
   document.addEventListener('keydown',e=>{if(e.altKey&&e.shiftKey&&e.key.toLowerCase()==='a'&&state.session?.nickname.toLowerCase()==='maronnix')showAdmin()});
 }
 initializeSite();
