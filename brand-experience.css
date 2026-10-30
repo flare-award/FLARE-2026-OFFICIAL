@@ -1059,9 +1059,10 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 }
 @media(prefers-reduced-motion:reduce){.youtube-player-backdrop{animation:none}}
 
-/* Match the vertical rhythm from the hero to voting with the gap before the 2025 winners. */
-.hero{padding-bottom:160px}
-@media(max-width:975px){.hero{padding-bottom:112.5px}}
+/* Match the visible gap before voting to the gap between the voting cards and 2025 winners. */
+.vote-hub{padding-top:92.5px}
+@media(max-width:975px){.vote-hub{padding-top:72.5px}}
+@media(max-width:600px) and (orientation:portrait){.vote-hub{padding-top:100px}}
 
 /* Give the countdown digits more visual weight and prevent selecting them. */
 .countdown-unit strong{font-size:clamp(64px,4.5vw,84px);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
