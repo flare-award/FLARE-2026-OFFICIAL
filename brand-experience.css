@@ -1208,6 +1208,8 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 
 /* A small winner-carousel easter egg, armed only by sustained rapid Next clicks. */
 .winner-track.is-easter-egg-spinning{will-change:transform}
+.winner-track.is-easter-egg-spinning .winner-icon,.winner-track.is-easter-egg-spinning .winner-title,.winner-track.is-easter-egg-spinning .winner-name{filter:blur(var(--winner-spin-blur,6px));opacity:var(--winner-spin-opacity,.35)}
+.winner-window.is-easter-egg-spinning+.carousel-caption #winner-counter{opacity:.28;transition:opacity .2s ease}
 .winner-card-clone{pointer-events:none}
 .winner-card{transition:border-color .35s ease,box-shadow .35s ease}
 .winner-card .winner-icon{transition:border-color .35s ease,color .35s ease,box-shadow .35s ease}

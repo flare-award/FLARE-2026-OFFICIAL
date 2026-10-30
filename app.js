@@ -463,7 +463,7 @@ async function loadPublishedWinners2026(){
   })();
   return publishedWinners2026Promise;
 }
-const winnerEasterEgg={active:false,clickTimes:[],frame:null,highlightTimer:null,boostTimer:null,failsafeTimer:null,phase:null,track:null,cards:null,step:0,sequenceWidth:0,startOffset:0,travelled:0,maxIndex:0,maxOffset:0,targetPosition:null,targetCard:null};
+const winnerEasterEgg={active:false,clickTimes:[],frame:null,highlightTimer:null,boostTimer:null,failsafeTimer:null,phase:null,track:null,cards:null,step:0,sequenceWidth:0,startOffset:0,travelled:0,boostVelocity:0,boostDistance:0,boostTarget:0,lastFrame:0,currentSpeed:0,maxIndex:0,maxOffset:0,targetPosition:null,targetCard:null};
 function getWinnerCarouselMetrics(){
   const track=$('#winner-track');if(!track||!track.parentElement)return null;
   const cards=$$('.winner-card:not(.winner-card-clone)',track);if(!cards.length)return null;
@@ -523,8 +523,8 @@ function startWinnerEasterEgg(){
   const track=metrics.track,offset=readWinnerTrackOffset(track,metrics.step,metrics.maxOffset),before=document.createDocumentFragment(),after=document.createDocumentFragment();
   metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.setAttribute('aria-hidden','true');before.append(clone)});
   metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.setAttribute('aria-hidden','true');after.append(clone)});
-  track.prepend(before);track.append(after);track.classList.add('is-easter-egg-spinning');track.style.transition='none';
-  winnerEasterEgg.startOffset=offset;winnerEasterEgg.travelled=0;winnerEasterEgg.manualBoost=0;winnerEasterEgg.phase='accelerate';winnerEasterEgg.phaseStart=performance.now();winnerEasterEgg.phaseTravelled=0;winnerEasterEgg.fastSpeed=Math.max(1050,Math.min(2450,metrics.sequenceWidth/2.1));
+  track.prepend(before);track.append(after);track.classList.add('is-easter-egg-spinning');track.parentElement.classList.add('is-easter-egg-spinning');track.style.transition='none';
+  winnerEasterEgg.startOffset=offset;winnerEasterEgg.travelled=0;winnerEasterEgg.boostVelocity=0;winnerEasterEgg.boostDistance=0;winnerEasterEgg.boostTarget=0;winnerEasterEgg.phase='accelerate';winnerEasterEgg.phaseStart=performance.now();winnerEasterEgg.lastFrame=winnerEasterEgg.phaseStart;winnerEasterEgg.phaseTravelled=0;winnerEasterEgg.fastSpeed=Math.max(1050,Math.min(2450,metrics.sequenceWidth/2.1));
   track.style.transform=`translate3d(${-metrics.sequenceWidth-offset}px,0,0)`;
   winnerEasterEgg.boostUntil=performance.now()+2400;
   winnerEasterEgg.boostTimer=setTimeout(()=>{if(winnerEasterEgg.active&&['accelerate','lap'].includes(winnerEasterEgg.phase))$('#winner-next').disabled=true;winnerEasterEgg.boostTimer=null},2400);
@@ -540,19 +540,26 @@ function startWinnerEasterEgg(){
 }
 function boostWinnerEasterEgg(){
   const egg=winnerEasterEgg;if(!egg.active||!['accelerate','lap'].includes(egg.phase)||performance.now()>egg.boostUntil)return;
-  egg.manualBoost=(egg.manualBoost||0)+egg.step;paintWinnerEasterEgg();
+  egg.boostTarget=Math.min(egg.fastSpeed*.65,egg.boostTarget+egg.fastSpeed*.18);
+}
+function updateWinnerBoost(egg,deltaSeconds){
+  const change=egg.fastSpeed*2.2*deltaSeconds,difference=egg.boostTarget-egg.boostVelocity;
+  egg.boostVelocity+=Math.sign(difference)*Math.min(Math.abs(difference),change);
+  egg.boostDistance+=egg.boostVelocity*deltaSeconds;
 }
 function paintWinnerEasterEgg(){
   const egg=winnerEasterEgg,offset=(egg.startOffset+egg.travelled)%egg.sequenceWidth;
   egg.track.style.transform=`translate3d(${-egg.sequenceWidth-offset}px,0,0)`;
   const current=Math.min(egg.cards.length-1,Math.floor(offset/egg.step));
   if(current!==egg.counterIndex){egg.counterIndex=current;updateWinnerCounter(current,egg.cards.length)}
+  const speedRatio=Math.min(1,Math.max(0,(egg.currentSpeed||egg.fastSpeed)/egg.fastSpeed)),blur=egg.phase==='decelerate'?4.5*speedRatio:4.5,opacity=egg.phase==='decelerate'?.52+.48*(1-speedRatio):.48;
+  egg.track.style.setProperty('--winner-spin-blur',`${blur.toFixed(2)}px`);egg.track.style.setProperty('--winner-spin-opacity',opacity.toFixed(2));
 }
 function beginWinnerEasterEggDeceleration(now){
-  const egg=winnerEasterEgg,currentOffset=(egg.startOffset+egg.travelled)%egg.sequenceWidth,candidates=[];
+  const egg=winnerEasterEgg,currentOffset=(egg.startOffset+egg.travelled)%egg.sequenceWidth,speed=Math.max(egg.fastSpeed,egg.currentSpeed||egg.fastSpeed),candidates=[];
   for(let position=0;position<=egg.maxIndex;position++){
     const offset=Math.min(position*egg.step,egg.maxOffset),distance=(offset-currentOffset+egg.sequenceWidth)%egg.sequenceWidth;
-    if(distance>=egg.fastSpeed&&distance<=egg.fastSpeed*2)candidates.push({position,offset,distance});
+    if(distance>=speed&&distance<=speed*2)candidates.push({position,offset,distance});
   }
   let target;
   if(candidates.length)target=candidates[Math.floor(Math.random()*candidates.length)];
@@ -562,34 +569,38 @@ function beginWinnerEasterEggDeceleration(now){
       const offset=Math.min(position*egg.step,egg.maxOffset),distance=(offset-currentOffset+egg.sequenceWidth)%egg.sequenceWidth||egg.sequenceWidth;
       fallback.push({position,offset,distance});
     }
-    target=fallback.reduce((best,item)=>!best||Math.abs(item.distance-egg.fastSpeed*1.5)<Math.abs(best.distance-egg.fastSpeed*1.5)?item:best,null);
+    target=fallback.reduce((best,item)=>!best||Math.abs(item.distance-speed*1.5)<Math.abs(best.distance-speed*1.5)?item:best,null);
   }
   if(!target){cancelWinnerEasterEgg();return}
   egg.targetPosition=target.position;egg.targetOffset=target.offset;egg.targetDistance=target.distance;
-  if(egg.targetDistance<egg.fastSpeed)egg.targetDistance+=egg.sequenceWidth;
-  egg.targetDuration=Math.max(2000,Math.min(4000,2000*egg.targetDistance/egg.fastSpeed));egg.decelerationPower=egg.fastSpeed*(egg.targetDuration/1000)/egg.targetDistance;
+  if(egg.targetDistance<speed)egg.targetDistance+=egg.sequenceWidth;
+  egg.decelerationStartSpeed=speed;egg.targetDuration=Math.max(3200,Math.min(5000,3400*egg.targetDistance/speed));egg.decelerationPower=speed*(egg.targetDuration/1000)/egg.targetDistance;
   egg.targetCardIndex=chooseVisibleWinnerCard(target.position,{cards:egg.cards,step:egg.step,maxOffset:egg.maxOffset,viewportWidth:egg.track.parentElement.clientWidth});
   egg.phase='decelerate';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;
 }
 function runWinnerEasterEggFrame(now){
   const egg=winnerEasterEgg;if(!egg.active||!egg.track)return;
   try{
+    const deltaSeconds=Math.min(.05,Math.max(0,(now-egg.lastFrame)/1000));egg.lastFrame=now;
     if(egg.phase==='accelerate'){
-      const duration=1.2,elapsed=Math.min(duration,Math.max(0,(now-egg.phaseStart)/1000)),startSpeed=egg.fastSpeed*.12,deltaSpeed=egg.fastSpeed-startSpeed;
-      egg.travelled=startSpeed*elapsed+deltaSpeed*(elapsed**3)/(3*duration**2)+(egg.manualBoost||0);
-      if(elapsed>=duration){egg.phase='lap';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;egg.manualBoost=0}
+      updateWinnerBoost(egg,deltaSeconds);
+      const duration=1.2,elapsed=Math.min(duration,Math.max(0,(now-egg.phaseStart)/1000)),startSpeed=egg.fastSpeed*.12,deltaSpeed=egg.fastSpeed-startSpeed,progress=elapsed/duration;
+      const baseDistance=startSpeed*elapsed+deltaSpeed*(elapsed**3)/(3*duration**2),baseSpeed=startSpeed+deltaSpeed*progress**2;
+      egg.travelled=baseDistance+egg.boostDistance;egg.currentSpeed=baseSpeed+egg.boostVelocity;
+      if(elapsed>=duration){egg.phase='lap';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;egg.boostDistance=0}
     }else if(egg.phase==='lap'){
+      updateWinnerBoost(egg,deltaSeconds);
       const duration=egg.sequenceWidth/egg.fastSpeed*1000,progress=Math.min(1,Math.max(0,(now-egg.phaseStart)/duration));
-      egg.travelled=egg.phaseTravelled+egg.sequenceWidth*progress+(egg.manualBoost||0);
-      if(progress>=1){egg.phase='hold';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;egg.manualBoost=0;setWinnerCarouselControlsDisabled(true)}
+      egg.travelled=egg.phaseTravelled+egg.sequenceWidth*progress+egg.boostDistance;egg.currentSpeed=egg.fastSpeed+egg.boostVelocity;
+      if(progress>=1){egg.phase='hold';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;egg.boostDistance=0;egg.holdBoostVelocity=egg.boostVelocity;setWinnerCarouselControlsDisabled(true)}
     }else if(egg.phase==='hold'){
       const duration=2700,elapsed=Math.min(duration,Math.max(0,(now-egg.phaseStart)/1000));
-      egg.travelled=egg.phaseTravelled+egg.fastSpeed*elapsed;
+      egg.travelled=egg.phaseTravelled+(egg.fastSpeed+egg.holdBoostVelocity)*elapsed;egg.currentSpeed=egg.fastSpeed+egg.holdBoostVelocity;
       if(elapsed>=duration){beginWinnerEasterEggDeceleration(now);if(!egg.active)return}
     }else if(egg.phase==='decelerate'){
       const progress=Math.min(1,Math.max(0,(now-egg.phaseStart)/egg.targetDuration)),eased=1-(1-progress)**egg.decelerationPower;
-      egg.travelled=egg.phaseTravelled+egg.targetDistance*eased;
-      if(progress>=1){egg.travelled=egg.phaseTravelled+egg.targetDistance;paintWinnerEasterEgg();revealWinnerEasterEgg(egg.targetPosition,egg.targetCardIndex);return}
+      egg.travelled=egg.phaseTravelled+egg.targetDistance*eased;egg.currentSpeed=egg.decelerationStartSpeed*(1-progress)**Math.max(0,egg.decelerationPower-1);
+      if(progress>=1){egg.travelled=egg.phaseTravelled+egg.targetDistance;egg.currentSpeed=0;paintWinnerEasterEgg();revealWinnerEasterEgg(egg.targetPosition,egg.targetCardIndex);return}
     }
     paintWinnerEasterEgg();egg.frame=requestAnimationFrame(runWinnerEasterEggFrame);
   }catch(error){
@@ -602,7 +613,7 @@ function revealWinnerEasterEgg(position,cardIndex){
   if(egg.frame!==null){cancelAnimationFrame(egg.frame);egg.frame=null}
   if(egg.boostTimer!==null){clearTimeout(egg.boostTimer);egg.boostTimer=null}
   if(egg.failsafeTimer!==null){clearTimeout(egg.failsafeTimer);egg.failsafeTimer=null}
-  if(track){track.style.transition='none';$$('.winner-card-clone',track).forEach(clone=>clone.remove());track.classList.remove('is-easter-egg-spinning')}
+  if(track){track.style.transition='none';$$('.winner-card-clone',track).forEach(clone=>clone.remove());track.classList.remove('is-easter-egg-spinning');track.parentElement?.classList.remove('is-easter-egg-spinning');track.style.removeProperty('--winner-spin-blur');track.style.removeProperty('--winner-spin-opacity')}
   egg.active=false;egg.phase=null;state.carousel=position;updateCarousel();
   const card=egg.cards?.[cardIndex]||$$('.winner-card:not(.winner-card-clone)',track||document)[cardIndex];
   if(card){card.classList.add('is-easter-egg-selected');egg.targetCard=card}
@@ -628,7 +639,7 @@ function cancelWinnerEasterEgg(refresh=true){
   let position=egg.targetPosition;
   if(position===null){const offset=(egg.startOffset+egg.travelled)%egg.sequenceWidth;position=Math.max(0,Math.min(egg.maxIndex,Math.round(offset/egg.step)))}
   egg.active=false;egg.phase=null;egg.targetCard?.classList.remove('is-easter-egg-selected');egg.targetCard=null;
-  if(egg.track){egg.track.style.transition='none';$$('.winner-card-clone',egg.track).forEach(clone=>clone.remove());egg.track.classList.remove('is-easter-egg-spinning')}
+  if(egg.track){egg.track.style.transition='none';$$('.winner-card-clone',egg.track).forEach(clone=>clone.remove());egg.track.classList.remove('is-easter-egg-spinning');egg.track.parentElement?.classList.remove('is-easter-egg-spinning');egg.track.style.removeProperty('--winner-spin-blur');egg.track.style.removeProperty('--winner-spin-opacity')}
   state.carousel=position;setWinnerCarouselControlsDisabled(false);
   if(refresh)updateCarousel();else if(egg.track){const track=egg.track;requestAnimationFrame(()=>{track.style.transition=''})}
   egg.track=null;egg.cards=null;egg.clickTimes=[];
