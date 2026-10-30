@@ -257,6 +257,7 @@ function initCountdown(){
   };
   const tick=()=>{
     const now=Date.now();
+    const winnersSection=$('#winners-2026');if(winnersSection)winnersSection.hidden=now<winnersTeaserReleaseDate.getTime();
     const winnersTitle=$('#winners-2026-title');if(winnersTitle)winnersTitle.hidden=now<winnersReleaseDate.getTime();
     const winnersTeaser=$('#winners-2026-teaser');if(winnersTeaser)winnersTeaser.hidden=now<winnersTeaserReleaseDate.getTime()||now>=winnersReleaseDate.getTime();
     if(now>=winnersReleaseDate.getTime()){
