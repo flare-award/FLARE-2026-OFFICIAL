@@ -4,7 +4,12 @@ function saveNomineeViewPreference(view){try{localStorage.setItem('flare-nominee
 const state={session:JSON.parse(localStorage.getItem('flare-session')||'null'),votes:{},eventChoice:null,eventSaved:null,eventResults:null,eventSaving:false,eventChoiceRevision:0,category:'основная',nomination:null,selected:null,carousel:0,busy:false,nominationListScrollTop:0,nomineeView:loadNomineeViewPreference()};
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const closing=new Date('2026-11-22T00:00:00+03:00');
-const ceremonyDate=new Date('2026-12-05T00:00:00+03:00');
+const ceremonyDates={
+  'dec-4':new Date('2026-12-04T00:00:00+03:00'),
+  'dec-5':new Date('2026-12-05T00:00:00+03:00'),
+  'dec-6':new Date('2026-12-06T00:00:00+03:00')
+};
+const eventChoiceLabels={'dec-4':'4 декабря','dec-5':'5 декабря','dec-6':'6 декабря'};
 const winnersReleaseDate=new Date('2026-12-06T00:00:00+03:00');
 const selfHoverMessages=['ЗА СЕБЯ НЕЛЬЗЯ ГОЛОСОВАТЬ','УБЕРИ КУРСОР','МНОГО ХОЧЕШЬ','КУДА ЛЕЗЕШЬ?','ЧИТАЙ ПРАВИЛА','ИДИ НАХУЙ','ТЫ СЛУЧАЕМ НЕ АХУЕЛ?','ДОСТУП ОТКЛОНЁН','СПАСИБО ЗА ПОНИМАНИЕ','НЕ ПОЛУЧАЕТСЯ?','ЭГОИСТ','ПИДОРАС ОБНАРУЖЕН','НЕ СЕЙЧАС','Я СКАЗАЛ НЕЛЬЗЯ','ПОПРОБУЙ ЕЩЁ РАЗ','ЩА ПОЧИНЮ, ПОДОЖДИ'];
 const isClosed=()=>Date.now()>=closing.getTime();
@@ -222,24 +227,62 @@ function bindDesignPanel(){
   $('#export-design-changes').onclick=()=>exportPhotoPack(true);$('#export-design-photos').onclick=()=>exportPhotoPack(false);updatePhotoSyncStatus();
 }
 function scrollToVoteHeading(){const heading=$('.vote-hub .section-heading');if(!heading)return;const header=$('#site-header'),headerHeight=header?.getBoundingClientRect().height||95,portraitPhone=matchMedia('(max-width:600px) and (orientation:portrait)').matches,topOffset=portraitPhone?Math.max(0,headerHeight-16):Math.max(170,headerHeight+70),target=window.scrollY+heading.getBoundingClientRect().top-topOffset;window.scrollTo({top:Math.max(0,target),behavior:'smooth'})}
+let publicEventPollWinner=null,publicEventPollWinnerResolved=false,publicEventPollWinnerRequest=null;
+function loadPublicEventPollWinner(){
+  if(publicEventPollWinnerResolved)return Promise.resolve(publicEventPollWinner);
+  if(publicEventPollWinnerRequest)return publicEventPollWinnerRequest;
+  publicEventPollWinnerRequest=rpc('get_event_poll_winner').then(result=>{
+    if(!result?.closed)throw new Error('Итоги опроса ещё не опубликованы.');
+    const choiceIds=(Array.isArray(result.choice_ids)?result.choice_ids:[]).filter(id=>ceremonyDates[id]).sort((a,b)=>ceremonyDates[a]-ceremonyDates[b]);
+    publicEventPollWinnerResolved=true;
+    publicEventPollWinner=choiceIds.length?{choiceIds,target:ceremonyDates[choiceIds[0]]}:null;
+    return publicEventPollWinner;
+  }).catch(error=>{publicEventPollWinnerRequest=null;throw error});
+  return publicEventPollWinnerRequest;
+}
 function initCountdown(){
   const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes'),seconds:$('#countdown-seconds')},status=$('#countdown-status'),label=$('.countdown-label',$('#vote-countdown')),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
-  const phases=[
-    {target:closing,label:'ДО ОКОНЧАНИЯ ГОЛОСОВАНИЯ',status:'Закрытие: 21 ноября · 23:59 МСК'},
-    {target:ceremonyDate,label:'ДО ЦЕРЕМОНИИ',status:'Церемония состоится 5 декабря'},
-    {target:winnersReleaseDate,label:'ДО ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ',status:'Победители появятся 6 декабря'}
-  ];
-  let timer,currentPhase=-1;
+  let timer,currentPhase=-1,closedHandled=false,pollLoadStarted=false,pollLoadFailed=false;
   const pad=n=>String(n).padStart(2,'0');
+  const showPollRetry=()=>{
+    status.replaceChildren(document.createTextNode('Не удалось получить результат опроса. '));
+    const retry=document.createElement('button');retry.type='button';retry.className='text-button';retry.textContent='Повторить';
+    retry.onclick=()=>{pollLoadFailed=false;pollLoadStarted=false;startPollLoad()};status.append(retry);
+  };
+  const startPollLoad=()=>{
+    if(pollLoadStarted||publicEventPollWinnerResolved)return;
+    pollLoadStarted=true;status.textContent='Получаем победившую дату из опроса…';
+    loadPublicEventPollWinner().then(()=>{pollLoadStarted=false;currentPhase=-1;tick()}).catch(()=>{pollLoadStarted=false;pollLoadFailed=true;showPollRetry()});
+  };
   const tick=()=>{
     const now=Date.now();
     if(now>=winnersReleaseDate.getTime()){
       values.hidden=true;label.textContent='ДЕНЬ ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Загружаем победителей…';box.classList.add('is-finished');box.setAttribute('aria-label','День публикации результатов FLARE 2026');
       clearInterval(timer);loadPublishedWinners2026();return;
     }
-    const phaseIndex=now<closing.getTime()?0:now<ceremonyDate.getTime()?1:2,phase=phases[phaseIndex],remaining=Math.max(0,phase.target.getTime()-now),total=Math.floor(remaining/1000);
+    if(now>=closing.getTime()&&!closedHandled){closedHandled=true;updateProgress()}
+    if(now>=closing.getTime()&&!publicEventPollWinnerResolved){
+      values.hidden=true;label.textContent='ДАТА ЦЕРЕМОНИИ ПО РЕЗУЛЬТАТАМ ОПРОСА';box.classList.add('is-finished');box.setAttribute('aria-label','Ожидание победившей даты церемонии из опроса');
+      if(!pollLoadFailed)startPollLoad();
+      return;
+    }
+    if(now>=closing.getTime()&&!publicEventPollWinner){
+      values.hidden=true;label.textContent='ДАТА ЦЕРЕМОНИИ НЕ ОПРЕДЕЛЕНА';status.textContent='В опросе не оказалось голосов. Дату нужно определить отдельно.';box.classList.add('is-finished');box.setAttribute('aria-label','Дата церемонии не определена');return;
+    }
+    const phaseIndex=now<closing.getTime()?0:now<publicEventPollWinner.target.getTime()?1:2;
+    const target=phaseIndex===0?closing:phaseIndex===1?publicEventPollWinner.target:winnersReleaseDate;
+    const remaining=Math.max(0,target.getTime()-now),total=Math.floor(remaining/1000);
     values.hidden=false;box.classList.remove('is-finished');
-    if(currentPhase!==phaseIndex){currentPhase=phaseIndex;label.textContent=phase.label;status.textContent=phase.status;box.setAttribute('aria-label',phase.label.toLowerCase());if(phaseIndex===1)updateProgress()}
+    if(currentPhase!==phaseIndex){
+      currentPhase=phaseIndex;
+      if(phaseIndex===0){label.textContent='ДО ОКОНЧАНИЯ ГОЛОСОВАНИЯ';status.textContent='Закрытие: 21 ноября · 23:59 МСК'}
+      else if(phaseIndex===1){
+        const winningDates=publicEventPollWinner.choiceIds.map(id=>eventChoiceLabels[id]),selectedDate=eventChoiceLabels[publicEventPollWinner.choiceIds[0]];
+        label.textContent=publicEventPollWinner.choiceIds.length>1?'НИЧЬЯ В ОПРОСЕ · ДО БЛИЖАЙШЕЙ ДАТЫ':'ДО ДАТЫ ЦЕРЕМОНИИ';
+        status.textContent=publicEventPollWinner.choiceIds.length>1?`Ничья (${winningDates.join(' и ')}); отсчёт до ${selectedDate}`:`Победившая дата по опросу: ${selectedDate}`;
+      }else{label.textContent='ДО ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Победители появятся 6 декабря'}
+      box.setAttribute('aria-label',label.textContent.toLowerCase());
+    }
     units.days.textContent=pad(Math.floor(total/86400));units.hours.textContent=pad(Math.floor(total%86400/3600));units.minutes.textContent=pad(Math.floor(total%3600/60));units.seconds.textContent=pad(total%60);
   };
   tick();if(Date.now()<winnersReleaseDate.getTime())timer=setInterval(tick,1000);

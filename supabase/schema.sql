@@ -239,6 +239,21 @@ begin
   return jsonb_build_object('ok',true,'event_results',v_event_results);
 end $$;
 
+-- After voting closes, expose only the leading ceremony date(s), never poll participants.
+create or replace function public.get_event_poll_winner() returns jsonb language plpgsql stable security definer set search_path=public,extensions,pg_temp as $$
+declare v_choice_ids jsonb;
+begin
+  if not flare_closed() then return jsonb_build_object('closed',false,'choice_ids','[]'::jsonb); end if;
+  with tallies as (
+    select choice_id,count(*)::integer as vote_count from public.flare_event_choices group by choice_id
+  ), leaders as (
+    select choice_id from tallies where vote_count=(select max(vote_count) from tallies)
+  )
+  select coalesce(jsonb_agg(choice_id order by choice_id),'[]'::jsonb)
+  into v_choice_ids from leaders;
+  return jsonb_build_object('closed',true,'choice_ids',v_choice_ids);
+end $$;
+
 create or replace function public.finalize_ballot(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
 declare v_account uuid:=flare_session_account(p_token); v_required integer; v_done integer;
 begin
@@ -346,6 +361,7 @@ revoke all on function public.save_event_choice(text,text) from public,authentic
 revoke all on function public.finalize_ballot(text) from public,authenticated;
 revoke all on function public.admin_summary(text) from public,authenticated;
 revoke all on function public.get_public_winners() from public,anon,authenticated;
+revoke all on function public.get_event_poll_winner() from public,anon,authenticated;
 revoke all on function public.get_clip_options() from public,authenticated;
 revoke all on function public.admin_update_clip_option(text,text,text,text) from public,authenticated;
 revoke all on function public.get_video_options() from public,authenticated;
@@ -359,6 +375,7 @@ grant execute on function public.save_event_choice(text,text) to anon;
 grant execute on function public.finalize_ballot(text) to anon;
 grant execute on function public.admin_summary(text) to anon;
 grant execute on function public.get_public_winners() to anon;
+grant execute on function public.get_event_poll_winner() to anon;
 grant execute on function public.get_clip_options() to anon;
 grant execute on function public.admin_update_clip_option(text,text,text,text) to anon;
 grant execute on function public.get_video_options() to anon;
