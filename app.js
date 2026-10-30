@@ -464,7 +464,7 @@ async function loadPublishedWinners2026(){
   return publishedWinners2026Promise;
 }
 let winnerCarouselCentered=false;
-const winnerEasterEgg={active:false,clickTimes:[],frame:null,highlightTimer:null,boostTimer:null,failsafeTimer:null,phase:null,track:null,cards:null,step:0,sequenceWidth:0,startOffset:0,travelled:0,boostVelocity:0,boostDistance:0,boostTarget:0,lastFrame:0,currentSpeed:0,maxIndex:0,maxOffset:0,centerPadding:0,targetPosition:null,targetCard:null};
+const winnerEasterEgg={active:false,clickTimes:[],frame:null,highlightTimer:null,boostTimer:null,failsafeTimer:null,phase:null,track:null,cards:null,step:0,sequenceWidth:0,startOffset:0,travelled:0,boostVelocity:0,boostDistance:0,boostTarget:0,lastFrame:0,currentSpeed:0,maxIndex:0,maxOffset:0,centerPadding:0,targetPosition:null,targetCard:null,restoreLastWinnerAfterReveal:false,cooldownUntil:0};
 function getWinnerCarouselMetrics(){
   const track=$('#winner-track');if(!track||!track.parentElement)return null;
   const cards=$$('.winner-card:not(.winner-card-clone)',track);if(!cards.length)return null;
@@ -473,7 +473,7 @@ function getWinnerCarouselMetrics(){
   const contentWidth=cards.reduce((sum,card)=>sum+card.getBoundingClientRect().width,0)+gap*Math.max(0,cards.length-1),maxOffset=Math.max(0,contentWidth-viewportWidth),maxIndex=Math.ceil(maxOffset/step),sequenceWidth=contentWidth+gap,centerPadding=Math.max(0,(viewportWidth-width)/2);
   return{track,cards,gap,width,step,contentWidth,maxOffset,maxIndex,sequenceWidth,centerPadding,viewportWidth};
 }
-function updateWinnerCounter(index,total){const counter=$('#winner-counter');if(counter)counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`}
+function updateWinnerCounter(index,total,lastVisibleIndex=index){const counter=$('#winner-counter');if(counter){const first=String(index+1).padStart(2,'0'),last=String(lastVisibleIndex+1).padStart(2,'0');counter.textContent=`${first}${lastVisibleIndex>index?`–${last}`:''} / ${String(total).padStart(2,'0')}`}}
 function renderWinners(){const track=$('#winner-track');track.innerHTML=previousWinners.map(([title,name],i)=>`<article class="winner-card"><div class="winner-icon">${String(i+1).padStart(2,'0')}</div><div><div class="winner-title">${esc(title)}</div><div class="winner-name">${esc(name)}</div></div></article>`).join('');updateCarousel();}
 function updateCarousel(){
   if(winnerEasterEgg.active)cancelWinnerEasterEgg(false);
@@ -487,7 +487,8 @@ function updateCarousel(){
   }
   const offset=winnerCarouselCentered?state.carousel*metrics.step:Math.min(state.carousel*metrics.step,metrics.maxOffset);
   metrics.track.style.transform=`translate3d(${-offset}px,0,0)`;
-  updateWinnerCounter(state.carousel,metrics.cards.length);
+  const visibleCards=winnerCarouselCentered?1:Math.max(1,Math.floor((metrics.viewportWidth+metrics.gap)/metrics.step)),lastVisibleIndex=winnerCarouselCentered?state.carousel:Math.min(metrics.cards.length-1,state.carousel+visibleCards-1);
+  updateWinnerCounter(state.carousel,metrics.cards.length,lastVisibleIndex);
 }
 let carouselDebounce=false,carouselDebounceTimer=null;
 function moveCarousel(dir){if(winnerEasterEgg.active||carouselDebounce)return;carouselDebounce=true;state.carousel+=dir;updateCarousel();clearTimeout(carouselDebounceTimer);carouselDebounceTimer=setTimeout(()=>{carouselDebounce=false;carouselDebounceTimer=null},360)}
@@ -499,16 +500,17 @@ function readWinnerTrackOffset(track,step,maxOffset){
 }
 function registerRapidWinnerClick(){
   const now=performance.now(),times=winnerEasterEgg.clickTimes,last=times[times.length-1];
+  if(now<winnerEasterEgg.cooldownUntil){times.length=0;return false}
   if(last&&now-last>700)times.length=0;
   times.push(now);
   while(times.length&&now-times[0]>2600)times.shift();
-  if(times.length>=6&&now-times[0]>=900){winnerEasterEgg.clickTimes=[];return startWinnerEasterEgg()}
+  if(times.length>=10&&now-times[0]>=900){winnerEasterEgg.clickTimes=[];return startWinnerEasterEgg()}
   return false;
 }
 function startWinnerEasterEgg(){
   const metrics=getWinnerCarouselMetrics();if(!metrics||metrics.maxIndex<1)return false;
   if(carouselDebounceTimer){clearTimeout(carouselDebounceTimer);carouselDebounceTimer=null}carouselDebounce=false;
-  winnerEasterEgg.active=true;winnerEasterEgg.phase='preparing';winnerEasterEgg.targetPosition=null;winnerEasterEgg.targetCard=null;winnerEasterEgg.counterIndex=null;
+  winnerEasterEgg.active=true;winnerEasterEgg.phase='preparing';winnerEasterEgg.targetPosition=null;winnerEasterEgg.targetCard=null;winnerEasterEgg.restoreLastWinnerAfterReveal=false;winnerEasterEgg.counterIndex=null;
   winnerEasterEgg.track=metrics.track;winnerEasterEgg.cards=metrics.cards;winnerEasterEgg.step=metrics.step;winnerEasterEgg.sequenceWidth=metrics.sequenceWidth;winnerEasterEgg.centerPadding=metrics.centerPadding;winnerEasterEgg.maxIndex=metrics.maxIndex;winnerEasterEgg.maxOffset=metrics.maxOffset;
   if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
     setWinnerCarouselControlsDisabled(true);
@@ -521,8 +523,8 @@ function startWinnerEasterEgg(){
   const track=metrics.track;let offset=readWinnerTrackOffset(track,metrics.step,winnerCarouselCentered?Infinity:metrics.maxOffset);
   if(winnerCarouselCentered){offset-=metrics.centerPadding;winnerCarouselCentered=false;track.style.removeProperty('padding-left');track.style.removeProperty('padding-right')}
   const before=document.createDocumentFragment(),after=document.createDocumentFragment();
-  metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.setAttribute('aria-hidden','true');before.append(clone)});
-  metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.setAttribute('aria-hidden','true');after.append(clone)});
+  metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.dataset.winnerLoop='before';clone.setAttribute('aria-hidden','true');before.append(clone)});
+  metrics.cards.forEach(card=>{const clone=card.cloneNode(true);clone.classList.add('winner-card-clone');clone.dataset.winnerLoop='after';clone.setAttribute('aria-hidden','true');after.append(clone)});
   track.prepend(before);track.append(after);track.classList.add('is-easter-egg-spinning');track.parentElement.classList.add('is-easter-egg-spinning');track.style.transition='none';
   const leadingClone=$('.winner-card-clone',track),measuredLoopWidth=leadingClone?metrics.cards[0].getBoundingClientRect().left-leadingClone.getBoundingClientRect().left:0;if(measuredLoopWidth>0)winnerEasterEgg.sequenceWidth=measuredLoopWidth;
   winnerEasterEgg.startOffset=((offset%winnerEasterEgg.sequenceWidth)+winnerEasterEgg.sequenceWidth)%winnerEasterEgg.sequenceWidth;winnerEasterEgg.travelled=0;winnerEasterEgg.boostVelocity=0;winnerEasterEgg.boostDistance=0;winnerEasterEgg.boostTarget=0;winnerEasterEgg.phase='accelerate';winnerEasterEgg.phaseStart=performance.now();winnerEasterEgg.lastFrame=winnerEasterEgg.phaseStart;winnerEasterEgg.phaseTravelled=0;winnerEasterEgg.fastSpeed=Math.max(1050,Math.min(2450,winnerEasterEgg.sequenceWidth/2.1));
@@ -535,7 +537,7 @@ function startWinnerEasterEgg(){
     const position=Number.isInteger(winnerEasterEgg.targetPosition)?winnerEasterEgg.targetPosition:Math.floor(Math.random()*winnerEasterEgg.cards.length);
     const cardIndex=Number.isInteger(winnerEasterEgg.targetCardIndex)?winnerEasterEgg.targetCardIndex:position;
     revealWinnerEasterEgg(position,cardIndex);
-  },20000);
+  },30000);
   winnerEasterEgg.frame=requestAnimationFrame(runWinnerEasterEggFrame);
   return true;
 }
@@ -559,7 +561,7 @@ function beginWinnerEasterEggDeceleration(now){
   const egg=winnerEasterEgg,currentOffset=(egg.startOffset+egg.travelled)%egg.sequenceWidth,speed=Math.max(egg.fastSpeed,egg.currentSpeed||egg.fastSpeed),candidates=[];
   for(let position=0;position<egg.cards.length;position++){
     const offset=(position*egg.step-egg.centerPadding+egg.sequenceWidth)%egg.sequenceWidth,distance=(offset-currentOffset+egg.sequenceWidth)%egg.sequenceWidth;
-    if(distance>=speed&&distance<=speed*2)candidates.push({position,offset,distance});
+    if(distance>=speed*1.5&&distance<=speed*2.8)candidates.push({position,offset,distance});
   }
   let target;
   if(candidates.length)target=candidates[Math.floor(Math.random()*candidates.length)];
@@ -574,7 +576,7 @@ function beginWinnerEasterEggDeceleration(now){
   if(!target){cancelWinnerEasterEgg();return}
   egg.targetPosition=target.position;egg.targetOffset=target.offset;egg.targetDistance=target.distance;
   while(egg.targetDistance<speed*1.5)egg.targetDistance+=egg.sequenceWidth;
-  egg.decelerationStartSpeed=speed;egg.targetDuration=Math.max(4500,Math.min(8000,3000*egg.targetDistance/speed));egg.decelerationPower=speed*(egg.targetDuration/1000)/egg.targetDistance;
+  egg.decelerationStartSpeed=speed;egg.targetDuration=3000*egg.targetDistance/speed;egg.decelerationPower=3;
   egg.targetCardIndex=target.position;egg.phase='decelerate';egg.phaseStart=now;egg.phaseTravelled=egg.travelled;
 }
 function runWinnerEasterEggFrame(now){
@@ -608,11 +610,12 @@ function runWinnerEasterEggFrame(now){
   }
 }
 function revealWinnerEasterEgg(position,cardIndex){
-  const egg=winnerEasterEgg,track=egg.track||$('#winner-track');
+  const egg=winnerEasterEgg,track=egg.track||$('#winner-track'),keepRightCopies=position===egg.cards?.length-1;
   if(egg.frame!==null){cancelAnimationFrame(egg.frame);egg.frame=null}
   if(egg.boostTimer!==null){clearTimeout(egg.boostTimer);egg.boostTimer=null}
   if(egg.failsafeTimer!==null){clearTimeout(egg.failsafeTimer);egg.failsafeTimer=null}
-  if(track){track.style.transition='none';$$('.winner-card-clone',track).forEach(clone=>clone.remove());track.classList.remove('is-easter-egg-spinning');track.parentElement?.classList.remove('is-easter-egg-spinning')}
+  egg.restoreLastWinnerAfterReveal=keepRightCopies;
+  if(track){track.style.transition='none';$$('.winner-card-clone[data-winner-loop="before"]',track).forEach(clone=>clone.remove());if(!keepRightCopies)$$('.winner-card-clone',track).forEach(clone=>clone.remove());track.classList.remove('is-easter-egg-spinning');track.parentElement?.classList.remove('is-easter-egg-spinning')}
   egg.active=false;egg.phase=null;winnerCarouselCentered=true;state.carousel=position;updateCarousel();
   const card=egg.cards?.[cardIndex]||$$('.winner-card:not(.winner-card-clone)',track||document)[cardIndex];
   if(card){card.classList.add('is-easter-egg-selected');egg.targetCard=card}
@@ -626,7 +629,9 @@ function finishWinnerEasterEgg(){
   if(egg.boostTimer!==null){clearTimeout(egg.boostTimer);egg.boostTimer=null}
   if(egg.failsafeTimer!==null){clearTimeout(egg.failsafeTimer);egg.failsafeTimer=null}
   egg.targetCard?.classList.remove('is-easter-egg-selected');egg.targetCard=null;egg.active=false;egg.phase=null;
-  if(egg.track){egg.track.classList.remove('is-easter-egg-spinning');egg.track.style.transition=''}
+  if(egg.track){$$('.winner-card-clone',egg.track).forEach(clone=>clone.remove());egg.track.classList.remove('is-easter-egg-spinning');egg.track.style.transition=''}
+  if(egg.restoreLastWinnerAfterReveal){winnerCarouselCentered=false;const metrics=getWinnerCarouselMetrics();state.carousel=metrics?.maxIndex??0}
+  egg.cooldownUntil=performance.now()+60000;egg.restoreLastWinnerAfterReveal=false;
   setWinnerCarouselControlsDisabled(false);updateCarousel();egg.track=null;egg.cards=null;egg.clickTimes=[];
 }
 function cancelWinnerEasterEgg(refresh=true){
