@@ -1237,3 +1237,6 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
   .nickname-vibrate-trigger{font-size:12.5px}
 }
 @media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-1)}}
+
+/* Avoid thin edge artifacts on the primary intro pill while keeping its palette. */
+.intro-links>.intro-link:first-child{border:0;border-radius:999px;padding-inline:30px;background:linear-gradient(90deg,#FFD54F 0%,#FF9800 100%);background-size:100% 100%;background-repeat:no-repeat;background-clip:padding-box}
