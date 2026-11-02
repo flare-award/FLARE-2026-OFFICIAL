@@ -1208,3 +1208,33 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 
 /* Clip media cards at their rounded edge so photos cannot cover the top border. */
 .nomination-detail-modal .nominee-grid>div.nominee-card{overflow:hidden}
+
+/* Shared 4 px spacing rhythm for repeated interface groups. */
+:root{--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px}
+.intro-links{gap:var(--space-4)}
+.top-actions{gap:var(--space-4)}
+.section-heading{gap:var(--space-6)}
+.category-actions{gap:var(--space-5)}
+.nomination-grid{gap:var(--space-4)}
+.nominee-grid{gap:var(--space-4)}
+.poll-options{gap:var(--space-3)}
+.faq-layout{gap:var(--space-6)}
+.admin-design-panel{gap:var(--space-4)}
+.nickname-vibrate-trigger{font-family:var(--font);font-size:13.75px;font-weight:700;letter-spacing:.045em}
+@media(max-width:975px){
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-3)}
+  .category-actions{gap:var(--space-4)}
+  .nomination-grid,.nominee-grid{gap:var(--space-3)}
+  .faq-layout{gap:var(--space-5)}
+  .nickname-vibrate-trigger{font-size:13px}
+}
+@media(max-width:600px){
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-2)}
+  .intro-links{gap:var(--space-3)}
+  .section-heading{gap:var(--space-4)}
+  .category-actions{gap:var(--space-3)}
+  .nominee-grid{gap:var(--space-2)}
+  .faq-layout{gap:var(--space-5)}
+  .nickname-vibrate-trigger{font-size:12.5px;letter-spacing:.035em}
+}
+@media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-1)}}
