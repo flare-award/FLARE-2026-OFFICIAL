@@ -1237,3 +1237,6 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
   .nickname-vibrate-trigger{font-size:12.5px}
 }
 @media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-1)}}
+
+/* Keep the primary nominations card's darker end consistently on the right. */
+#category-primary{background:linear-gradient(90deg,#201b11 0%,#0e0d0c 100%)}
