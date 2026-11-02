@@ -1205,3 +1205,6 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
   .admin-design-sync details{max-width:none}
 }
 @media(max-width:390px){.admin-design-export-actions{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep the uploaded group photo inside its nominee card, including in list view. */
+.nomination-detail-modal.nomination-no-photo-shade [data-nominee="scam-group"]{overflow:hidden}
