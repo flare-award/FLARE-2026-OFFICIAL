@@ -1220,13 +1220,12 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 .poll-options{gap:var(--space-3)}
 .faq-layout{gap:var(--space-6)}
 .admin-design-panel{gap:var(--space-4)}
-.nickname-vibrate-trigger{font-family:var(--font);font-size:13.75px;font-weight:700;letter-spacing:.045em}
+.nickname-vibrate-trigger{font-family:var(--logo);font-size:15px;font-weight:700;letter-spacing:0}
 @media(max-width:975px){
   .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-3)}
   .category-actions{gap:var(--space-4)}
   .nomination-grid,.nominee-grid{gap:var(--space-3)}
   .faq-layout{gap:var(--space-5)}
-  .nickname-vibrate-trigger{font-size:13px}
 }
 @media(max-width:600px){
   .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-2)}
@@ -1235,6 +1234,6 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
   .category-actions{gap:var(--space-3)}
   .nominee-grid{gap:var(--space-2)}
   .faq-layout{gap:var(--space-5)}
-  .nickname-vibrate-trigger{font-size:12.5px;letter-spacing:.035em}
+  .nickname-vibrate-trigger{font-size:12.5px}
 }
 @media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-1)}}
