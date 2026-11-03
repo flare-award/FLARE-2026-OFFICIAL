@@ -4,10 +4,12 @@ create extension if not exists pgcrypto with schema extensions;
 
 create table if not exists public.flare_members (
   nickname text primary key,
-  constraint flare_members_nickname_known check (nickname in ('Akirakume','Awal','Balabol','Cloury','Dony_zq','Eozik','Flourin','Izumrudik','Maronnix','Nodben','Qusti','Rezo1n'))
+  constraint flare_members_nickname_known check (nickname in ('Akirakume','Awal','Balabol','Cloury','Dony_zq','Eozik','Flourin','Izumrudik','Maronnix','Nodben','Qusti','Rezo1n','FLARE_TESTER'))
 );
+ALTER TABLE public.flare_members DROP CONSTRAINT IF EXISTS flare_members_nickname_known;
+ALTER TABLE public.flare_members ADD CONSTRAINT flare_members_nickname_known CHECK (nickname in ('Akirakume','Awal','Balabol','Cloury','Dony_zq','Eozik','Flourin','Izumrudik','Maronnix','Nodben','Qusti','Rezo1n','FLARE_TESTER'));
 insert into public.flare_members(nickname) values
-('Akirakume'),('Awal'),('Balabol'),('Cloury'),('Dony_zq'),('Eozik'),('Flourin'),('Izumrudik'),('Maronnix'),('Nodben'),('Qusti'),('Rezo1n') on conflict do nothing;
+('Akirakume'),('Awal'),('Balabol'),('Cloury'),('Dony_zq'),('Eozik'),('Flourin'),('Izumrudik'),('Maronnix'),('Nodben'),('Qusti'),('Rezo1n'),('FLARE_TESTER') on conflict do nothing;
 
 -- Organizers pre-authorize email addresses here. First registration attaches the email to a member.
 -- Keep the email list in Supabase, not in public GitHub files.
@@ -15,15 +17,22 @@ create table if not exists public.flare_authorized_emails (
   email text primary key check (email = lower(trim(email))),
   expected_nickname text not null references public.flare_members(nickname),
   account_id uuid null,
+  is_test_account boolean not null default false,
   created_at timestamptz not null default now()
 );
+ALTER TABLE public.flare_authorized_emails ADD COLUMN IF NOT EXISTS is_test_account boolean not null default false;
+ALTER TABLE public.flare_authorized_emails DROP CONSTRAINT IF EXISTS flare_authorized_emails_test_identity_check;
+ALTER TABLE public.flare_authorized_emails ADD CONSTRAINT flare_authorized_emails_test_identity_check CHECK ((is_test_account and expected_nickname='FLARE_TESTER') or (not is_test_account and expected_nickname<>'FLARE_TESTER'));
 create table if not exists public.flare_accounts (
   id uuid primary key default gen_random_uuid(),
   nickname text not null unique references public.flare_members(nickname),
   pin_hash text not null,
+  is_test_account boolean not null default false,
   ballot_submitted_at timestamptz,
   created_at timestamptz not null default now()
 );
+ALTER TABLE public.flare_accounts ADD COLUMN IF NOT EXISTS is_test_account boolean not null default false;
+UPDATE public.flare_accounts SET is_test_account=true WHERE nickname='FLARE_TESTER';
 alter table public.flare_authorized_emails drop constraint if exists flare_authorized_emails_account_id_fkey;
 alter table public.flare_authorized_emails add constraint flare_authorized_emails_account_id_fkey foreign key(account_id) references public.flare_accounts(id) on delete cascade;
 create table if not exists public.flare_login_attempts (
@@ -57,6 +66,7 @@ create table if not exists public.flare_options (
   check ((kind='person' and person_nickname is not null) or (kind<>'person' and person_nickname is null))
 );
 alter table public.flare_options add column if not exists video_url text;
+alter table public.flare_options add column if not exists hidden_for_testers boolean not null default false;
 create table if not exists public.flare_votes (
   account_id uuid not null references public.flare_accounts(id) on delete cascade,
   nomination_id text not null references public.flare_nominations(id),
@@ -70,8 +80,26 @@ create table if not exists public.flare_event_choices (
   choice_id text not null check(choice_id in ('dec-4','dec-5','dec-6')),
   updated_at timestamptz not null default now()
 );
+create table if not exists public.flare_test_votes (
+  account_id uuid not null references public.flare_accounts(id) on delete cascade,
+  nomination_id text not null references public.flare_nominations(id),
+  option_id text not null,
+  updated_at timestamptz not null default now(),
+  primary key(account_id,nomination_id),
+  foreign key(nomination_id,option_id) references public.flare_options(nomination_id,id)
+);
+create table if not exists public.flare_test_event_choices (
+  account_id uuid primary key references public.flare_accounts(id) on delete cascade,
+  choice_id text not null check(choice_id in ('dec-4','dec-5','dec-6')),
+  updated_at timestamptz not null default now()
+);
+create table if not exists public.flare_access_settings (
+  singleton boolean primary key default true check(singleton),
+  accounts_closed boolean not null default false
+);
+INSERT INTO public.flare_access_settings(singleton,accounts_closed) VALUES(true,false) ON CONFLICT(singleton) DO NOTHING;
 
-REVOKE ALL ON public.flare_members, public.flare_authorized_emails, public.flare_accounts, public.flare_sessions, public.flare_login_attempts, public.flare_nominations, public.flare_options, public.flare_votes, public.flare_event_choices FROM anon, authenticated;
+REVOKE ALL ON public.flare_members, public.flare_authorized_emails, public.flare_accounts, public.flare_sessions, public.flare_login_attempts, public.flare_nominations, public.flare_options, public.flare_votes, public.flare_event_choices, public.flare_test_votes, public.flare_test_event_choices, public.flare_access_settings FROM anon, authenticated;
 ALTER TABLE public.flare_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_authorized_emails ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_accounts ENABLE ROW LEVEL SECURITY;
@@ -81,10 +109,20 @@ ALTER TABLE public.flare_nominations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_event_choices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.flare_test_votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.flare_test_event_choices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.flare_access_settings ENABLE ROW LEVEL SECURITY;
 
 create or replace function public.flare_closed() returns boolean language sql stable as $$
   select now() >= timestamptz '2026-11-22 00:00:00+03'
 $$;
+create or replace function public.flare_assert_account_access(p_account uuid) returns void language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+begin
+  if coalesce((select accounts_closed from public.flare_access_settings where singleton),false)
+     and not exists(select 1 from public.flare_accounts where id=p_account and (nickname='Maronnix' or is_test_account)) then
+    raise exception 'Доступ к аккаунтам временно закрыт.';
+  end if;
+end $$;
 create or replace function public.flare_new_session(p_account uuid) returns text language plpgsql security definer set search_path=public,extensions,pg_temp as $$
 declare v_token text := encode(extensions.gen_random_bytes(32),'hex');
 begin
@@ -116,6 +154,9 @@ declare
   v_email text:=lower(trim(coalesce(p_email,'')));
   v_expected text;
   v_linked uuid;
+  v_is_test_email boolean:=false;
+  v_is_test_account boolean:=false;
+  v_accounts_closed boolean:=false;
   v_account uuid;
   v_nickname text;
   v_pin_hash text;
@@ -138,17 +179,22 @@ begin
     return jsonb_build_object('error','Не удалось войти. Проверь email и PIN-код.');
   end if;
 
-  select expected_nickname,account_id into v_expected,v_linked
+  select expected_nickname,account_id,is_test_account into v_expected,v_linked,v_is_test_email
     from flare_authorized_emails where email=v_email for update;
   v_allowed:=found and v_expected is not null;
+  select coalesce(accounts_closed,false) into v_accounts_closed from flare_access_settings where singleton;
+  if v_accounts_closed and v_expected is distinct from 'Maronnix' and not coalesce(v_is_test_email,false) then
+    v_allowed:=false;
+  end if;
 
   if v_allowed then
     perform pg_advisory_xact_lock(hashtext('member:'||v_expected));
-    select id,nickname,pin_hash into v_account,v_nickname,v_pin_hash
+    select id,nickname,pin_hash,is_test_account into v_account,v_nickname,v_pin_hash,v_is_test_account
       from flare_accounts where nickname=v_expected for update;
     if found then
       if (v_linked is not null and v_linked<>v_account)
-         or extensions.crypt(p_pin,v_pin_hash) is distinct from v_pin_hash then
+         or extensions.crypt(p_pin,v_pin_hash) is distinct from v_pin_hash
+         or v_is_test_account is distinct from coalesce(v_is_test_email,false) then
         v_allowed:=false;
       end if;
     else
@@ -156,22 +202,23 @@ begin
         v_allowed:=false;
       else
         v_create:=true;
+        v_is_test_account:=coalesce(v_is_test_email,false);
       end if;
     end if;
   end if;
 
   if v_allowed then
     if v_create then
-      insert into flare_accounts(nickname,pin_hash)
-        values(v_expected,extensions.crypt(p_pin,extensions.gen_salt('bf',12)))
+      insert into flare_accounts(nickname,pin_hash,is_test_account)
+        values(v_expected,extensions.crypt(p_pin,extensions.gen_salt('bf',12)),v_is_test_account)
         returning id,nickname into v_account,v_nickname;
     end if;
-    -- Every organizer-authorized alias for this member becomes the same account.
     update flare_authorized_emails set account_id=v_account
       where expected_nickname=v_expected and (account_id is null or account_id=v_account);
     delete from flare_login_attempts where email=v_email;
     v_token:=flare_new_session(v_account);
-    return jsonb_build_object('token',v_token,'nickname',v_nickname,
+    return jsonb_build_object('token',v_token,'nickname',v_nickname,'is_test_account',v_is_test_account,
+      'hidden_option_ids',case when v_is_test_account then (select coalesce(jsonb_agg(id order by id),'[]'::jsonb) from flare_options where hidden_for_testers) else '[]'::jsonb end,
       'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account));
   end if;
 
@@ -184,26 +231,53 @@ begin
 end $$;
 
 create or replace function public.get_my_ballot(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_account uuid:=flare_session_account(p_token); v_votes jsonb; v_event_choice text; v_event_results jsonb;
+declare
+  v_account uuid:=flare_session_account(p_token);
+  v_is_test_account boolean:=false;
+  v_votes jsonb;
+  v_event_choice text;
+  v_event_results jsonb;
+  v_hidden_options jsonb:='[]'::jsonb;
 begin
-  select coalesce(jsonb_object_agg(nomination_id,option_id),'{}'::jsonb) into v_votes from flare_votes where account_id=v_account;
-  select choice_id into v_event_choice from flare_event_choices where account_id=v_account;
+  perform flare_assert_account_access(v_account);
+  select is_test_account into v_is_test_account from flare_accounts where id=v_account;
+  if v_is_test_account then
+    select coalesce(jsonb_object_agg(nomination_id,option_id),'{}'::jsonb) into v_votes from flare_test_votes where account_id=v_account;
+    select choice_id into v_event_choice from flare_test_event_choices where account_id=v_account;
+    select coalesce(jsonb_agg(id order by id),'[]'::jsonb) into v_hidden_options from flare_options where hidden_for_testers;
+  else
+    select coalesce(jsonb_object_agg(nomination_id,option_id),'{}'::jsonb) into v_votes from flare_votes where account_id=v_account;
+    select choice_id into v_event_choice from flare_event_choices where account_id=v_account;
+  end if;
   if v_event_choice is not null then
     select jsonb_build_object('total',coalesce(sum(votes),0),'counts',coalesce(jsonb_object_agg(choice_id,votes),'{}'::jsonb)) into v_event_results
     from (select choice_id,count(*)::integer as votes from flare_event_choices group by choice_id) poll_counts;
   end if;
-  return jsonb_build_object('votes',v_votes,'event_choice',v_event_choice,'event_results',v_event_results,'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account));
+  return jsonb_build_object(
+    'votes',coalesce(v_votes,'{}'::jsonb),
+    'event_choice',v_event_choice,
+    'event_results',v_event_results,
+    'ballot_submitted',(select ballot_submitted_at is not null from flare_accounts where id=v_account),
+    'is_test_account',coalesce(v_is_test_account,false),
+    'hidden_option_ids',v_hidden_options
+  );
 end $$;
 
 create or replace function public.cast_vote(p_token text,p_nomination_id text,p_option_id text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_account uuid:=flare_session_account(p_token); v_nickname text;
+declare v_account uuid:=flare_session_account(p_token); v_nickname text; v_is_test_account boolean:=false;
 begin
+  perform flare_assert_account_access(v_account);
   if flare_closed() then raise exception 'Голосование завершено. Голоса больше нельзя изменить.'; end if;
-  select nickname into v_nickname from flare_accounts where id=v_account;
+  select nickname,is_test_account into v_nickname,v_is_test_account from flare_accounts where id=v_account;
   if not exists(select 1 from flare_options o join flare_nominations n on n.id=o.nomination_id where o.id=p_option_id and o.nomination_id=p_nomination_id) then raise exception 'Такого номинанта нет.'; end if;
+  if v_is_test_account and exists(select 1 from flare_options where id=p_option_id and nomination_id=p_nomination_id and hidden_for_testers) then raise exception 'Этот номинант скрыт в тестовом режиме.'; end if;
   if exists(select 1 from flare_options o join flare_nominations n on n.id=o.nomination_id where o.id=p_option_id and o.nomination_id=p_nomination_id and o.kind='person' and o.person_nickname=v_nickname and not n.allow_self) then raise exception 'Нельзя голосовать за себя.'; end if;
-  insert into flare_votes(account_id,nomination_id,option_id,updated_at) values(v_account,p_nomination_id,p_option_id,now()) on conflict(account_id,nomination_id) do update set option_id=excluded.option_id,updated_at=now();
-  return jsonb_build_object('ok',true);
+  if v_is_test_account then
+    insert into flare_test_votes(account_id,nomination_id,option_id,updated_at) values(v_account,p_nomination_id,p_option_id,now()) on conflict(account_id,nomination_id) do update set option_id=excluded.option_id,updated_at=now();
+  else
+    insert into flare_votes(account_id,nomination_id,option_id,updated_at) values(v_account,p_nomination_id,p_option_id,now()) on conflict(account_id,nomination_id) do update set option_id=excluded.option_id,updated_at=now();
+  end if;
+  return jsonb_build_object('ok',true,'test_vote',v_is_test_account);
 end $$;
 
 -- Public endpoint reveals aggregate winners only from 6 December 2026; it never returns voter identities.
@@ -229,14 +303,20 @@ begin
 end $$;
 
 create or replace function public.save_event_choice(p_token text,p_choice_id text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_account uuid:=flare_session_account(p_token); v_event_results jsonb;
+declare v_account uuid:=flare_session_account(p_token); v_is_test_account boolean:=false; v_event_results jsonb;
 begin
+  perform flare_assert_account_access(v_account);
   if flare_closed() then raise exception 'Голосование завершено.'; end if;
   if p_choice_id not in ('dec-4','dec-5','dec-6') then raise exception 'Выбери один из предложенных дней.'; end if;
-  insert into flare_event_choices(account_id,choice_id,updated_at) values(v_account,p_choice_id,now()) on conflict(account_id) do update set choice_id=excluded.choice_id,updated_at=now();
+  select is_test_account into v_is_test_account from flare_accounts where id=v_account;
+  if v_is_test_account then
+    insert into flare_test_event_choices(account_id,choice_id,updated_at) values(v_account,p_choice_id,now()) on conflict(account_id) do update set choice_id=excluded.choice_id,updated_at=now();
+  else
+    insert into flare_event_choices(account_id,choice_id,updated_at) values(v_account,p_choice_id,now()) on conflict(account_id) do update set choice_id=excluded.choice_id,updated_at=now();
+  end if;
   select jsonb_build_object('total',coalesce(sum(votes),0),'counts',coalesce(jsonb_object_agg(choice_id,votes),'{}'::jsonb)) into v_event_results
   from (select choice_id,count(*)::integer as votes from flare_event_choices group by choice_id) poll_counts;
-  return jsonb_build_object('ok',true,'event_results',v_event_results);
+  return jsonb_build_object('ok',true,'event_results',v_event_results,'test_vote',v_is_test_account);
 end $$;
 
 -- After voting closes, expose only the leading ceremony date(s), never poll participants.
@@ -255,14 +335,20 @@ begin
 end $$;
 
 create or replace function public.finalize_ballot(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare v_account uuid:=flare_session_account(p_token); v_required integer; v_done integer;
+declare v_account uuid:=flare_session_account(p_token); v_required integer; v_done integer; v_is_test_account boolean:=false;
 begin
+  perform flare_assert_account_access(v_account);
   if flare_closed() then raise exception 'Голосование завершено.'; end if;
+  select is_test_account into v_is_test_account from flare_accounts where id=v_account;
   select count(*) into v_required from flare_nominations;
-  select count(*) into v_done from flare_votes where account_id=v_account;
+  if v_is_test_account then
+    select count(*) into v_done from flare_test_votes where account_id=v_account;
+  else
+    select count(*) into v_done from flare_votes where account_id=v_account;
+  end if;
   if v_done<>v_required then raise exception 'Заполни все номинации: сейчас % из %.',v_done,v_required; end if;
   update flare_accounts set ballot_submitted_at=coalesce(ballot_submitted_at,now()) where id=v_account;
-  return jsonb_build_object('ok',true);
+  return jsonb_build_object('ok',true,'test_ballot',v_is_test_account);
 end $$;
 
 create or replace function public.admin_summary(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
@@ -278,23 +364,26 @@ declare
   v_voted_count bigint;
   v_total_votes bigint;
   v_required integer;
+  v_accounts_closed boolean:=false;
 begin
   if not exists(select 1 from flare_accounts where id=v_account and nickname='Maronnix') then raise exception 'Нет доступа к панели организатора.'; end if;
-  select coalesce(jsonb_agg(jsonb_build_object('nomination_title',n.title,'option_name',o.name,'nickname',a.nickname) order by n.title,a.nickname),'[]'::jsonb) into v_votes from flare_votes v join flare_accounts a on a.id=v.account_id join flare_nominations n on n.id=v.nomination_id join flare_options o on o.id=v.option_id;
-  select coalesce(jsonb_agg(jsonb_build_object('nickname',a.nickname,'choice_label',case c.choice_id when 'dec-4' then '4 декабря · пятница' when 'dec-5' then '5 декабря · суббота' else '6 декабря · воскресенье' end) order by a.nickname),'[]'::jsonb) into v_choices from flare_event_choices c join flare_accounts a on a.id=c.account_id;
-  select count(*) into v_registered_count from flare_accounts;
+  select coalesce(accounts_closed,false) into v_accounts_closed from flare_access_settings where singleton;
+  select coalesce(jsonb_agg(jsonb_build_object('nomination_title',n.title,'option_name',o.name,'nickname',a.nickname) order by n.title,a.nickname),'[]'::jsonb) into v_votes from flare_votes v join flare_accounts a on a.id=v.account_id and not a.is_test_account join flare_nominations n on n.id=v.nomination_id join flare_options o on o.id=v.option_id;
+  select coalesce(jsonb_agg(jsonb_build_object('nickname',a.nickname,'choice_label',case c.choice_id when 'dec-4' then '4 декабря · пятница' when 'dec-5' then '5 декабря · суббота' else '6 декабря · воскресенье' end) order by a.nickname),'[]'::jsonb) into v_choices from flare_event_choices c join flare_accounts a on a.id=c.account_id and not a.is_test_account;
+  select count(*) into v_registered_count from flare_accounts where not is_test_account;
   select count(*) into v_required from flare_nominations;
   select count(distinct account_id),count(*) into v_voted_count,v_total_votes from flare_votes;
-  select coalesce(jsonb_agg(a.nickname order by a.nickname),'[]'::jsonb) into v_registered from flare_accounts a;
+  select coalesce(jsonb_agg(a.nickname order by a.nickname),'[]'::jsonb) into v_registered from flare_accounts a where not a.is_test_account;
   select coalesce(jsonb_agg(a.nickname order by a.nickname),'[]'::jsonb) into v_voted
-  from flare_accounts a where v_required>0 and (select count(*) from flare_votes v where v.account_id=a.id)>=v_required;
+  from flare_accounts a where not a.is_test_account and v_required>0 and (select count(*) from flare_votes v where v.account_id=a.id)>=v_required;
   select coalesce(jsonb_agg(jsonb_build_object('nickname',a.nickname,'vote_count',vote_counts.vote_count) order by a.nickname),'[]'::jsonb) into v_partially_voted
   from flare_accounts a join (select account_id,count(*)::integer as vote_count from flare_votes group by account_id) vote_counts on vote_counts.account_id=a.id
-  where vote_counts.vote_count>0 and vote_counts.vote_count<v_required;
-  select coalesce(jsonb_agg(m.nickname order by m.nickname),'[]'::jsonb) into v_not_voted from flare_members m where not exists(select 1 from flare_accounts a join flare_votes v on v.account_id=a.id where a.nickname=m.nickname);
+  where not a.is_test_account and vote_counts.vote_count>0 and vote_counts.vote_count<v_required;
+  select coalesce(jsonb_agg(m.nickname order by m.nickname),'[]'::jsonb) into v_not_voted from flare_members m where m.nickname<>'FLARE_TESTER' and not exists(select 1 from flare_accounts a join flare_votes v on v.account_id=a.id where a.nickname=m.nickname);
   return jsonb_build_object(
     'votes',v_votes,
     'event_preferences',v_choices,
+    'accounts_closed',v_accounts_closed,
     'statistics',jsonb_build_object(
       'registered_count',v_registered_count,
       'registered_nicknames',v_registered,
@@ -306,6 +395,14 @@ begin
       'not_voted_nicknames',v_not_voted
     )
   );
+end $$;
+
+create or replace function public.admin_set_accounts_closed(p_token text,p_closed boolean) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare v_account uuid:=flare_session_account(p_token); v_closed boolean;
+begin
+  if not exists(select 1 from flare_accounts where id=v_account and nickname='Maronnix') then raise exception 'Нет доступа к панели организатора.'; end if;
+  update flare_access_settings set accounts_closed=coalesce(p_closed,false) where singleton returning accounts_closed into v_closed;
+  return jsonb_build_object('accounts_closed',coalesce(v_closed,false));
 end $$;
 
 create or replace function public.get_clip_options() returns jsonb language sql stable security definer set search_path=public,extensions,pg_temp as $$
@@ -349,6 +446,7 @@ begin
 end $$;
 
 revoke all on function public.flare_closed() from public,anon,authenticated;
+revoke all on function public.flare_assert_account_access(uuid) from public,anon,authenticated;
 revoke all on function public.flare_new_session(uuid) from public,anon,authenticated;
 revoke all on function public.flare_session_account(text) from public,anon,authenticated;
 revoke all on function public.flare_access(text,text) from public,authenticated;
@@ -360,6 +458,7 @@ revoke all on function public.cast_vote(text,text,text) from public,authenticate
 revoke all on function public.save_event_choice(text,text) from public,authenticated;
 revoke all on function public.finalize_ballot(text) from public,authenticated;
 revoke all on function public.admin_summary(text) from public,authenticated;
+revoke all on function public.admin_set_accounts_closed(text,boolean) from public,authenticated;
 revoke all on function public.get_public_winners() from public,anon,authenticated;
 revoke all on function public.get_event_poll_winner() from public,anon,authenticated;
 revoke all on function public.get_clip_options() from public,authenticated;
@@ -374,6 +473,7 @@ grant execute on function public.cast_vote(text,text,text) to anon;
 grant execute on function public.save_event_choice(text,text) to anon;
 grant execute on function public.finalize_ballot(text) to anon;
 grant execute on function public.admin_summary(text) to anon;
+grant execute on function public.admin_set_accounts_closed(text,boolean) to anon;
 grant execute on function public.get_public_winners() to anon;
 grant execute on function public.get_event_poll_winner() to anon;
 grant execute on function public.get_clip_options() to anon;
