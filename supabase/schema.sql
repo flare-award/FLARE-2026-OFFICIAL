@@ -528,5 +528,6 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('squad-1','squad-of-year','Akirakume, Dony_zq, Nodben','group',NULL) ,
 ('squad-2','squad-of-year','Eozik, Flourin, Maronnix','group',NULL) ,
 ('squad-3','squad-of-year','Akirakume, Dony_zq, Maronnix, Nodben, Qusti','group',NULL) ,
-('squad-4','squad-of-year','Akirakume, Dony_zq, Maronnix, Rezo1n','group',NULL)
+('squad-4','squad-of-year','Akirakume, Dony_zq, Maronnix, Rezo1n','group',NULL) ,
+('squad-5','squad-of-year','Izumrudik, Maronnix, Qusti','group',NULL)
 ON CONFLICT (id) DO UPDATE SET nomination_id=excluded.nomination_id, name=case when excluded.nomination_id='clip-of-year' then existing_option.name else excluded.name end, kind=excluded.kind, person_nickname=excluded.person_nickname;
