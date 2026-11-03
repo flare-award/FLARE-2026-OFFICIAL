@@ -405,6 +405,30 @@ begin
   return jsonb_build_object('accounts_closed',coalesce(v_closed,false));
 end $$;
 
+create or replace function public.admin_rotate_test_credentials(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+  v_account uuid:=flare_session_account(p_token);
+  v_test_account uuid;
+  v_email text:='flare-tester-'||encode(extensions.gen_random_bytes(8),'hex')||'@example.invalid';
+  v_pin text:=encode(extensions.gen_random_bytes(9),'hex');
+begin
+  if not exists(select 1 from flare_accounts where id=v_account and nickname='Maronnix') then raise exception 'Нет доступа к панели организатора.'; end if;
+  perform pg_advisory_xact_lock(hashtext('flare-test-account-rotate'));
+  insert into flare_accounts(nickname,pin_hash,is_test_account,ballot_submitted_at)
+    values('FLARE_TESTER',extensions.crypt(v_pin,extensions.gen_salt('bf',12)),true,null)
+    on conflict(nickname) do update set pin_hash=excluded.pin_hash,is_test_account=true,ballot_submitted_at=null
+    returning id into v_test_account;
+  delete from flare_sessions where account_id=v_test_account;
+  delete from flare_votes where account_id=v_test_account;
+  delete from flare_event_choices where account_id=v_test_account;
+  delete from flare_test_votes where account_id=v_test_account;
+  delete from flare_test_event_choices where account_id=v_test_account;
+  delete from flare_authorized_emails where expected_nickname='FLARE_TESTER';
+  insert into flare_authorized_emails(email,expected_nickname,account_id,is_test_account)
+    values(v_email,'FLARE_TESTER',v_test_account,true);
+  return jsonb_build_object('email',v_email,'pin',v_pin,'nickname','FLARE_TESTER');
+end $$;
+
 create or replace function public.get_clip_options() returns jsonb language sql stable security definer set search_path=public,extensions,pg_temp as $$
   select coalesce(jsonb_agg(jsonb_build_object('id',id,'name',name,'video_url',video_url) order by id),'[]'::jsonb)
   from flare_options where nomination_id='clip-of-year' and kind='video';
@@ -459,6 +483,7 @@ revoke all on function public.save_event_choice(text,text) from public,authentic
 revoke all on function public.finalize_ballot(text) from public,authenticated;
 revoke all on function public.admin_summary(text) from public,authenticated;
 revoke all on function public.admin_set_accounts_closed(text,boolean) from public,authenticated;
+revoke all on function public.admin_rotate_test_credentials(text) from public,authenticated;
 revoke all on function public.get_public_winners() from public,anon,authenticated;
 revoke all on function public.get_event_poll_winner() from public,anon,authenticated;
 revoke all on function public.get_clip_options() from public,authenticated;
@@ -474,6 +499,7 @@ grant execute on function public.save_event_choice(text,text) to anon;
 grant execute on function public.finalize_ballot(text) to anon;
 grant execute on function public.admin_summary(text) to anon;
 grant execute on function public.admin_set_accounts_closed(text,boolean) to anon;
+grant execute on function public.admin_rotate_test_credentials(text) to anon;
 grant execute on function public.get_public_winners() to anon;
 grant execute on function public.get_event_poll_winner() to anon;
 grant execute on function public.get_clip_options() to anon;

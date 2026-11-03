@@ -1,7 +1,0 @@
--- Replace the address locally and run this as project owner in Supabase SQL Editor.
--- Use a new email reserved for the tester; do not reuse a participant's address.
--- Do not put the tester's email, PIN, or password in the public repository.
--- To hide selected nominee IDs later, set flare_options.hidden_for_testers=true in Supabase.
-INSERT INTO public.flare_authorized_emails (email, expected_nickname, is_test_account)
-VALUES (lower(trim('REPLACE_WITH_TESTER_EMAIL')), 'FLARE_TESTER', true)
-ON CONFLICT (email) DO NOTHING;

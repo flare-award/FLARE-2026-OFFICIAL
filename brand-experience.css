@@ -1252,3 +1252,14 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 .admin-access-status.is-closed{border-color:rgba(240,150,100,.34);color:#f1a67c;background:rgba(180,80,45,.1)}
 .admin-access-note{margin:0;color:#89847c;font-size:12px;line-height:1.6}
 @media(max-width:600px){.admin-access-card{align-items:stretch;flex-direction:column;padding:18px}.admin-access-actions{justify-items:stretch}.admin-access-actions .button{width:100%}}
+.admin-test-account-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;padding:22px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:#12110f}
+.admin-test-account-card h3{margin:8px 0;font-size:20px}
+.admin-test-account-card p{margin:0;color:#989187;font-size:12px;line-height:1.65}
+.admin-test-credentials{grid-column:1/-1;display:grid;gap:12px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)}
+.admin-test-credentials[hidden]{display:none}
+.admin-test-credentials label{display:grid;gap:6px;color:#aaa397;font-size:11px}
+.admin-test-credentials label>div{display:flex;gap:8px;min-width:0}
+.admin-test-credentials input{flex:1;min-width:0;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#0b0b0a;color:#f3f0e9;font:13px ui-monospace,monospace}
+.admin-test-credentials .button-quiet{padding:8px 12px;font-size:11px}
+.admin-test-credentials>p{color:#847e74;font-size:11px}
+@media(max-width:600px){.admin-test-account-card{grid-template-columns:minmax(0,1fr);padding:18px}.admin-test-account-card>.button{width:100%}.admin-test-credentials label>div{flex-direction:column}.admin-test-credentials .button-quiet{width:100%}}
