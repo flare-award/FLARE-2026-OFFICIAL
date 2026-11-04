@@ -681,7 +681,7 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 
 /* Uniform outline SVG icons, centered directly on the tile with no art backdrop. */
 .nomination-art{position:relative;display:block;overflow:hidden;padding:0!important;background:none!important}
-.nomination-art-icon{position:absolute;z-index:0;left:50%;top:50%;display:block;width:112px;height:112px;max-width:90%;max-height:90%;transform:translate(-50%,-50%);object-fit:contain;filter:none}
+.nomination-art-icon{position:absolute;z-index:0;left:50%;top:50%;display:block;width:112px;height:112px;max-width:90%;max-height:90%;transform:translate(-50%,-50%);object-fit:contain;filter:blur(.3px)}
 .nomination-art::after{display:none}
 .nomination-art .nomination-voted{position:absolute;top:9px;right:9px;z-index:2}
 @media(max-width:600px){.nomination-art-icon{width:96px;height:96px}}
