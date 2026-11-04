@@ -1288,3 +1288,4 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 .admin-test-ballot-event strong{color:#e8c77e;font-weight:500}
 @media(max-width:700px){.admin-test-ballot-list{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.admin-test-ballot-card{padding:18px}.admin-test-ballot-heading{align-items:stretch;flex-direction:column}.admin-test-ballot-heading .button-quiet{width:100%}.admin-test-ballot-row{grid-template-columns:minmax(0,1fr)}.admin-test-ballot-row strong{text-align:left}}
+.visual-tester-locked{background:linear-gradient(145deg,#211e18,#141312)!important}
