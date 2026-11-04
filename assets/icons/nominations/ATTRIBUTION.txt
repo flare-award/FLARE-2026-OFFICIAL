@@ -1,6 +1,6 @@
 All nomination and voted-status icons are adapted from Hugeicons Core Free Icons v4.4.0.
 Source: https://hugeicons.com/icons
-The same rounded-stroke family is used throughout, normalized to a 24×24 viewBox and 1.25-unit stroke; nomination icons use #f2cf80 and the vote check uses #d4ffc5.
+The original 24×24 Hugeicons paths and native 1.5-unit stroke settings are preserved; only the color is customized (#f2cf80 for nominations, #d4ffc5 for the vote check). Native rounded line caps and joins are kept.
 The Vibe of the Year nomination uses Hugeicons Sparkles; Best CS uses the Hugeicons Gun icon; Clip of the Year uses Clapperboard; the event calendar is the blank Calendar 04 variant.
 
 MIT License
