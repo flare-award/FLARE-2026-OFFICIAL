@@ -1,7 +1,7 @@
 All nomination and voted-status icons are adapted from Hugeicons Core Free Icons v4.4.0.
 Source: https://hugeicons.com/icons
-The original 24×24 Hugeicons paths and native 1.5-unit stroke settings are preserved; only the color is customized (#f2cf80 for nominations, #d4ffc5 for the vote check). Native rounded line caps and joins are kept.
-The Vibe of the Year nomination uses Hugeicons Sparkles; Best CS uses Crosshair; Best Rematch uses Football Pitch; Breakthrough of the Year uses Rocket 02; Clip of the Year uses Film 01; the event calendar is the blank Calendar 04 variant.
+The original 24×24 Hugeicons paths are preserved with rounded line caps and joins. Nomination icon strokes are adjusted to 1.0 units for a lighter look; the vote check retains its original weight and color (#d4ffc5). Nomination icons use #f2cf80; the two category-card icons use their matching accent colors.
+The Vibe of the Year nomination uses Hugeicons Heart; the Style of the Year nomination uses Hugeicons TShirt; Best CS uses Crosshair; Best Rematch uses Football Pitch; Breakthrough of the Year uses Rocket 02; Clip of the Year uses Film 01; the event calendar is the blank Calendar 04 variant. The category cards use Hugeicons Trophy and Medal 01.
 
 MIT License
 
