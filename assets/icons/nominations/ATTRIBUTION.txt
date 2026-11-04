@@ -2,7 +2,7 @@ The nomination and voted-status SVG icons in this directory are adapted from Tab
 Source: https://github.com/tabler/tabler-icons
 Copyright (c) 2020-2026 Paweł Kuna.
 
-The SVGs are normalized to a 64×64 viewBox, with consistent round caps/joins and 1-unit Tabler stroke; nomination symbols use #f2cf80, while the vote-confirmation check uses #d4ffc5. The rocket retains the Tabler geometry previously supplied by the user. `mood-xd` is used as the closest playful Tabler face for the meme nomination; `movie`, `crosshair`, and `swords` are the nearest Tabler equivalents for clip, CS, and conflict themes.
+The SVGs are normalized to a 64×64 viewBox, with consistent round caps/joins and 1-unit Tabler stroke; nomination symbols use #f2cf80, while the vote-confirmation check uses #d4ffc5. The rocket retains the Tabler geometry previously supplied by the user. `mood-xd` is used as the closest playful Tabler face for the meme nomination; `movie` and `swords` are the nearest Tabler equivalents for clip and conflict themes. The CS pistol is an original outline drawing using Tabler’s stroke weight, color, round caps, and round joins because @tabler/icons v3.50.0 does not include a pistol icon.
 
 MIT License
 
