@@ -1,4 +1,6 @@
-Selected nomination SVG outlines are adapted from Font Awesome Free Solid icons, version 7.3.1 (Fonticons, Inc.): Crown, Gamepad, Layer Group, Person Rifle, Rocket, Face Grin Squint Tears, Burst, Heart, Users, Check, Clapperboard, Ghost, Calendar, User Group, Palette, Star, Fire, Comment Dots, and Thumbs Down. Their original filled paths are rendered as unfilled outlines. The Rocket outline includes an original custom-drawn flame trail. These icons are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/ . Source: https://fontawesome.com/ .
+Selected nomination SVG outlines are adapted from Font Awesome Free Solid icons, version 7.3.1 (Fonticons, Inc.): Crown, Gamepad, Layer Group, Person Rifle, Face Grin Squint Tears, Burst, Heart, Users, Check, Clapperboard, Ghost, Calendar, User Group, Palette, Star, Fire, Comment Dots, and Thumbs Down. Their original filled paths are rendered as unfilled outlines. These icons are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/ . Source: https://fontawesome.com/ .
+
+The Rocket SVG is adapted from the Tabler Icons outline `rocket` icon; its geometry was supplied by the user and restyled in the site’s gold contour color. Copyright (c) 2020-2026 Paweł Kuna. MIT License; a copy follows below.
 
 The Futbol SVG is adapted from the outlined sports_soccer icon in Material Design Icons v0.14.15 (@material-design-icons/svg), Copyright Google LLC and contributors. Source: https://github.com/marella/material-design-icons . It is distributed under the Apache License, Version 2.0; a copy of that license follows below.
 
@@ -206,3 +208,26 @@ The Face Grin Tears, Swords, and Sparkles SVGs are original outline drawings cre
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+MIT License
+
+Copyright (c) 2020-2026 Paweł Kuna
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
