@@ -356,6 +356,7 @@ declare
   v_account uuid:=flare_session_account(p_token);
   v_votes jsonb;
   v_choices jsonb;
+  v_test_ballot jsonb;
   v_registered jsonb;
   v_voted jsonb;
   v_not_voted jsonb;
@@ -370,6 +371,12 @@ begin
   select coalesce(accounts_closed,false) into v_accounts_closed from flare_access_settings where singleton;
   select coalesce(jsonb_agg(jsonb_build_object('nomination_title',n.title,'option_name',o.name,'nickname',a.nickname) order by n.title,a.nickname),'[]'::jsonb) into v_votes from flare_votes v join flare_accounts a on a.id=v.account_id and not a.is_test_account join flare_nominations n on n.id=v.nomination_id join flare_options o on o.id=v.option_id;
   select coalesce(jsonb_agg(jsonb_build_object('nickname',a.nickname,'choice_label',case c.choice_id when 'dec-4' then '4 декабря · пятница' when 'dec-5' then '5 декабря · суббота' else '6 декабря · воскресенье' end) order by a.nickname),'[]'::jsonb) into v_choices from flare_event_choices c join flare_accounts a on a.id=c.account_id and not a.is_test_account;
+  select jsonb_build_object(
+    'exists',exists(select 1 from flare_accounts where nickname='FLARE_TESTER' and is_test_account),
+    'submitted',coalesce((select ballot_submitted_at is not null from flare_accounts where nickname='FLARE_TESTER' and is_test_account),false),
+    'votes',coalesce((select jsonb_agg(jsonb_build_object('nomination_id',n.id,'nomination_title',n.title,'option_id',o.id,'option_name',o.name) order by case n.category when 'основная' then 0 else 1 end,n.title) from flare_test_votes tv join flare_accounts ta on ta.id=tv.account_id and ta.nickname='FLARE_TESTER' and ta.is_test_account join flare_nominations n on n.id=tv.nomination_id join flare_options o on o.id=tv.option_id),'[]'::jsonb),
+    'event_choice',(select choice_id from flare_test_event_choices c join flare_accounts a on a.id=c.account_id where a.nickname='FLARE_TESTER' and a.is_test_account)
+  ) into v_test_ballot;
   select count(*) into v_registered_count from flare_accounts where not is_test_account;
   select count(*) into v_required from flare_nominations;
   select count(distinct account_id),count(*) into v_voted_count,v_total_votes from flare_votes;
@@ -382,6 +389,7 @@ begin
   select coalesce(jsonb_agg(m.nickname order by m.nickname),'[]'::jsonb) into v_not_voted from flare_members m where m.nickname<>'FLARE_TESTER' and not exists(select 1 from flare_accounts a join flare_votes v on v.account_id=a.id where a.nickname=m.nickname);
   return jsonb_build_object(
     'votes',v_votes,
+    'test_ballot',v_test_ballot,
     'event_preferences',v_choices,
     'accounts_closed',v_accounts_closed,
     'statistics',jsonb_build_object(
@@ -446,6 +454,7 @@ begin
   if v_name='' or length(v_name)>120 then raise exception 'Название должно содержать от 1 до 120 символов.'; end if;
   if v_video_url is not null and v_video_url !~* '^https?://[^[:space:]]+$' then raise exception 'Ссылка должна начинаться с http:// или https://.'; end if;
   update flare_options set name=v_name,video_url=v_video_url where id=p_option_id and nomination_id='clip-of-year' returning * into v_saved;
+  update flare_options set hidden_for_testers=lower(trim(name))<>lower('Qusti въебал все коины') where nomination_id='clip-of-year';
   return jsonb_build_object('id',v_saved.id,'name',v_saved.name,'video_url',v_saved.video_url);
 end $$;
 
@@ -528,7 +537,7 @@ INSERT INTO public.flare_nominations (id,title,category,display_type,allow_self)
 ('shame-of-year','ПОЗОР ГОДА','доп.','Участник',false)
 ON CONFLICT (id) DO UPDATE SET title=excluded.title, category=excluded.category, display_type=excluded.display_type, allow_self=excluded.allow_self;
 INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,person_nickname) VALUES
-('clip-1','clip-of-year','Клип 01 · скоро','video',NULL) ,
+('clip-1','clip-of-year','Qusti въебал все коины','video',NULL) ,
 ('clip-2','clip-of-year','Клип 02 · скоро','video',NULL) ,
 ('clip-3','clip-of-year','Клип 03 · скоро','video',NULL) ,
 ('clip-4','clip-of-year','Клип 04 · скоро','video',NULL) ,
@@ -545,6 +554,7 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('game-2','game-of-year','MECCHA CHAMELEON','game',NULL) ,
 ('game-3','game-of-year','Minecraft','game',NULL) ,
 ('game-4','game-of-year','REMATCH','game',NULL) ,
+('game-5','game-of-year','Dub Together','game',NULL) ,
 ('person-1-akirakume','flare-king','Akirakume','person','Akirakume') ,
 ('person-1-awal','flare-king','Awal','person','Awal') ,
 ('person-1-dony-zq','flare-king','Dony_zq','person','Dony_zq') ,
@@ -658,3 +668,19 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('squad-4','squad-of-year','Akirakume, Dony_zq, Maronnix, Rezo1n','group',NULL) ,
 ('squad-5','squad-of-year','Izumrudik, Maronnix, Qusti','group',NULL)
 ON CONFLICT (id) DO UPDATE SET nomination_id=excluded.nomination_id, name=case when excluded.nomination_id='clip-of-year' then existing_option.name else excluded.name end, kind=excluded.kind, person_nickname=excluded.person_nickname;
+
+-- Keep the named Qusti clip available in test ballots, while dimming the other clip options.
+UPDATE public.flare_options
+SET name='Qusti въебал все коины'
+WHERE id='clip-1' AND nomination_id='clip-of-year' AND name='Клип 01 · скоро'
+  AND NOT EXISTS (SELECT 1 FROM public.flare_options WHERE nomination_id='clip-of-year' AND lower(trim(name))=lower('Qusti въебал все коины'));
+
+UPDATE public.flare_options SET hidden_for_testers=false;
+UPDATE public.flare_options
+SET hidden_for_testers = CASE
+  WHEN nomination_id='clip-of-year' THEN lower(trim(name)) <> lower('Qusti въебал все коины')
+  ELSE true
+END
+WHERE nomination_id='clip-of-year'
+   OR id IN ('event-1','event-2','squad-4','squad-5','sos-1','sos-2','sos-5','conflict-1')
+   OR name IN ('Akirakume получил права','Выживание в Minecraft','Akirakume, Dony_zq, Maronnix, Rezo1n','Izumrudik, Maronnix, Qusti','Камбэк CYBERSHOKE летом','Возвращение на сервер','Сезон с Blue Lock в REMATCH','Akirakume, Dony_zq, Nodben, Maronnix');

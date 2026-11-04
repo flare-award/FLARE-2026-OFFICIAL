@@ -1266,3 +1266,22 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 .admin-test-credentials .button-quiet{padding:8px 12px;font-size:11px}
 .admin-test-credentials>p{color:#847e74;font-size:11px}
 @media(max-width:600px){.admin-test-account-card{grid-template-columns:minmax(0,1fr);padding:18px}.admin-test-account-card>.button{width:100%}.admin-test-credentials label>div{flex-direction:column}.admin-test-credentials .button-quiet{width:100%}}
+
+/* Tester-only nominees stay visible for context, but are visibly unavailable. */
+.nominee-card.tester-locked{opacity:.52;filter:saturate(.65);cursor:not-allowed}
+.nominee-card.tester-locked:hover{transform:none;border-color:rgba(255,255,255,.11)}
+.tester-lock-label{display:inline-flex;align-items:center;justify-content:center;margin:8px auto 0;padding:4px 8px;border:1px solid rgba(198,168,102,.28);border-radius:999px;color:#b8a779;font-size:9px;font-weight:700;letter-spacing:.08em;line-height:1.2}
+.admin-test-ballot-card{display:grid;gap:14px;padding:22px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:#12110f}
+.admin-test-ballot-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.admin-test-ballot-heading h3{margin:8px 0;font-size:20px}
+.admin-test-ballot-heading p{margin:0;color:#989187;font-size:12px;line-height:1.6}
+.admin-test-ballot-status{margin:0;color:#c6a866;font-size:12px}
+.admin-test-ballot-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px}
+.admin-test-ballot-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;padding:9px 0;border-top:1px solid rgba(255,255,255,.07);font-size:11px}
+.admin-test-ballot-row span{color:#9b958b}
+.admin-test-ballot-row strong{color:#eee6d8;font-weight:500;text-align:right;overflow-wrap:anywhere}
+.admin-test-ballot-event{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);font-size:12px}
+.admin-test-ballot-event span{color:#9b958b}
+.admin-test-ballot-event strong{color:#e8c77e;font-weight:500}
+@media(max-width:700px){.admin-test-ballot-list{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.admin-test-ballot-card{padding:18px}.admin-test-ballot-heading{align-items:stretch;flex-direction:column}.admin-test-ballot-heading .button-quiet{width:100%}.admin-test-ballot-row{grid-template-columns:minmax(0,1fr)}.admin-test-ballot-row strong{text-align:left}}
