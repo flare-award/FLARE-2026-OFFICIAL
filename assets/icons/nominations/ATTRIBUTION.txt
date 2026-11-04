@@ -1,8 +1,8 @@
-Selected nomination SVG outlines are adapted from Font Awesome Free Solid icons, version 7.3.1 (Fonticons, Inc.): Crown, Gamepad, Layer Group, Person Rifle, Clapperboard, Ghost, Calendar, User Group, Palette, Star, Fire, Comment Dots, and Thumbs Down. Their original filled paths are rendered as unfilled outlines. These icons are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/ . Source: https://fontawesome.com/ .
+Selected nomination SVG outlines are adapted from Font Awesome Free Solid icons, version 7.3.1 (Fonticons, Inc.): Crown, Gamepad, Layer Group, Person Rifle, Rocket, Face Grin Squint Tears, Burst, Heart, Users, Clapperboard, Ghost, Calendar, User Group, Palette, Star, Fire, Comment Dots, and Thumbs Down. Their original filled paths are rendered as unfilled outlines. The Rocket outline includes an original custom-drawn flame trail. These icons are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/ . Source: https://fontawesome.com/ .
 
 The Futbol SVG is adapted from the outlined sports_soccer icon in Material Design Icons v0.14.15 (@material-design-icons/svg), Copyright Google LLC and contributors. Source: https://github.com/marella/material-design-icons . It is distributed under the Apache License, Version 2.0; a copy of that license follows below.
 
-The Face Grin Tears, Swords, Rocket, and Sparkles SVGs are original outline drawings created for this site.
+The Face Grin Tears, Swords, and Sparkles SVGs are original outline drawings created for this site.
 
 
                                  Apache License
