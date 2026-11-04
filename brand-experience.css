@@ -353,6 +353,7 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 
 /* A subtle completion mark instead of a text pill on voted nominations. */
 .nomination-voted{display:grid;place-items:center;width:35px;height:35px;padding:0;border:1px solid rgba(197,244,181,.64);border-radius:50%;background:linear-gradient(145deg,rgba(23,70,37,.96),rgba(11,34,20,.96));color:#d4ffc5;font-size:20px;font-weight:800;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.38),0 0 16px rgba(124,219,129,.18)}
+.nomination-voted-icon{display:block;width:22px;height:22px;object-fit:contain}
 
 /* Paired carousel arrows remain the same glyph; the previous arrow is mirrored. */
 .carousel-controls .icon-button{display:grid;place-items:center;padding:0;line-height:1}
