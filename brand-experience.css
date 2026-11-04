@@ -1273,8 +1273,7 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 .nominee-card.tester-locked .visual-photo,.nominee-card.tester-locked .portrait{filter:blur(14px);transform:scale(1.2)!important}
 .nominee-card.tester-locked::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:rgba(7,7,7,.68)}
 .nominee-card.tester-locked .video-play{display:none!important}
-.nominee-card.tester-locked .nominee-name,.nominee-card.tester-locked .tester-lock-label{position:relative;z-index:3}
-.tester-lock-label{display:inline-flex;align-items:center;justify-content:center;margin:8px auto 0;padding:5px 9px;border:1px solid rgba(198,168,102,.36);border-radius:999px;background:rgba(18,17,15,.96);color:#e1c47d;font-size:9px;font-weight:700;letter-spacing:.08em;line-height:1.2}
+.nominee-card.tester-locked .nominee-name{position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;margin:8px auto 0;padding:5px 9px;border:1px solid rgba(198,168,102,.36);border-radius:999px;background:rgba(18,17,15,.96);color:#e1c47d;font-size:9px;font-weight:700;letter-spacing:.08em;line-height:1.2}
 .admin-test-ballot-card{display:grid;gap:14px;padding:22px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:#12110f}
 .admin-test-ballot-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .admin-test-ballot-heading h3{margin:8px 0;font-size:20px}
