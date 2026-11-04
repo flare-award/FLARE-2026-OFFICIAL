@@ -398,7 +398,7 @@ function bindNomineeViewControl(){
     grid.classList.toggle('nominee-grid-list',state.nomineeView==='list');
     if(state.nomineeView==='list')updateListPhotoAspectRatios(grid);else $$('.visual',grid).forEach(visual=>visual.style.removeProperty('aspect-ratio'));
     $$('[data-nominee-view]',menu).forEach(item=>{const selected=item.dataset.nomineeView===state.nomineeView;item.classList.toggle('is-selected',selected);item.setAttribute('aria-pressed',String(selected))});
-    closeNomineeViewMenu(true);
+    // Keep the view menu open so another layout can be selected immediately.
   });
   if(state.nomineeView==='list')updateListPhotoAspectRatios(grid);
 }
