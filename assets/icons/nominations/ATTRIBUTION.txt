@@ -1,3 +1,8 @@
 Selected nomination SVG outlines are adapted from Font Awesome Free Solid icons, version 7.3.1 (Fonticons, Inc.): Crown, Gamepad, Layer Group, Person Rifle, Futbol, Face Grin, Rocket, Clapperboard, Ghost, Calendar, User Group, Palette, Star, Fire, Comment Dots, and Thumbs Down. Their original filled paths are rendered as unfilled outlines. These icons are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/ . Source: https://fontawesome.com/ .
 
-The Swords and Sparkles SVGs are original outline drawings created for this site.
+The Swords SVG is adapted from Lucide Static v1.67.0 (ISC License): https://github.com/lucide-icons/lucide .
+Copyright (c) 2026 Lucide Icons and Contributors.
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+The Sparkles SVG is an original outline drawing created for this site.
