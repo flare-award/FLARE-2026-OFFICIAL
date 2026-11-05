@@ -1,8 +1,8 @@
 Active nomination-card icons use rounded filled Phosphor Icons v2.1.1 symbols with a restrained FLARE gold-to-bronze gradient. The set includes crown, game-controller, layers/stack, soccer ball, rocket, clapperboard, heart, blank and starred calendars, group, sparkle, fire, chat, thumbs-down, prohibition, and sword.
 Source: https://phosphoricons.com/ · https://github.com/phosphor-icons/core
 
-`pistol.svg` uses Font Awesome Free Solid `faGun`; the Human Meme nomination's `laugh.svg` uses `faFaceLaughBeam`, v7.3.1. Both are adapted with the FLARE gradient.
-Source: https://fontawesome.com/icons/gun?f=classic&s=solid · https://fontawesome.com/icons/face-laugh-beam?f=classic&s=solid · https://creativecommons.org/licenses/by/4.0/
+`pistol.svg` uses Font Awesome Free Solid `faGun`; the Human Meme nomination's `masks-theater.svg` uses `faMasksTheater`, v7.3.1. Both are adapted with the FLARE gradient.
+Source: https://fontawesome.com/icons/gun?f=classic&s=solid · https://fontawesome.com/icons/masks-theater?f=classic&s=solid · https://creativecommons.org/licenses/by/4.0/
 
 Unused legacy Iconoir SVGs are retained under the Iconoir MIT license below.
 
@@ -72,7 +72,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Font Awesome Free Solid icons `faGun` and `faFaceLaughBeam` by Fonticons, Inc.,
+Font Awesome Free Solid icons `faGun` and `faMasksTheater` by Fonticons, Inc.,
 v7.3.1, are used under Creative Commons Attribution 4.0 International
 (CC BY 4.0), adapted with the FLARE gradient. License:
 https://creativecommons.org/licenses/by/4.0/.

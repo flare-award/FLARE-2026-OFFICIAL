@@ -6,8 +6,8 @@
   font-display:swap;
 }
 @font-face{
-  font-family:"League Spartan";
-  src:url("assets/brand/LeagueSpartan-Latin-800.woff2?v=1") format("woff2");
+  font-family:"Sora";
+  src:url("assets/brand/Sora-Latin-800.woff2?v=1") format("woff2");
   font-style:normal;
   font-weight:800;
   font-display:swap;
@@ -1528,8 +1528,8 @@ small{color:#bdb7ad;font-weight:500}
 .brand-intro .intro-links>.intro-link:hover,.brand-intro .intro-links>.intro-link:nth-child(2):hover{border-color:#F25467;background:#151012;box-shadow:none;color:#F25467;filter:none;transform:none}
 .brand-intro .intro-links>.intro-link[data-category="доп."]:hover{border-color:#D650DD;background:#170E18;color:#D650DD}
 
-/* Crisp geometric display lettering: heavy and distinctive without a cartoon look. */
-.intro-logo,.wordmark,.wordmark>span{font-family:"League Spartan","Archivo Black",sans-serif;font-weight:800;font-synthesis:none}
+/* Crisp technical display lettering: heavy and distinctive without a cartoon look. */
+.intro-logo,.wordmark,.wordmark>span{font-family:"Sora","Archivo Black",sans-serif;font-weight:800;font-synthesis:none}
 .intro-logo{letter-spacing:.01em}
 .wordmark,.wordmark>span{letter-spacing:.025em}
 
@@ -1553,9 +1553,13 @@ small{color:#bdb7ad;font-weight:500}
 
 .footer-social-link svg.telegram-plane-icon{width:31px;height:31px}
 
-/* Let the header wordmark fade and collapse smoothly when returning to the intro. */
-.topbar .wordmark{flex:0 0 auto;width:auto;max-width:180px;min-width:0;overflow:hidden;transition:max-width .28s cubic-bezier(.2,.7,.2,1),opacity .22s ease,transform .22s ease,visibility 0s}
-.topbar.is-at-top .wordmark{flex-basis:auto;width:auto;max-width:0;min-width:0;overflow:hidden;transition:max-width .28s cubic-bezier(.2,.7,.2,1),opacity .22s ease,transform .22s ease,visibility 0s linear .22s}
-.topbar.is-scrolled .wordmark{flex-basis:auto;width:auto;max-width:180px;transition:max-width .28s cubic-bezier(.2,.7,.2,1),opacity .25s ease,transform .25s ease,visibility 0s}
-@media(max-width:600px){.topbar.is-scrolled .wordmark{max-width:120px}}
+/* Mirror the same fade and vertical motion in both scroll directions.
+   Absolute positioning prevents layout jumps and leaves room for account controls. */
+.topbar .top-actions{margin-left:auto}
+.topbar .wordmark{position:absolute;left:clamp(20px,3.2vw,55px);top:50%;translate:0 -50%;flex:0 0 auto;width:auto;max-width:none;min-width:0;overflow:visible;opacity:1;visibility:visible;transform:translate3d(0,0,0);transition:opacity .25s ease,transform .25s ease,visibility 0s}
+.topbar.is-at-top .wordmark{flex-basis:auto;width:auto;max-width:none;overflow:visible;opacity:0;visibility:hidden;transform:translate3d(0,-6.25px,0);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
+.topbar.is-scrolled .wordmark{flex-basis:auto;width:auto;max-width:none;opacity:1;visibility:visible;transform:translate3d(0,0,0);transition:opacity .25s ease,transform .25s ease,visibility 0s}
+@media(min-width:2000px){.topbar .wordmark{left:max(60px,calc((100vw - 1780px)/2))}}
+@media(max-width:975px){.topbar .wordmark{left:27.5px}}
+@media(max-width:700px){.topbar .wordmark{left:max(14px,env(safe-area-inset-left))}}
 @media(prefers-reduced-motion:reduce){.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{transition:none}}
