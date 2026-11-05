@@ -49,7 +49,8 @@ function updateAccount(){const s=state.session;$('#auth-button').textContent=s?'
   {transform:'translate3d(0,0,0) rotate(0deg)',offset:1}
 ],{duration:520,easing:'linear'});});$('#admin-entry')?.addEventListener('click',showAdmin);updateProgress();if(s){const accountToken=s.token,choiceRevision=state.eventChoiceRevision;restoreNomineeViewFromAccount(accountToken);rpc('get_my_ballot',{p_token:accountToken}).then(data=>{if(state.session?.token!==accountToken)return;state.votes=data.votes||{};state.hiddenOptionIds=Array.isArray(data.hidden_option_ids)?data.hidden_option_ids:[];if(state.session)state.session.is_test_account=Boolean(data.is_test_account);state.eventSaved=data.event_choice||null;if(state.eventChoiceRevision===choiceRevision)state.eventChoice=state.eventSaved;state.eventResults=data.event_results||null;state.session.ballot_submitted=Boolean(data.ballot_submitted);localStorage.setItem('flare-session',JSON.stringify(state.session));if(state.eventChoiceRevision!==choiceRevision&&state.eventChoice&&state.eventChoice!==state.eventSaved)saveEvent();updateProgress();renderEventOptions();}).catch(e=>{console.warn(e);if(state.session?.token===accountToken&&/session|token|авторизац|доступ к аккаунтам временно закрыт/i.test(e.message)){localStorage.removeItem('flare-session');state.session=null;state.hiddenOptionIds=[];updateAccount();if(/доступ к аккаунтам временно закрыт/i.test(e.message))toast('Для аккаунта временно закрыт доступ.')}})}else{state.votes={};state.hiddenOptionIds=[];state.eventChoice=null;state.eventSaved=null;state.eventResults=null;updateProgress();renderEventOptions()}}
 function updateProgress(){const total=nominations.length,done=Object.keys(state.votes).length;$('#overall-progress').textContent=state.session?`Проголосовано: ${done}/${total}`:'Войди, чтобы голосовать';$('#deadline-banner').hidden=!isClosed();$('#event-poll-status').textContent=!state.session?'Войди в аккаунт, чтобы ответить на опрос.':state.eventSaving?'Сохраняем твой ответ…':state.eventSaved?'Твой ответ сохранён. Нажми другой вариант, чтобы изменить его.':'Нажми на вариант — ответ сохранится сразу.';}
-function countLabel(count,one,few,many){const n=Math.abs(Number(count)||0)%100,last=n%10,word=n>10&&n<20?many:last===1?one:last>=2&&last<=4?few:many;return `${count} ${word}`}
+function countForm(count,one,few,many){const n=Math.abs(Number(count)||0)%100,last=n%10;return n>10&&n<20?many:last===1?one:last>=2&&last<=4?few:many}
+function countLabel(count,one,few,many){return `${count} ${countForm(count,one,few,many)}`}
 function nomineeCountLabel(count){return countLabel(count,'номинант','номинанта','номинантов')}
 
 const photoOverrides=Object.create(null);
@@ -280,7 +281,7 @@ function loadPublicEventPollWinner(){
   return publicEventPollWinnerRequest;
 }
 function initCountdown(){
-  const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes')},status=$('#countdown-status'),label=$('#countdown-title'),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
+  const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes')},minuteLabel=$('#countdown-minutes-label'),status=$('#countdown-status'),label=$('#countdown-title'),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
   let timer,currentPhase=-1,closedHandled=false,pollLoadStarted=false,pollLoadFailed=false;
   const pad=n=>String(n).padStart(2,'0');
   const setDigit=(element,value)=>{
@@ -289,23 +290,26 @@ function initCountdown(){
     element.dataset.value=value;
     const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if(reduceMotion||typeof element.animate!=='function'){element.textContent=value;return}
-    const stage=document.createElement('span');stage.className='countdown-digit-stage';
-    const previousDigits=[...previous],animations=[];
-    [...value].forEach((digit,index)=>{
-      const oldDigit=previousDigits[index]??digit,slot=document.createElement('span');
-      slot.className='countdown-digit-slot';
-      if(oldDigit===digit){slot.textContent=digit;stage.append(slot);return}
+    let stage=element.querySelector('.countdown-digit-stage');
+    if(!stage){
+      stage=document.createElement('span');stage.className='countdown-digit-stage';
+      [...previous].forEach(digit=>{const slot=document.createElement('span');slot.className='countdown-digit-slot';slot.dataset.value=digit;slot.textContent=digit;stage.append(slot)});
+      element.replaceChildren(stage);
+    }
+    const previousDigits=[...previous],nextDigits=[...value];
+    nextDigits.forEach((digit,index)=>{
+      let slot=stage.children[index];
+      if(!slot){slot=document.createElement('span');slot.className='countdown-digit-slot';stage.append(slot)}
+      if(previousDigits[index]===digit){slot.dataset.value=digit;return}
+      const token=Number(slot.dataset.animationToken||0)+1;slot.dataset.animationToken=String(token);slot.dataset.value=digit;
       const stack=document.createElement('span'),outgoing=document.createElement('span'),incoming=document.createElement('span');
       stack.className='countdown-digit-stack';
-      outgoing.className='countdown-digit-roll countdown-digit-outgoing';outgoing.textContent=oldDigit;
+      outgoing.className='countdown-digit-roll countdown-digit-outgoing';outgoing.textContent=previousDigits[index]??digit;
       incoming.className='countdown-digit-roll countdown-digit-incoming';incoming.textContent=digit;
-      stack.append(outgoing,incoming);slot.append(stack);stage.append(slot);animations.push({slot,outgoing,incoming,digit});
-    });
-    element.replaceChildren(stage);
-    const easing='cubic-bezier(.22,.8,.2,1)';
-    animations.forEach(({slot,outgoing,incoming,digit})=>{
+      stack.append(outgoing,incoming);slot.replaceChildren(stack);
+      const easing='cubic-bezier(.22,.8,.2,1)';
       outgoing.animate([{transform:'translate3d(0,0,0)',opacity:1},{transform:'translate3d(0,-115%,0)',opacity:0}],{duration:560,easing,fill:'forwards'});
-      incoming.animate([{transform:'translate3d(0,115%,0)',opacity:0},{transform:'translate3d(0,0,0)',opacity:1}],{duration:620,easing,fill:'forwards'}).finished.then(()=>{if(element.dataset.value===value)slot.textContent=digit}).catch(()=>{});
+      incoming.animate([{transform:'translate3d(0,115%,0)',opacity:0},{transform:'translate3d(0,0,0)',opacity:1}],{duration:620,easing,fill:'forwards'}).finished.then(()=>{if(slot.dataset.animationToken===String(token))slot.textContent=digit}).catch(()=>{});
     });
   };
   const showPollRetry=()=>{
@@ -350,7 +354,7 @@ function initCountdown(){
       }else{label.textContent='ДО ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Победители появятся 6 декабря'}
       box.setAttribute('aria-label',label.textContent.toLowerCase());
     }
-    setDigit(units.days,pad(Math.floor(total/86400)));setDigit(units.hours,pad(Math.floor(total%86400/3600)));setDigit(units.minutes,pad(Math.floor(total%3600/60)));
+    const minuteCount=Math.floor(total%3600/60);setDigit(units.days,pad(Math.floor(total/86400)));setDigit(units.hours,pad(Math.floor(total%86400/3600)));setDigit(units.minutes,pad(minuteCount));if(minuteLabel)minuteLabel.textContent=countForm(minuteCount,'минута','минуты','минут');
   };
   tick();if(Date.now()<winnersReleaseDate.getTime())timer=setInterval(tick,1000);
 }

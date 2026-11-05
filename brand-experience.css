@@ -1530,3 +1530,17 @@ small{color:#bdb7ad;font-weight:500}
 #countdown-section .countdown-digit-slot{position:relative;display:block;flex:0 0 1ch;width:1ch;height:1em;overflow:hidden;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;font:inherit;line-height:inherit;letter-spacing:inherit;font-variant-numeric:inherit;text-shadow:0 0 24px rgba(254,111,1,.16)}
 #countdown-section .countdown-digit-stack{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:hidden}
 #countdown-section .countdown-digit-roll{inset:0;width:100%;height:100%;}
+
+/* Give the year room at the edge and align it farther left in the hero. */
+.hero-year{justify-self:start;overflow:visible;padding-right:.14em;letter-spacing:-.055em}
+@media(min-width:701px){.hero-topline{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
+@media(max-width:700px){.hero-year{justify-self:start}}
+
+/* Tighten the title-to-digits gap and keep the minute word directly tied to its value. */
+#countdown-section .countdown-heading{margin-bottom:0}
+#countdown-section .countdown-values{margin-top:12px}
+@media(max-width:700px){#countdown-section .countdown-values{margin-top:8px}}
+
+/* Official filled marks use the same optical center inside each social circle. */
+.footer-social-link svg{width:28px;height:28px}
+.faq-intro p{position:relative;top:-4px}
