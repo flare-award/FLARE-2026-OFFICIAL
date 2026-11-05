@@ -466,23 +466,34 @@ function renderWinners(){const track=$('#winner-track');track.innerHTML=previous
 function updateCarousel(){const track=$('#winner-track'),cards=$$('.winner-card',track);if(!cards.length)return;const gap=parseFloat(getComputedStyle(track).gap)||0,width=cards[0].getBoundingClientRect().width+gap;const maxOffset=Math.max(0,track.scrollWidth-track.parentElement.clientWidth),maxIndex=Math.ceil(maxOffset/width);state.carousel=Math.max(0,Math.min(state.carousel,maxIndex));const offset=Math.min(state.carousel*width,maxOffset);track.style.transform=`translate3d(${-offset}px,0,0)`}
 let carouselDebounce=false;function moveCarousel(dir){if(carouselDebounce)return;carouselDebounce=true;state.carousel+=dir;updateCarousel();setTimeout(()=>carouselDebounce=false,360)}
 function initWinnerSwipe(){const viewport=$('.winner-window');if(!viewport)return;let start=null;viewport.addEventListener('touchstart',event=>{if(event.touches.length!==1){start=null;return}const touch=event.touches[0];start={x:touch.clientX,y:touch.clientY}},{passive:true});viewport.addEventListener('touchend',event=>{if(!start)return;const touch=event.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;start=null;if(Math.abs(dx)>=42&&Math.abs(dx)>Math.abs(dy)*1.2)moveCarousel(dx<0?1:-1)},{passive:true});viewport.addEventListener('touchcancel',()=>{start=null},{passive:true})}
+function displayedEventResults(){
+  const results=state.eventResults;
+  if(!results)return null;
+  const counts={...(results.counts||{})};
+  let total=Number(results.total)||0;
+  const previousChoice=state.eventSaved,nextChoice=state.eventChoice;
+  if(nextChoice&&nextChoice!==previousChoice){
+    if(previousChoice)counts[previousChoice]=Math.max(0,(Number(counts[previousChoice])||0)-1);
+    else total++;
+    counts[nextChoice]=(Number(counts[nextChoice])||0)+1;
+  }
+  return {...results,counts,total};
+}
 function renderEventOptions(){
   const box=$('#event-options');
-  const showResults=Boolean(state.eventSaved&&state.eventResults);
-  const counts=state.eventResults?.counts||{};
-  const total=Number(state.eventResults?.total)||0;
+  const results=displayedEventResults();
+  const showResults=Boolean(state.eventSaved&&results);
+  const counts=results?.counts||{};
+  const total=Number(results?.total)||0;
   const max=Math.max(0,...eventChoices.map(([id])=>Number(counts[id])||0));
   const leaders=eventChoices.filter(([id])=>Number(counts[id])===max&&max>0);
   box.innerHTML=eventChoices.map(([id,date,day])=>{
     const count=Number(counts[id])||0;
     const percent=total?Math.round(count/total*100):0;
     const leader=showResults&&max>0&&count===max;
-    const saved=state.eventSaved===id;
     const selected=state.eventChoice===id;
-    const pending=Boolean(state.eventSaved&&selected&&!saved);
-    const choiceStatus=selected?(saved?'ТВОЙ ОТВЕТ':pending?'НОВЫЙ ВЫБОР':''):'';
     const badge=leader?(leaders.length===1?'ЛИДИРУЕТ':'НИЧЬЯ'):'';
-    return `<button class="poll-option ${selected?'selected':''} ${saved?'saved-choice':''} ${pending?'pending-choice':''} ${showResults?'has-results':''} ${leader?'poll-leader':''}" data-event-choice="${id}" ${isClosed()?'disabled':''}><span class="poll-option-top"><span class="radio"></span><span class="poll-option-date"><strong>${date} (${day[0].toUpperCase()+day.slice(1)})</strong>${choiceStatus?`<small class="poll-choice-status">${choiceStatus}</small>`:''}</span>${showResults?`<span class="poll-result-badge">${badge}</span>`:''}</span>${showResults?`<span class="poll-result-track" aria-hidden="true"><span style="width:${percent}%"></span></span><span class="poll-result-meta"><span>${countLabel(count,'голос','голоса','голосов')}</span><strong>${percent}%</strong></span>`:''}</button>`
+    return `<button class="poll-option ${selected?'selected':''} ${showResults?'has-results':''} ${leader?'poll-leader':''}" data-event-choice="${id}" ${isClosed()?'disabled':''}><span class="poll-option-top"><span class="radio"></span><span class="poll-option-date"><strong>${date} (${day[0].toUpperCase()+day.slice(1)})</strong></span>${showResults?`<span class="poll-result-badge">${badge}</span>`:''}</span>${showResults?`<span class="poll-result-track" aria-hidden="true"><span style="width:${percent}%"></span></span><span class="poll-result-meta"><span>${countLabel(count,'голос','голоса','голосов')}</span><strong>${percent}%</strong></span>`:''}</button>`
   }).join('');
   $$('[data-event-choice]',box).forEach(button=>button.onclick=()=>{
     if(!state.session){renderAuth();return}
