@@ -1487,12 +1487,11 @@ small{color:#bdb7ad;font-weight:500}
 .nominee-view-chevron{width:13px;height:13px;flex-basis:13px}
 @media(max-width:700px){.nom-detail-top .back-link,.nom-detail-actions .nominee-view-toggle{gap:5px;padding-inline:8px;font-size:10.5px}.nom-detail-top .back-link{max-width:calc(100% - 124px);gap:4px;padding-inline:5px;font-size:10px;letter-spacing:-.02em}.nom-detail-actions{gap:6px}.nominee-view-current-icon{width:15px;height:15px;flex-basis:15px}.nominee-view-current-icon svg{width:15px;height:15px}}
 
-/* Replace the ornamental halo on archival cards with one crisp, restrained sparkle. */
+/* Keep the archival winner cards free of decorative overlays. */
 .winner-card::before{content:none;box-shadow:none}
 .winner-card-top{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;width:100%}
-.winner-card-accent{display:block;width:29px;height:29px;object-fit:contain;opacity:.78;filter:none}
 
-/* Bare, keyboard-accessible social links sit just above the FAQ/footer. */
+/* Keyboard-accessible social links sit under the FAQ introduction. */
 .footer-socials{display:flex;justify-content:center;align-items:center;gap:16px;margin:20px auto 14px}
 .footer-social-link{display:grid;place-items:center;width:54px;height:54px;border:1px solid rgba(255,193,7,.3);border-radius:50%;background:#11100e;color:#e8c879;transition:transform .2s ease,border-color .2s ease,background .2s ease,color .2s ease}
 .footer-social-link:hover{transform:translateY(-3px);border-color:rgba(255,193,7,.7);background:#1a1711;color:#ffe7a8}
@@ -1501,3 +1500,32 @@ small{color:#bdb7ad;font-weight:500}
 @media(min-width:701px){.hero-year{justify-self:end}}
 .footer-socials{margin:42px auto 0}
 .footer-bottom{margin-top:34px}
+
+/* Keep equal breathing room across the main content transitions. */
+:root{--content-section-spacing:clamp(148px,11vw,168px)}
+.hero{padding-bottom:calc(var(--content-section-spacing)/2)}
+.vote-hub{padding-top:calc(var(--content-section-spacing)/2)}
+#event-poll .event-poll{padding-top:var(--content-section-spacing);padding-bottom:calc(var(--content-section-spacing)/2)}
+#countdown-section{padding-block:calc(var(--content-section-spacing)/2);border-top:0}
+.winners-section{margin-top:0;padding-top:calc(var(--content-section-spacing)/2);padding-bottom:calc(var(--content-section-spacing)/2)}
+.faq-section{padding-top:calc(var(--content-section-spacing)/2)}
+#countdown-section .countdown-deadline{margin-top:8px;font-size:15px;line-height:1.5}
+@media(max-width:700px){#countdown-section .countdown-deadline{font-size:13px}}
+
+/* The countdown headline carries the phase label; no duplicate label above the digits. */
+#countdown-section .countdown-label{display:none}
+
+/* Solid social marks, placed directly below the FAQ intro copy. */
+.faq-intro p{margin-bottom:20px}
+.faq-intro .footer-socials{justify-content:flex-start;margin:0;gap:14px}
+.footer-social-link{--social-bg:#11100e;transition:border-color .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease}
+.footer-social-link:hover{--social-bg:#1a1711;transform:none;box-shadow:0 0 22px rgba(255,193,7,.13)}
+.footer-social-link svg{fill:currentColor;stroke:none}
+.footer-bottom{display:block;text-align:center}
+.footer-credit{display:block;width:100%;text-align:center;line-height:1.7}
+
+/* Stable single-character tracks keep unchanged countdown digits perfectly still. */
+#countdown-section .countdown-digit-stage{display:flex;align-items:flex-start;justify-content:center;width:100%;height:1em;overflow:hidden;line-height:1;isolation:isolate}
+#countdown-section .countdown-digit-slot{position:relative;display:block;flex:0 0 1ch;width:1ch;height:1em;overflow:hidden;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;font:inherit;line-height:inherit;letter-spacing:inherit;font-variant-numeric:inherit;text-shadow:0 0 24px rgba(254,111,1,.16)}
+#countdown-section .countdown-digit-stack{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:hidden}
+#countdown-section .countdown-digit-roll{inset:0;width:100%;height:100%;}

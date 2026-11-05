@@ -280,7 +280,7 @@ function loadPublicEventPollWinner(){
   return publicEventPollWinnerRequest;
 }
 function initCountdown(){
-  const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes')},status=$('#countdown-status'),label=$('.countdown-label',$('#vote-countdown')),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
+  const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes')},status=$('#countdown-status'),label=$('#countdown-title'),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
   let timer,currentPhase=-1,closedHandled=false,pollLoadStarted=false,pollLoadFailed=false;
   const pad=n=>String(n).padStart(2,'0');
   const setDigit=(element,value)=>{
@@ -289,14 +289,24 @@ function initCountdown(){
     element.dataset.value=value;
     const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if(reduceMotion||typeof element.animate!=='function'){element.textContent=value;return}
-    const stage=document.createElement('span'),outgoing=document.createElement('span'),incoming=document.createElement('span');
-    stage.className='countdown-digit-stage';
-    outgoing.className='countdown-digit-roll countdown-digit-outgoing';outgoing.textContent=previous;
-    incoming.className='countdown-digit-roll countdown-digit-incoming';incoming.textContent=value;
-    stage.append(outgoing,incoming);element.replaceChildren(stage);
+    const stage=document.createElement('span');stage.className='countdown-digit-stage';
+    const previousDigits=[...previous],animations=[];
+    [...value].forEach((digit,index)=>{
+      const oldDigit=previousDigits[index]??digit,slot=document.createElement('span');
+      slot.className='countdown-digit-slot';
+      if(oldDigit===digit){slot.textContent=digit;stage.append(slot);return}
+      const stack=document.createElement('span'),outgoing=document.createElement('span'),incoming=document.createElement('span');
+      stack.className='countdown-digit-stack';
+      outgoing.className='countdown-digit-roll countdown-digit-outgoing';outgoing.textContent=oldDigit;
+      incoming.className='countdown-digit-roll countdown-digit-incoming';incoming.textContent=digit;
+      stack.append(outgoing,incoming);slot.append(stack);stage.append(slot);animations.push({slot,outgoing,incoming,digit});
+    });
+    element.replaceChildren(stage);
     const easing='cubic-bezier(.22,.8,.2,1)';
-    outgoing.animate([{transform:'translate3d(0,0,0)',opacity:1},{transform:'translate3d(0,-115%,0)',opacity:0}],{duration:560,easing,fill:'forwards'});
-    incoming.animate([{transform:'translate3d(0,115%,0)',opacity:0},{transform:'translate3d(0,0,0)',opacity:1}],{duration:620,easing,fill:'forwards'}).finished.then(()=>{if(element.dataset.value===value)element.textContent=value}).catch(()=>{});
+    animations.forEach(({slot,outgoing,incoming,digit})=>{
+      outgoing.animate([{transform:'translate3d(0,0,0)',opacity:1},{transform:'translate3d(0,-115%,0)',opacity:0}],{duration:560,easing,fill:'forwards'});
+      incoming.animate([{transform:'translate3d(0,115%,0)',opacity:0},{transform:'translate3d(0,0,0)',opacity:1}],{duration:620,easing,fill:'forwards'}).finished.then(()=>{if(element.dataset.value===value)slot.textContent=digit}).catch(()=>{});
+    });
   };
   const showPollRetry=()=>{
     status.replaceChildren(document.createTextNode('Не удалось получить результат опроса. '));
@@ -332,7 +342,7 @@ function initCountdown(){
     values.hidden=false;box.classList.remove('is-finished');
     if(currentPhase!==phaseIndex){
       currentPhase=phaseIndex;
-      if(phaseIndex===0){label.textContent='ДО ОКОНЧАНИЯ ГОЛОСОВАНИЯ';status.textContent='Закрытие: 21 ноября · 23:59 МСК'}
+      if(phaseIndex===0){label.textContent='ДО ОКОНЧАНИЯ ГОЛОСОВАНИЯ';status.textContent='Закрытие 22 ноября в 00:00 по МСК'}
       else if(phaseIndex===1){
         const winningDates=publicEventPollWinner.choiceIds.map(id=>eventChoiceLabels[id]),selectedDate=eventChoiceLabels[publicEventPollWinner.choiceIds[0]];
         label.textContent=publicEventPollWinner.choiceIds.length>1?'НИЧЬЯ В ОПРОСЕ · ДО БЛИЖАЙШЕЙ ДАТЫ':'ДО ДАТЫ ЦЕРЕМОНИИ';
@@ -475,7 +485,7 @@ function renderPublishedWinners2026(rows){
     if(image.complete){if(image.naturalWidth)applyRatio();else image.remove()}
   });
   $('#winners-2026-teaser').hidden=true;$('#winners-2026-results').hidden=false;
-  const countdown=$('#vote-countdown');$('.countdown-label',countdown).textContent='ПОБЕДИТЕЛИ FLARE 2026';$('#countdown-status').textContent='Карточки победителей ниже';countdown.setAttribute('aria-label','Победители FLARE 2026 опубликованы');
+  const countdown=$('#vote-countdown');$('#countdown-title').textContent='ПОБЕДИТЕЛИ FLARE 2026';$('#countdown-status').textContent='Карточки победителей ниже';countdown.setAttribute('aria-label','Победители FLARE 2026 опубликованы');
 }
 function setWinners2026Retry(message){
   const status=$('#winners-2026-status');if(!status)return;
@@ -497,7 +507,7 @@ async function loadPublishedWinners2026(){
   })();
   return publishedWinners2026Promise;
 }
-function renderWinners(){const track=$('#winner-track');track.innerHTML=previousWinners.map(([title,name],i)=>`<article class="winner-card"><div class="winner-card-top"><div class="winner-icon">${String(i+1).padStart(2,'0')}</div><img class="winner-card-accent" src="assets/icons/nominations/sparks.svg?v=25" alt="" aria-hidden="true"></div><div><div class="winner-title">${esc(title)}</div><div class="winner-name">${esc(name)}</div></div></article>`).join('');updateCarousel();}
+function renderWinners(){const track=$('#winner-track');track.innerHTML=previousWinners.map(([title,name],i)=>`<article class="winner-card"><div class="winner-card-top"><div class="winner-icon">${String(i+1).padStart(2,'0')}</div></div><div><div class="winner-title">${esc(title)}</div><div class="winner-name">${esc(name)}</div></div></article>`).join('');updateCarousel();}
 function updateCarousel(){const track=$('#winner-track'),cards=$$('.winner-card',track);if(!cards.length)return;const gap=parseFloat(getComputedStyle(track).gap)||0,width=cards[0].getBoundingClientRect().width+gap;const maxOffset=Math.max(0,track.scrollWidth-track.parentElement.clientWidth),maxIndex=Math.ceil(maxOffset/width);state.carousel=Math.max(0,Math.min(state.carousel,maxIndex));const offset=Math.min(state.carousel*width,maxOffset);track.style.transform=`translate3d(${-offset}px,0,0)`}
 let carouselDebounce=false;function moveCarousel(dir){if(carouselDebounce)return;carouselDebounce=true;state.carousel+=dir;updateCarousel();setTimeout(()=>carouselDebounce=false,360)}
 function initWinnerSwipe(){const viewport=$('.winner-window');if(!viewport)return;let start=null;viewport.addEventListener('touchstart',event=>{if(event.touches.length!==1){start=null;return}const touch=event.touches[0];start={x:touch.clientX,y:touch.clientY}},{passive:true});viewport.addEventListener('touchend',event=>{if(!start)return;const touch=event.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;start=null;if(Math.abs(dx)>=42&&Math.abs(dx)>Math.abs(dy)*1.2)moveCarousel(dx<0?1:-1)},{passive:true});viewport.addEventListener('touchcancel',()=>{start=null},{passive:true})}
