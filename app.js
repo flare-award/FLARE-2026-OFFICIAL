@@ -34,19 +34,35 @@ async function restoreNomineeViewFromAccount(token){
   try{const view=await rpc('get_my_nominee_view',{p_token:token});if(state.session?.token!==token||revision!==nomineeViewRevision)return;if(!nomineeViewIds.has(view)){if(view===null)persistNomineeViewPreference(state.nomineeView);return}state.nomineeView=view;saveNomineeViewPreference(view,state.session.nickname);syncNomineeViewUi()}
   catch(error){console.info('Настройка вида аккаунта пока не загружена:',error.message)}
 }
-function updateAccount(){const s=state.session;$('#auth-button').textContent=s?'Выйти':'Войти';$('#account-status').innerHTML=s?`<button type="button" class="nickname-vibrate-trigger" aria-label="Вызвать вибрацию никнейма ${esc(s.nickname)}">${esc(s.nickname)}</button>${s.nickname.toLowerCase()==='maronnix'?' <button type="button" class="text-button" id="admin-entry">Панель</button>':''}`:'';$('.nickname-vibrate-trigger')?.addEventListener('click',event=>{event.stopPropagation();const nickname=event.currentTarget;if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||typeof nickname.animate!=='function')return;nickname.getAnimations?.().forEach(animation=>animation.cancel());nickname.animate([
-  {transform:'translate3d(0,0,0) rotate(0deg)',offset:0},
-  {transform:'translate3d(-1.4px,0,0) rotate(-.3deg)',offset:.1},
-  {transform:'translate3d(1.4px,0,0) rotate(.3deg)',offset:.2},
-  {transform:'translate3d(-1.2px,0,0) rotate(-.25deg)',offset:.3},
-  {transform:'translate3d(1.2px,0,0) rotate(.25deg)',offset:.4},
-  {transform:'translate3d(-1px,0,0) rotate(-.2deg)',offset:.5},
-  {transform:'translate3d(.9px,0,0) rotate(.18deg)',offset:.6},
-  {transform:'translate3d(-.7px,0,0) rotate(-.14deg)',offset:.7},
-  {transform:'translate3d(.55px,0,0) rotate(.11deg)',offset:.8},
-  {transform:'translate3d(-.3px,0,0) rotate(-.06deg)',offset:.9},
-  {transform:'translate3d(0,0,0) rotate(0deg)',offset:1}
-],{duration:520,easing:'linear'});});$('#admin-entry')?.addEventListener('click',showAdmin);updateProgress();if(s){const accountToken=s.token,choiceRevision=state.eventChoiceRevision;restoreNomineeViewFromAccount(accountToken);rpc('get_my_ballot',{p_token:accountToken}).then(data=>{if(state.session?.token!==accountToken)return;state.votes=data.votes||{};state.hiddenOptionIds=Array.isArray(data.hidden_option_ids)?data.hidden_option_ids:[];if(state.session)state.session.is_test_account=Boolean(data.is_test_account);state.eventSaved=data.event_choice||null;if(state.eventChoiceRevision===choiceRevision)state.eventChoice=state.eventSaved;state.eventResults=data.event_results||null;state.session.ballot_submitted=Boolean(data.ballot_submitted);localStorage.setItem('flare-session',JSON.stringify(state.session));if(state.eventChoiceRevision!==choiceRevision&&state.eventChoice&&state.eventChoice!==state.eventSaved)saveEvent();updateProgress();renderEventOptions();}).catch(e=>{console.warn(e);if(state.session?.token===accountToken&&/session|token|авторизац|доступ к аккаунтам временно закрыт/i.test(e.message)){localStorage.removeItem('flare-session');state.session=null;state.hiddenOptionIds=[];updateAccount();if(/доступ к аккаунтам временно закрыт/i.test(e.message))toast('Для аккаунта временно закрыт доступ.')}})}else{state.votes={};state.hiddenOptionIds=[];state.eventChoice=null;state.eventSaved=null;state.eventResults=null;updateProgress();renderEventOptions()}}
+function updateAccount(){
+  const s=state.session,button=$('#auth-button');
+  button.textContent=s?s.nickname:'Профиль';
+  button.classList.toggle('is-signed-in',Boolean(s));
+  button.setAttribute('aria-label',s?`Открыть профиль ${s.nickname}`:'Войти или зарегистрироваться');
+  $('#account-status').innerHTML=s?.nickname.toLowerCase()==='maronnix'?'<button type="button" class="text-button" id="admin-entry">Панель</button>':'';
+  $('#admin-entry')?.addEventListener('click',showAdmin);
+  updateProgress();
+  if(!s&&typeof clearProfileState==='function')clearProfileState();
+  if(s){
+    const accountToken=s.token,choiceRevision=state.eventChoiceRevision;
+    restoreNomineeViewFromAccount(accountToken);
+    rpc('get_my_ballot',{p_token:accountToken}).then(data=>{
+      if(state.session?.token!==accountToken)return;
+      state.votes=data.votes||{};state.hiddenOptionIds=Array.isArray(data.hidden_option_ids)?data.hidden_option_ids:[];
+      if(state.session)state.session.is_test_account=Boolean(data.is_test_account);
+      state.eventSaved=data.event_choice||null;if(state.eventChoiceRevision===choiceRevision)state.eventChoice=state.eventSaved;state.eventResults=data.event_results||null;state.session.ballot_submitted=Boolean(data.ballot_submitted);localStorage.setItem('flare-session',JSON.stringify(state.session));
+      if(state.eventChoiceRevision!==choiceRevision&&state.eventChoice&&state.eventChoice!==state.eventSaved)saveEvent();
+      updateProgress();renderEventOptions();
+    }).catch(e=>{
+      console.warn(e);
+      if(state.session?.token===accountToken&&/session|token|авторизац|доступ к аккаунтам временно закрыт/i.test(e.message)){
+        localStorage.removeItem('flare-session');state.session=null;state.hiddenOptionIds=[];updateAccount();if(/доступ к аккаунтам временно закрыт/i.test(e.message))toast('Для аккаунта временно закрыт доступ.');
+      }
+    });
+  }else{
+    state.votes={};state.hiddenOptionIds=[];state.eventChoice=null;state.eventSaved=null;state.eventResults=null;updateProgress();renderEventOptions();
+  }
+}
 function updateProgress(){const total=nominations.length,done=Object.keys(state.votes).length;$('#overall-progress').textContent=state.session?`Проголосовано: ${done}/${total}`:'Войди, чтобы голосовать';$('#deadline-banner').hidden=!isClosed();$('#event-poll-status').textContent=!state.session?'Войди в аккаунт, чтобы ответить на опрос.':state.eventSaving?'Сохраняем твой ответ…':state.eventSaved?'Твой ответ сохранён. Нажми другой вариант, чтобы изменить его.':'Нажми на вариант — ответ сохранится сразу.';}
 function countForm(count,one,few,many){const n=Math.abs(Number(count)||0)%100,last=n%10;return n>10&&n<20?many:last===1?one:last>=2&&last<=4?few:many}
 function countLabel(count,one,few,many){return `${count} ${countForm(count,one,few,many)}`}
@@ -466,7 +482,7 @@ function openModal(content,kind=''){
   backdrop.addEventListener('click',e=>{if(e.target!==backdrop)return;if(pointerStartedInside){pointerStartedInside=false;return}closeModal()});
   bindModalClose(modal);modalEscapeHandler=e=>{if(e.key==='Escape')closeModal()};document.addEventListener('keydown',modalEscapeHandler);
 }
-function closeModal(){if(typeof adminRequestCounter!=='undefined')adminRequestCounter++;if(modalEscapeHandler){document.removeEventListener('keydown',modalEscapeHandler);modalEscapeHandler=null}closeNomineeViewMenu();closeAllAvatarCrops();$('#modal-root').innerHTML='';state.nomination=null;state.pendingCategory=null}
+function closeModal(){if(typeof teardownBoing==='function')teardownBoing(true);if(typeof adminRequestCounter!=='undefined')adminRequestCounter++;if(modalEscapeHandler){document.removeEventListener('keydown',modalEscapeHandler);modalEscapeHandler=null}closeNomineeViewMenu();closeAllAvatarCrops();$('#modal-root').innerHTML='';state.nomination=null;state.pendingCategory=null}
 function renderAuth(){openModal(`<div class="eyebrow">FLARE AWARDS · 2026</div><h2 class="auth-title">Вход / регистрация</h2><form id="auth-form" class="auth-form"><label class="form-field"><span>EMAIL</span><input name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Твой email"></label><label class="form-field form-field-pin"><span>ЛИЧНЫЙ PIN-КОД</span><span class="pin-input-wrap"><input id="auth-pin" name="pin" type="password" autocomplete="current-password" required minlength="4" maxlength="72" pattern="[A-Za-z0-9]{4,72}" placeholder="Придумай PIN из букв и цифр"><button type="button" class="pin-toggle" id="toggle-pin" aria-label="Показать PIN" aria-pressed="false"><svg class="pin-eye-show" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6-3.2 6-9.2 6-9.2-6-9.2-6Z"/><circle cx="12" cy="12" r="2.8"/></svg><svg class="pin-eye-hide" aria-hidden="true" viewBox="0 0 24 24" hidden><path d="m3 3 18 18M10.6 6.2A9.8 9.8 0 0 1 12 6c6 0 9.2 6 9.2 6a15.8 15.8 0 0 1-2.4 3.1M6.2 6.3C4 7.7 2.8 12 2.8 12s3.2 6 9.2 6c1.3 0 2.5-.3 3.5-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></span></label><p class="auth-error" id="auth-error"></p><button class="button" type="submit">Войти в аккаунт</button></form>`, 'auth-modal');$('#toggle-pin').onclick=e=>{const button=e.currentTarget,input=$('#auth-pin'),visible=input.type==='password';input.type=visible?'text':'password';button.setAttribute('aria-pressed',String(visible));button.setAttribute('aria-label',visible?'Скрыть PIN':'Показать PIN');$('.pin-eye-show',button).hidden=visible;$('.pin-eye-hide',button).hidden=!visible};$('#auth-form').onsubmit=async e=>{e.preventDefault();const form=new FormData(e.target),email=String(form.get('email')).trim().toLowerCase(),pin=String(form.get('pin'));const error=$('#auth-error'),button=$('button[type="submit"]',e.target);button.disabled=true;error.textContent='';try{if(!clientReady())throw new Error('Сначала настрой Supabase и заполни URL и anon key в config.js.');const data=await rpc('flare_access',{p_email:email,p_pin:pin});if(data.error)throw new Error(data.error);saveSession(data);await loadVideoCatalog();const pendingCategory=state.pendingCategory;state.pendingCategory=null;if(pendingCategory){state.category=pendingCategory;state.nominationListScrollTop=0;renderNominations()}else closeModal();toast(`Добро пожаловать, ${data.nickname}!`)}catch(err){error.textContent=err.message}finally{button.disabled=false}}}
 function renderWinners(){const track=$('#winner-track');track.innerHTML=previousWinners.map(([title,name,boldName],i)=>`<article class="winner-card"><div class="winner-card-top"><div class="winner-icon">${String(i+1).padStart(2,'0')}</div></div><div><div class="winner-title">${esc(title)}</div><div class="winner-name">${boldName?`<strong class="winner-name-highlight">${esc(name)}</strong>`:esc(name)}</div></div></article>`).join('');updateCarousel();}
 function updateCarousel(){const track=$('#winner-track'),cards=$$('.winner-card',track);if(!cards.length)return;const gap=parseFloat(getComputedStyle(track).gap)||0,width=cards[0].getBoundingClientRect().width+gap;const maxOffset=Math.max(0,track.scrollWidth-track.parentElement.clientWidth),maxIndex=Math.ceil(maxOffset/width);state.carousel=Math.max(0,Math.min(state.carousel,maxIndex));const offset=Math.min(state.carousel*width,maxOffset);track.style.transform=`translate3d(${-offset}px,0,0)`}
@@ -639,7 +655,7 @@ async function showAdmin(){
 }
 async function initializeSite(){
   await loadPhotoOverrides();
-  $('#auth-button').onclick=async()=>{if(state.session){const current=state.session;state.session=null;localStorage.removeItem('flare-session');updateAccount();rpc('flare_logout',{p_token:current.token}).catch(()=>{});toast('Ты вышел из аккаунта.')}else{renderAuth()}};
+  $('#auth-button').onclick=()=>{if(state.session)showProfile();else renderAuth()};
   $$('.intro-link[data-category]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();history.replaceState(null,'',link.getAttribute('href'));scrollToCategoryButtons()}));
   $$('.category-card').forEach(b=>b.onclick=()=>{b.blur();if(!state.session){state.pendingCategory=b.dataset.category;renderAuth();return}state.category=b.dataset.category;state.nominationListScrollTop=0;renderNominations()});$('#winner-prev').onclick=()=>moveCarousel(-1);$('#winner-next').onclick=()=>moveCarousel(1);renderFaq();renderWinners();initWinnerSwipe();renderEventOptions();updateAccount();initCountdown();initFloatingHeader();window.addEventListener('resize',updateCarousel);if(state.session)loadVideoCatalog();
   document.addEventListener('keydown',e=>{if(e.altKey&&e.shiftKey&&e.key.toLowerCase()==='a'&&state.session?.nickname.toLowerCase()==='maronnix')showAdmin()});
