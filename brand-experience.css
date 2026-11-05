@@ -1391,3 +1391,40 @@ small{color:#bdb7ad;font-weight:500}
 .faq-question span:last-child svg,.faq-item.open .faq-question span:last-child svg{transition:transform .42s cubic-bezier(.35,0,.25,1)}
 @media(max-width:600px){.faq-answer,.faq-item.open .faq-answer{padding-right:12px}}
 @media(prefers-reduced-motion:reduce){.faq-answer,.faq-item.open .faq-answer,.faq-question span:last-child svg,.faq-item.open .faq-question span:last-child svg{transition:none}}
+
+/* Compact three-part countdown with logo colors and a true upward number roll. */
+.hero-topline{grid-template-columns:minmax(0,1fr) max-content;gap:clamp(32px,4.5vw,76px)}
+.vote-countdown{justify-self:end;width:max-content;max-width:100%;padding:0}
+.countdown-label,.countdown-deadline{max-width:32ch;text-align:center;white-space:normal}
+.countdown-values{display:flex;width:max-content;max-width:100%;justify-content:flex-start;align-items:center;gap:clamp(10px,1.5vw,20px);margin:18px 0 12px}
+.countdown-unit{min-width:0;flex:0 0 auto;gap:8px}
+#vote-countdown .countdown-unit strong{position:relative;display:block;min-width:2.1ch;height:1em;overflow:hidden;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;font-family:"Manrope","DM Sans",sans-serif;font-size:clamp(96px,7vw,128px);font-weight:500;letter-spacing:-.055em;line-height:.94;font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(254,111,1,.14)}
+#vote-countdown .countdown-digit-roll{position:absolute;inset:0;display:block;overflow:hidden;white-space:nowrap;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;pointer-events:none}
+.countdown-separator{align-self:flex-start;margin:7px 0 0;color:#f59b23;font-family:"Manrope","DM Sans",sans-serif;font-size:clamp(34px,2.8vw,48px);font-weight:400;line-height:1}
+.vote-countdown.is-finished .countdown-unit strong{color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text}
+@media(max-width:1200px) and (min-width:901px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) max-content;gap:clamp(24px,3vw,40px)}
+  #vote-countdown .countdown-unit strong{font-size:clamp(80px,7.5vw,96px)}
+  .countdown-values{gap:clamp(8px,1.2vw,14px)}
+}
+@media(max-width:900px) and (min-width:701px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) max-content;gap:24px}
+  #vote-countdown .countdown-unit strong{font-size:clamp(68px,9vw,80px)}
+  .countdown-values{gap:8px}
+  .countdown-label{font-size:11px}
+  .countdown-deadline{font-size:12px}
+}
+@media(max-width:700px){
+  .hero-topline{grid-template-columns:minmax(0,1fr);gap:12px}
+  .vote-countdown{justify-self:center;width:max-content;max-width:100%;margin:12px auto 28px;padding:0}
+  .countdown-values{gap:clamp(8px,2.5vw,16px);margin:16px 0 12px}
+  #vote-countdown .countdown-unit strong{font-size:clamp(60px,12vw,78px)}
+  .countdown-unit{gap:6px}
+  .countdown-unit small{font-size:11px}
+  .countdown-separator{margin-top:5px;font-size:30px}
+}
+@media(max-width:390px){
+  #vote-countdown .countdown-unit strong{font-size:clamp(54px,14vw,62px)}
+  .countdown-values{gap:7px}
+  .countdown-unit small{font-size:10px}
+}

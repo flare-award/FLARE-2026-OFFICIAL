@@ -264,9 +264,23 @@ function loadPublicEventPollWinner(){
   return publicEventPollWinnerRequest;
 }
 function initCountdown(){
-  const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes'),seconds:$('#countdown-seconds')},status=$('#countdown-status'),label=$('.countdown-label',$('#vote-countdown')),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
+  const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes')},status=$('#countdown-status'),label=$('.countdown-label',$('#vote-countdown')),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
   let timer,currentPhase=-1,closedHandled=false,pollLoadStarted=false,pollLoadFailed=false;
   const pad=n=>String(n).padStart(2,'0');
+  const setDigit=(element,value)=>{
+    const previous=element.dataset.value??element.textContent.trim();
+    if(previous===value)return;
+    element.dataset.value=value;
+    const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if(reduceMotion||typeof element.animate!=='function'){element.textContent=value;return}
+    const outgoing=document.createElement('span'),incoming=document.createElement('span');
+    outgoing.className='countdown-digit-roll countdown-digit-outgoing';outgoing.textContent=previous;
+    incoming.className='countdown-digit-roll countdown-digit-incoming';incoming.textContent=value;
+    element.replaceChildren(outgoing,incoming);
+    const easing='cubic-bezier(.22,.8,.2,1)';
+    outgoing.animate([{transform:'translateY(0%)',opacity:1},{transform:'translateY(-110%)',opacity:0}],{duration:420,easing,fill:'forwards'});
+    incoming.animate([{transform:'translateY(110%)',opacity:0},{transform:'translateY(0%)',opacity:1}],{duration:460,easing,fill:'forwards'}).finished.then(()=>{if(element.dataset.value===value)element.textContent=value}).catch(()=>{});
+  };
   const showPollRetry=()=>{
     status.replaceChildren(document.createTextNode('Не удалось получить результат опроса. '));
     const retry=document.createElement('button');retry.type='button';retry.className='text-button';retry.textContent='Повторить';
@@ -309,7 +323,7 @@ function initCountdown(){
       }else{label.textContent='ДО ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Победители появятся 6 декабря'}
       box.setAttribute('aria-label',label.textContent.toLowerCase());
     }
-    units.days.textContent=pad(Math.floor(total/86400));units.hours.textContent=pad(Math.floor(total%86400/3600));units.minutes.textContent=pad(Math.floor(total%3600/60));units.seconds.textContent=pad(total%60);
+    setDigit(units.days,pad(Math.floor(total/86400)));setDigit(units.hours,pad(Math.floor(total%86400/3600)));setDigit(units.minutes,pad(Math.floor(total%3600/60)));
   };
   tick();if(Date.now()<winnersReleaseDate.getTime())timer=setInterval(tick,1000);
 }
