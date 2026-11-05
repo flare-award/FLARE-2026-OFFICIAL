@@ -1552,3 +1552,10 @@ small{color:#bdb7ad;font-weight:500}
 .event-poll-section .poll-option.has-results{padding-block:21px}
 
 .footer-social-link svg.telegram-plane-icon{width:31px;height:31px}
+
+/* Let the header wordmark fade and collapse smoothly when returning to the intro. */
+.topbar .wordmark{flex:0 0 auto;width:auto;max-width:180px;min-width:0;overflow:hidden;transition:max-width .28s cubic-bezier(.2,.7,.2,1),opacity .22s ease,transform .22s ease,visibility 0s}
+.topbar.is-at-top .wordmark{flex-basis:auto;width:auto;max-width:0;min-width:0;overflow:hidden;transition:max-width .28s cubic-bezier(.2,.7,.2,1),opacity .22s ease,transform .22s ease,visibility 0s linear .22s}
+.topbar.is-scrolled .wordmark{flex-basis:auto;width:auto;max-width:180px;transition:max-width .28s cubic-bezier(.2,.7,.2,1),opacity .25s ease,transform .25s ease,visibility 0s}
+@media(max-width:600px){.topbar.is-scrolled .wordmark{max-width:120px}}
+@media(prefers-reduced-motion:reduce){.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{transition:none}}
