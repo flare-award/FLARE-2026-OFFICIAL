@@ -1383,3 +1383,8 @@ small{color:#bdb7ad;font-weight:500}
 
 /* Larger vector viewport on desktop keeps the rounded icon strokes smooth at normal DPI. */
 @media(min-width:601px){.nomination-art-icon{width:104px;height:104px;opacity:.84}}
+
+/* Slow, restrained color drift for the FAQ closing line. */
+.faq-intro h2 em{background-size:240% 100%;background-position:0% 50%;background-repeat:no-repeat;animation:faq-heading-gradient-drift 18s ease-in-out infinite alternate}
+@keyframes faq-heading-gradient-drift{from{background-position:0% 50%}to{background-position:100% 50%}}
+@media(prefers-reduced-motion:reduce){.faq-intro h2 em{animation:none;background-position:50% 50%}}
