@@ -1552,3 +1552,8 @@ small{color:#bdb7ad;font-weight:500}
 @keyframes category-navigation-dim{from{opacity:0}to{opacity:1}}
 @keyframes category-navigation-panel{from{opacity:.82;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.modal-backdrop.category-navigation-backdrop,.modal-backdrop.category-navigation-backdrop>.modal{animation:none}}
+
+/* Tighten the optical spacing between independently animated numeral slots. */
+#countdown-section .countdown-digit-slot{display:flex;justify-content:center;text-align:center}
+#countdown-section .countdown-digit-slot:not(:last-child){margin-right:-.065em}
+#countdown-section .countdown-digit-roll{will-change:transform,opacity}

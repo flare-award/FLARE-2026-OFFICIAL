@@ -283,10 +283,10 @@ function loadPublicEventPollWinner(){
 function initCountdown(){
   const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes')},minuteLabel=$('#countdown-minutes-label'),status=$('#countdown-status'),label=$('#countdown-title'),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
   let timer,currentPhase=-1,closedHandled=false,pollLoadStarted=false,pollLoadFailed=false;
-  const pad=n=>String(n).padStart(2,'0');
+  const pad=n=>String(n).padStart(2,'0'),digitAnimations=new WeakMap();
   const setDigit=(element,value)=>{
-    const previous=element.dataset.value??element.textContent.trim();
-    if(previous===value)return;
+    const previous=element.dataset.value??element.textContent.trim(),hasRendered=element.dataset.value!==undefined||Boolean(element.querySelector('.countdown-digit-stage'));
+    if(previous===value){element.dataset.value=value;return}
     element.dataset.value=value;
     const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if(reduceMotion||typeof element.animate!=='function'){element.textContent=value;return}
@@ -300,16 +300,21 @@ function initCountdown(){
     nextDigits.forEach((digit,index)=>{
       let slot=stage.children[index];
       if(!slot){slot=document.createElement('span');slot.className='countdown-digit-slot';stage.append(slot)}
+      if(!hasRendered){slot.dataset.value=digit;slot.textContent=digit;return}
       if(previousDigits[index]===digit){slot.dataset.value=digit;return}
       const token=Number(slot.dataset.animationToken||0)+1;slot.dataset.animationToken=String(token);slot.dataset.value=digit;
+      digitAnimations.get(slot)?.forEach(animation=>animation.cancel());
+      digitAnimations.delete(slot);
       const stack=document.createElement('span'),outgoing=document.createElement('span'),incoming=document.createElement('span');
       stack.className='countdown-digit-stack';
       outgoing.className='countdown-digit-roll countdown-digit-outgoing';outgoing.textContent=previousDigits[index]??digit;
       incoming.className='countdown-digit-roll countdown-digit-incoming';incoming.textContent=digit;
       stack.append(outgoing,incoming);slot.replaceChildren(stack);
-      const easing='cubic-bezier(.22,.8,.2,1)';
-      outgoing.animate([{transform:'translate3d(0,0,0)',opacity:1},{transform:'translate3d(0,-115%,0)',opacity:0}],{duration:560,easing,fill:'forwards'});
-      incoming.animate([{transform:'translate3d(0,115%,0)',opacity:0},{transform:'translate3d(0,0,0)',opacity:1}],{duration:620,easing,fill:'forwards'}).finished.then(()=>{if(slot.dataset.animationToken===String(token))slot.textContent=digit}).catch(()=>{});
+      const easing='cubic-bezier(.2,.72,.25,1)';
+      const outgoingAnimation=outgoing.animate([{transform:'translate3d(0,0,0)',opacity:1},{transform:'translate3d(0,-105%,0)',opacity:0}],{duration:390,easing,fill:'both'});
+      const incomingAnimation=incoming.animate([{transform:'translate3d(0,105%,0)',opacity:0},{transform:'translate3d(0,0,0)',opacity:1}],{duration:460,easing,fill:'both'});
+      digitAnimations.set(slot,[outgoingAnimation,incomingAnimation]);
+      incomingAnimation.finished.then(()=>{if(slot.dataset.animationToken===String(token)){digitAnimations.delete(slot);outgoingAnimation.cancel();incomingAnimation.cancel();slot.textContent=digit}}).catch(()=>{if(slot.dataset.animationToken===String(token)){digitAnimations.delete(slot);slot.textContent=digit}});
     });
   };
   const showPollRetry=()=>{
