@@ -1285,7 +1285,7 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 .visual-tester-locked{background:linear-gradient(145deg,#211e18,#141312)!important}
 
 /* Clearer copy, softened category accents, and a short dark entry reveal. */
-body::after{content:"";position:fixed;inset:0;z-index:9999;background:#010101;opacity:0;pointer-events:none;transform:translateZ(0);backface-visibility:hidden;will-change:opacity;animation:flare-entry-reveal .72s ease-out 0s both}
+body::after{content:"";position:fixed;inset:0;z-index:9999;background:#010101;opacity:0;pointer-events:none;transform:translateZ(0);backface-visibility:hidden;will-change:opacity;animation:flare-entry-reveal 1.2s cubic-bezier(.4,0,.2,1) 0s both}
 @keyframes flare-entry-reveal{from{opacity:1}to{opacity:0}}
 @media(prefers-reduced-motion:reduce){body::after{animation:none;opacity:0;will-change:auto}}
 
