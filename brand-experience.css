@@ -1069,61 +1069,8 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 @media(max-width:900px) and (min-width:601px){.countdown-unit strong{font-size:clamp(48px,6vw,58px)}}
 @media(max-width:600px){.countdown-unit strong{font-size:clamp(44px,13vw,54px)}.countdown-separator{font-size:25px}}
 
-/* Ceremony countdown and the date-gated 2026 winners reveal. */
-#vote-countdown .countdown-values[hidden],#winners-2026-teaser[hidden],#winners-2026-results[hidden]{display:none!important}
-#winners-2026[hidden]{display:none!important}
-.winners-2026-section{position:relative;padding:90px 0 100px;background:linear-gradient(180deg,#0d0d0c,#11100e 48%,#0d0d0c);border-block:1px solid rgba(255,255,255,.07)}
-.winners-2026-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:32px}
-.winners-2026-heading h2{margin:12px 0 0;font:700 clamp(38px,4.5vw,62px)/1.05 var(--logo);letter-spacing:-.025em}
-.winners-2026-heading h2 em{color:#e7b650;font-style:normal}
-.winners-2026-release-label{padding:10px 13px;border:1px solid rgba(255,193,7,.22);border-radius:999px;color:#dbbf7d;font-size:11px;font-weight:700;letter-spacing:.11em;white-space:nowrap}
-.winners-2026-teaser{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(20px,4vw,54px);min-height:220px;padding:clamp(22px,4vw,46px);overflow:hidden;border:1px solid rgba(255,193,7,.2);border-radius:18px;background:radial-gradient(ellipse at 0% 100%,rgba(255,164,34,.12),transparent 55%),linear-gradient(120deg,#191713,#11110f 70%);box-shadow:0 18px 48px rgba(0,0,0,.22)}
-.winners-2026-teaser-mark{color:rgba(255,193,7,.16);font:900 clamp(72px,12vw,150px)/.8 "Archivo Black",sans-serif;letter-spacing:-.09em}
-.winners-2026-teaser-copy h3{margin:9px 0 7px;color:#f5efe3;font:700 clamp(24px,3.2vw,38px)/1.1 var(--logo)}
-.winners-2026-teaser-copy p{max-width:600px;margin:0;color:#aaa398;font-size:14px;line-height:1.65}
-.winners-2026-teaser-date{display:grid;justify-items:center;padding-left:clamp(18px,3vw,42px);border-left:1px solid rgba(255,255,255,.12);color:#f2d28c}
-.winners-2026-teaser-date strong{font:700 clamp(42px,6vw,68px)/.95 "Archivo Black",sans-serif}
-.winners-2026-teaser-date span{margin-top:7px;font-size:10px;font-weight:700;letter-spacing:.16em}
-.winners-2026-status{min-height:0;margin:0 0 14px;color:#d6c28f;font-size:13px}
-.winners-2026-status:empty{display:none}
-.winners-2026-retry{margin-left:8px}
-.winner-2026-category+.winner-2026-category{margin-top:55px}
-.winner-2026-category-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,.1)}
-.winner-2026-category-heading>span{color:#c2a665;font-size:10px;font-weight:700;letter-spacing:.17em}
-.winner-2026-category-heading h3{margin:0;color:#f1ede4;font:700 clamp(21px,2.8vw,30px)/1.15 var(--logo)}
-.winner-2026-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
-.winner-2026-card{min-width:0;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:linear-gradient(145deg,#191816,#111110);box-shadow:0 12px 30px rgba(0,0,0,.2);transition:transform .18s,border-color .18s,box-shadow .18s}
-.winner-2026-card:hover{transform:translateY(-3px);border-color:rgba(255,193,7,.38);box-shadow:0 17px 36px rgba(0,0,0,.32)}
-.winner-2026-photo{position:relative;aspect-ratio:16/9;overflow:hidden;background:linear-gradient(135deg,#453728,#171817 62%,#2d2220)}
-.winner-2026-photo-video{background:linear-gradient(135deg,#1f3f42,#172124 55%,#52402c)}
-.winner-2026-photo-person{background:radial-gradient(circle at 30% 30%,#765638,#222020 70%)}
-.winner-2026-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-.winner-2026-badge{position:absolute;top:12px;left:12px;padding:7px 10px;border:1px solid rgba(255,211,110,.42);border-radius:999px;background:rgba(13,12,10,.84);color:#f2d18a;font-size:9px;font-weight:800;letter-spacing:.1em}
-.winner-2026-copy{display:grid;gap:7px;padding:17px 18px 19px}
-.winner-2026-nomination{color:#bba36e;font-size:10px;font-weight:700;letter-spacing:.1em;line-height:1.4;text-transform:uppercase}
-.winner-2026-copy h4{margin:0;color:#f5f0e7;font-size:clamp(16px,1.5vw,20px);font-weight:700;line-height:1.35;overflow-wrap:anywhere}
-.winner-2026-votes{color:#918b80;font-size:11px}
-.winner-2026-empty{display:grid;gap:10px;align-content:center;min-height:105px;padding:18px;border:1px dashed rgba(255,255,255,.14);border-radius:12px;color:#918b80}
-.winner-2026-empty span{color:#bba36e;font-size:10px;font-weight:700;letter-spacing:.1em}
-.winner-2026-empty strong{color:#c3bdb1;font-size:14px}
-@media(max-width:900px){.winner-2026-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:700px){
-  .winners-2026-section{padding:62px 0 70px}
-  .winners-2026-heading{align-items:start;flex-direction:column;gap:16px;margin-bottom:22px}
-  .winners-2026-release-label{font-size:9px}
-  .winners-2026-teaser{grid-template-columns:auto minmax(0,1fr);gap:18px;min-height:175px;padding:21px;border-radius:14px}
-  .winners-2026-teaser-mark{font-size:70px}
-  .winners-2026-teaser-copy p{font-size:12px}
-  .winners-2026-teaser-date{grid-column:2;justify-self:start;display:flex;align-items:baseline;gap:7px;padding:0;border:0}
-  .winners-2026-teaser-date strong{font-size:28px}
-  .winners-2026-teaser-date span{margin:0}
-  .winner-2026-category+.winner-2026-category{margin-top:38px}
-  .winner-2026-category-heading{align-items:start;flex-direction:column;gap:7px}
-  .winner-2026-grid{gap:10px}
-  .winner-2026-copy{gap:6px;padding:12px}
-  .winner-2026-badge{top:8px;left:8px;padding:6px 8px;font-size:8px}
-}
-@media(max-width:430px){.winner-2026-grid{grid-template-columns:minmax(0,1fr)}}
+/* Hide the digit row when the countdown has completed. */
+#vote-countdown .countdown-values[hidden]{display:none!important}
 
 /* Unified, calmer layout for the organizer's Design library. */
 .admin-design-panel{gap:20px;color:#eee9e0;font-size:14px}
@@ -1501,8 +1448,8 @@ small{color:#bdb7ad;font-weight:500}
 .footer-socials{margin:42px auto 0}
 .footer-bottom{margin-top:34px}
 
-/* Keep equal breathing room across the main content transitions. */
-:root{--content-section-spacing:clamp(184px,13vw,216px)}
+/* Section gaps track the intro-to-hero breathing room, kept slightly tighter. */
+:root{--content-section-spacing:clamp(250px,36svh,340px)}
 .hero{padding-bottom:calc(var(--content-section-spacing)/2)}
 .hero-copy{margin-bottom:0}
 .vote-hub{padding-top:calc(var(--content-section-spacing)/2)}
@@ -1535,7 +1482,7 @@ small{color:#bdb7ad;font-weight:500}
 .hero-year{justify-self:start;overflow:visible;margin-left:clamp(20px,1.5vw,26px);padding-right:.14em;letter-spacing:-.055em}
 @media(min-width:701px){.hero-topline{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
 @media(max-width:700px){.hero-year{justify-self:start}}
-.hero-year{background:linear-gradient(145deg,#e6e3dd 0%,#c2bdb4 56%,#a9a498 100%);-webkit-background-clip:text;background-clip:text;filter:none;text-shadow:none;opacity:.94}
+.hero-year{background:linear-gradient(180deg,#F0B449 0%,#DE9B23 100%);-webkit-background-clip:text;background-clip:text;filter:none;text-shadow:none;opacity:1}
 
 /* Tighten the title-to-digits gap and keep the minute word directly tied to its value. */
 #countdown-section .countdown-heading{margin-bottom:0}
@@ -1547,13 +1494,17 @@ small{color:#bdb7ad;font-weight:500}
 .faq-intro p{position:relative;top:-4px}
 
 /* Category navigation gets a visible, smooth dim before its list settles in. */
-.modal-backdrop.category-navigation-backdrop{animation:category-navigation-dim .36s cubic-bezier(.2,.7,.2,1) both}
-.modal-backdrop.category-navigation-backdrop>.modal{animation:category-navigation-panel .24s cubic-bezier(.2,.7,.2,1) both}
-@keyframes category-navigation-dim{from{opacity:0}to{opacity:1}}
-@keyframes category-navigation-panel{from{opacity:.82;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-backdrop.category-navigation-backdrop{animation:category-navigation-dim .28s cubic-bezier(.2,.7,.2,1) both}
+.modal-backdrop.category-navigation-backdrop>.modal{animation:category-navigation-panel .2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes category-navigation-dim{from{background-color:rgba(0,0,0,0)}to{background-color:rgba(0,0,0,.91)}}
+@keyframes category-navigation-panel{from{transform:translateY(4px) scale(.995)}to{transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.modal-backdrop.category-navigation-backdrop,.modal-backdrop.category-navigation-backdrop>.modal{animation:none}}
 
 /* Tighten the optical spacing between independently animated numeral slots. */
 #countdown-section .countdown-digit-slot{display:flex;justify-content:center;text-align:center}
 #countdown-section .countdown-digit-slot:not(:last-child){margin-right:-.065em}
 #countdown-section .countdown-digit-roll{will-change:transform,opacity}
+
+/* More substantial separators balance the enlarged countdown figures. */
+#countdown-section .countdown-separator{font-size:clamp(52px,5.8vw,88px);font-weight:800;line-height:.82}
+@media(max-width:700px){#countdown-section .countdown-separator{font-size:clamp(42px,10vw,54px);font-weight:800}}
