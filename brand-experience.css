@@ -12,8 +12,8 @@ body{background:#010101}
 .brand-intro::before{content:"";position:absolute;inset:-2.5px;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(1,1,1,.4) 0%,rgba(1,1,1,.4) 67%,rgba(1,1,1,.2) 100%),linear-gradient(180deg,rgba(1,1,1,.2) 0%,rgba(1,1,1,.24) 66%,#010101 100%)}
 .intro-logo{position:relative;z-index:2;margin:0;font-family:"Rubik",var(--font),sans-serif;font-size:clamp(90px,15vw,240px);font-weight:700;line-height:.92;letter-spacing:.045em;text-align:center;text-transform:uppercase;color:transparent;background:var(--flare-logo-gradient);-webkit-background-clip:text;background-clip:text;transform:none;filter:var(--flare-logo-glow);user-select:none}
 .intro-links{position:relative;z-index:3;display:flex;flex-wrap:wrap;justify-content:center;gap:17.5px;padding:0 25px}
-.intro-link{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 28.75px;border:1.25px solid transparent;border-radius:1248.75px;background:linear-gradient(90deg,#FFD54F 0%,#FF9800 100%);box-shadow:0 6.25px 25px rgba(255,152,0,.18);color:#1b1005;font-family:var(--font);font-size:15px;font-weight:600;letter-spacing:.02em;text-align:center;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
-.intro-link:nth-child(2){background:linear-gradient(#0a080b,#0a080b) padding-box,linear-gradient(110deg,#FF4D9D 0%,#7B1FA2 100%) border-box;color:#fff0dd;box-shadow:0 5px 22.5px rgba(123,31,162,.16)}
+.intro-link{display:inline-flex;align-items:center;justify-content:center;min-height:60px;padding:0 28.75px;border:1.25px solid transparent;border-radius:1248.75px;background:linear-gradient(112deg,#FFE07A 0%,#FFD86C 24%,#FFCF5D 48%,#FFC451 72%,#F6B344 100%);box-shadow:0 6.25px 25px rgba(255,152,0,.18);color:#1b1005;font-family:var(--font);font-size:15px;font-weight:600;letter-spacing:.02em;text-align:center;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
+.intro-link:nth-child(2){background:linear-gradient(#0a080b,#0a080b) padding-box,linear-gradient(118deg,#E89BCB 0%,#D889C3 28%,#C477B8 62%,#A768AA 100%) border-box;color:#fff0dd;box-shadow:0 5px 22.5px rgba(123,31,162,.16)}
 .intro-link:hover{transform:translateY(-2.5px);filter:brightness(1.08);box-shadow:0 8.75px 30px rgba(255,152,0,.27)}
 .intro-link:nth-child(2):hover{box-shadow:0 8.75px 30px rgba(240,98,146,.24)}
 .topbar{position:fixed;z-index:15;top:0;left:0;right:0;width:100%;height:95px;margin:0;padding:0 clamp(20px,3.2vw,55px);display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,7,.96);-webkit-backdrop-filter:none;backdrop-filter:none;border:0;border-bottom:1.25px solid rgba(255,255,255,.08);border-radius:0;transform:translate3d(0,0,0);opacity:1;visibility:visible;pointer-events:auto;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease,background-color .3s ease,border-color .3s ease,visibility 0s;will-change:transform}
@@ -352,8 +352,8 @@ h1,h2,h3,.intro-logo,.wordmark,.hero-logo,.footer-lockup,.category-title,.nomina
 .admin-head .close-button:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.13);color:#ff8585;transform:scale(1.04)}
 
 /* A subtle completion mark instead of a text pill on voted nominations. */
-.nomination-voted{display:grid;place-items:center;width:35px;height:35px;padding:0;border:1px solid rgba(197,244,181,.64);border-radius:50%;background:linear-gradient(145deg,rgba(23,70,37,.96),rgba(11,34,20,.96));color:#d4ffc5;font-size:20px;font-weight:800;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.38),0 0 16px rgba(124,219,129,.18)}
-.nomination-voted-icon{display:block;width:22px;height:22px;object-fit:contain}
+.nomination-voted{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:0;background:transparent;color:#d4ffc5;font-size:0;font-weight:800;line-height:1;box-shadow:none}
+.nomination-voted-icon{display:block;width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.82))}
 
 /* Paired carousel arrows remain the same glyph; the previous arrow is mirrored. */
 .carousel-controls .icon-button{display:grid;place-items:center;padding:0;line-height:1}
@@ -1183,7 +1183,7 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 @media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-1)}}
 
 /* Avoid thin edge artifacts on the primary intro pill while keeping its palette. */
-.intro-links>.intro-link:first-child{border:0;border-radius:999px;padding-inline:30px;background:linear-gradient(90deg,#FFD54F 0%,#FF9800 100%);background-size:100% 100%;background-repeat:no-repeat;background-clip:padding-box}
+.intro-links>.intro-link:first-child{border:0;border-radius:999px;padding-inline:30px;background:linear-gradient(112deg,#FFE07A 0%,#FFD86C 24%,#FFCF5D 48%,#FFC451 72%,#F6B344 100%);background-size:100% 100%;background-repeat:no-repeat;background-clip:padding-box}
 
 .admin-access-panel{display:grid;gap:16px}
 .admin-access-card{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:linear-gradient(145deg,#181612,#11100e)}
@@ -1261,15 +1261,16 @@ body::after{content:"";position:fixed;inset:0;z-index:9999;background:#010101;op
 
 .category-card.primary-category{border-color:rgba(250,74,94,.32);background:linear-gradient(125deg,rgba(250,74,94,.15),rgba(25,17,19,.98) 60%,#11100f 100%)}
 .category-card.primary-category:hover{border-color:rgba(250,74,94,.58);box-shadow:0 24px 60px rgba(250,74,94,.11),0 16px 40px rgba(0,0,0,.34)}
-.category-card.extra-category{border-color:rgba(204,1,203,.34);background:linear-gradient(125deg,rgba(204,1,203,.13),rgba(23,15,23,.98) 60%,#110f11 100%)}
-.category-card.extra-category:hover{border-color:rgba(204,1,203,.58);box-shadow:0 24px 60px rgba(204,1,203,.12),0 16px 40px rgba(0,0,0,.34)}
+.category-card.extra-category{border-color:rgba(196,112,190,.34);background:linear-gradient(125deg,rgba(186,88,180,.13),rgba(31,22,31,.98) 60%,#131113 100%)}
+.category-card.extra-category:hover{border-color:rgba(196,112,190,.52);box-shadow:0 24px 60px rgba(186,88,180,.1),0 16px 40px rgba(0,0,0,.34)}
 .primary-category .card-index{color:#ffabb5}
 .extra-category .card-index{color:#e89be6}
 .primary-category .category-count{border-color:rgba(250,74,94,.42);background:rgba(250,74,94,.09);color:#ffb4be}
 .extra-category .category-count{border-color:rgba(204,1,203,.42);background:rgba(204,1,203,.10);color:#e9a0e8}
 .category-symbol img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 17px rgba(250,74,94,.2));}
 .extra-category .category-symbol img{filter:drop-shadow(0 0 17px rgba(204,1,203,.23))}
-.category-card:hover .category-symbol img{transform:scale(1.035)}
+.category-card:hover .category-symbol{transform:translateY(-50%)}
+.category-card:hover .category-symbol img{transform:none}
 .nomination-art-icon{width:88px;height:88px;opacity:.88}
 @media(max-width:600px){
   .hero-copy{font-size:16.5px}
@@ -1478,11 +1479,11 @@ small{color:#bdb7ad;font-weight:500}
 #countdown-section .countdown-digit-stack{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:hidden}
 #countdown-section .countdown-digit-roll{inset:0;width:100%;height:100%;}
 
-/* Give the year room at the edge and align it farther left in the hero. */
-.hero-year{justify-self:start;overflow:visible;margin-left:clamp(20px,1.5vw,26px);padding-right:.14em;letter-spacing:-.055em}
+/* Give the year room at the edge and nudge it slightly farther right. */
+.hero-year{justify-self:start;overflow:visible;margin-left:clamp(26px,1.9vw,32px);padding-right:.14em;letter-spacing:-.055em}
 @media(min-width:701px){.hero-topline{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
 @media(max-width:700px){.hero-year{justify-self:start}}
-.hero-year{background:linear-gradient(180deg,#F0B449 0%,#DE9B23 100%);-webkit-background-clip:text;background-clip:text;filter:none;text-shadow:none;opacity:1}
+.hero-year{background:linear-gradient(180deg,#F2B247 0%,#E39A1F 100%);-webkit-background-clip:text;background-clip:text;filter:none;text-shadow:none;opacity:1}
 
 /* Tighten the title-to-digits gap and keep the minute word directly tied to its value. */
 #countdown-section .countdown-heading{margin-bottom:0}
@@ -1508,3 +1509,8 @@ small{color:#bdb7ad;font-weight:500}
 /* More substantial separators balance the enlarged countdown figures. */
 #countdown-section .countdown-separator{font-size:clamp(52px,5.8vw,88px);font-weight:800;line-height:.82}
 @media(max-width:700px){#countdown-section .countdown-separator{font-size:clamp(42px,10vw,54px);font-weight:800}}
+
+/* Bring back the larger closing gap below the FAQ and emphasize the track title. */
+.footer-bottom{margin-top:94px}
+.winner-name-highlight{color:#f3eee4;font-weight:800}
+@media(max-width:600px){.footer-bottom{margin-top:68px}}
