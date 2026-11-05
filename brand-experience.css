@@ -5,6 +5,13 @@
   font-weight:400;
   font-display:swap;
 }
+@font-face{
+  font-family:"Bowlby One SC";
+  src:url("assets/brand/BowlbyOneSC-Latin.woff2?v=1") format("woff2");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
 :root{--logo:"Roundo Cyrillic",sans-serif}
 body{background:#010101}
 .brand-intro{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:47.5px;width:100%;height:100vh;height:100svh;min-height:575px;overflow:hidden;background:#010101}
@@ -1182,9 +1189,6 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 }
 @media(max-width:360px){.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:var(--space-1)}}
 
-/* Avoid thin edge artifacts on the primary intro pill while keeping its palette. */
-.intro-links>.intro-link:first-child{border:0;border-radius:999px;padding-inline:30px;background:linear-gradient(112deg,#FFE07A 0%,#FFD86C 24%,#FFCF5D 48%,#FFC451 72%,#F6B344 100%);background-size:100% 100%;background-repeat:no-repeat;background-clip:padding-box}
-
 .admin-access-panel{display:grid;gap:16px}
 .admin-access-card{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:linear-gradient(145deg,#181612,#11100e)}
 .admin-access-kicker{color:#c6a866;font-size:10px;font-weight:700;letter-spacing:.14em}
@@ -1482,7 +1486,7 @@ small{color:#bdb7ad;font-weight:500}
 #countdown-section .countdown-digit-roll{inset:0;width:100%;height:100%;}
 
 /* Give the year room at the edge and nudge it slightly farther right. */
-.hero-year{justify-self:start;overflow:visible;margin-left:clamp(36px,2.6vw,44px);padding-right:.14em;letter-spacing:-.055em}
+.hero-year{justify-self:start;overflow:visible;margin-left:clamp(44px,3.1vw,52px);padding-right:.14em;letter-spacing:-.055em}
 @media(min-width:701px){.hero-topline{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
 @media(max-width:700px){.hero-year{justify-self:start}}
 .hero-year{background:linear-gradient(180deg,#F2B247 0%,#E39A1F 100%);-webkit-background-clip:text;background-clip:text;filter:none;text-shadow:none;opacity:1}
@@ -1497,10 +1501,10 @@ small{color:#bdb7ad;font-weight:500}
 .faq-intro p{position:relative;top:-4px}
 
 /* Category navigation gets a visible, smooth dim before its list settles in. */
-.modal-backdrop.category-navigation-backdrop{animation:category-navigation-dim .28s cubic-bezier(.2,.7,.2,1) both}
-.modal-backdrop.category-navigation-backdrop>.modal{animation:category-navigation-panel .2s cubic-bezier(.2,.8,.2,1) both}
+.modal-backdrop.category-navigation-backdrop{animation:category-navigation-dim .24s ease-out both}
+.modal-backdrop.category-navigation-backdrop>.modal{animation:category-navigation-panel .28s cubic-bezier(.2,.75,.25,1) both}
 @keyframes category-navigation-dim{from{background-color:rgba(0,0,0,0)}to{background-color:rgba(0,0,0,.91)}}
-@keyframes category-navigation-panel{from{transform:translateY(4px) scale(.995)}to{transform:translateY(0) scale(1)}}
+@keyframes category-navigation-panel{from{opacity:0;transform:translateY(14px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.modal-backdrop.category-navigation-backdrop,.modal-backdrop.category-navigation-backdrop>.modal{animation:none}}
 
 /* Tighten the optical spacing between independently animated numeral slots. */
@@ -1518,16 +1522,16 @@ small{color:#bdb7ad;font-weight:500}
 .winner-name-highlight{color:#f3eee4;font-weight:700;font-synthesis:none}
 @media(max-width:600px){.footer-bottom{margin-top:68px}}
 
-/* Matched intro shortcuts: only the category hue differs, not the control styling. */
-.intro-links .intro-link,.intro-links .intro-link:nth-child(2){min-height:60px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:#FA4A5E;box-shadow:none;color:#160d0f;filter:none;transform:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
-.intro-links .intro-link[data-category="доп."]{background:#DF46EA}
-.intro-links .intro-link:hover,.intro-links .intro-link:nth-child(2):hover{background:#FF6576;border-color:rgba(255,255,255,.27);box-shadow:none;color:#160d0f;filter:none;transform:none}
-.intro-links .intro-link[data-category="доп."]:hover{background:#E65AF0}
+/* Dark outlined shortcuts use each category's accent, with no inherited yellow fill. */
+.brand-intro .intro-links>.intro-link,.brand-intro .intro-links>.intro-link:nth-child(2){min-height:60px;border:1px solid rgba(250,74,94,.68);border-radius:999px;background:#0A080B;box-shadow:none;color:#FA4A5E;filter:none;transform:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+.brand-intro .intro-links>.intro-link[data-category="доп."]{border-color:rgba(223,70,234,.68);color:#DF46EA}
+.brand-intro .intro-links>.intro-link:hover,.brand-intro .intro-links>.intro-link:nth-child(2):hover{border-color:#FA4A5E;background:#151012;box-shadow:none;color:#FA4A5E;filter:none;transform:none}
+.brand-intro .intro-links>.intro-link[data-category="доп."]:hover{border-color:#DF46EA;background:#170E18;color:#DF46EA}
 
-/* A bold, distinctive locally bundled display face for the FLARE wordmarks. */
-.intro-logo,.wordmark,.wordmark>span{font-family:"Archivo Black",sans-serif;font-weight:400;font-synthesis:none}
-.intro-logo{letter-spacing:.02em}
-.wordmark,.wordmark>span{letter-spacing:.04em}
+/* Distinctive, extra-heavy display lettering for the FLARE wordmarks. */
+.intro-logo,.wordmark,.wordmark>span{font-family:"Bowlby One SC","Archivo Black",sans-serif;font-weight:400;font-synthesis:none}
+.intro-logo{letter-spacing:.01em}
+.wordmark,.wordmark>span{letter-spacing:.025em}
 
 /* Optical inset aligns supporting copy and section labels with the display headings. */
 .hero-copy,.poll-copy>.eyebrow,.poll-copy>p,.winners-heading .eyebrow,.carousel-caption-copy,.faq-intro>.eyebrow,.faq-intro>p{transform:translateX(4px)}
@@ -1547,4 +1551,4 @@ small{color:#bdb7ad;font-weight:500}
 .event-poll-section .poll-option strong,.event-poll-section .poll-option-date strong{font-size:18px;line-height:1.35}
 .event-poll-section .poll-option.has-results{padding-block:21px}
 
-.footer-social-link svg.telegram-plane-icon{width:28px;height:28px}
+.footer-social-link svg.telegram-plane-icon{width:31px;height:31px}

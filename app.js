@@ -265,7 +265,7 @@ function bindDesignPanel(){
   bindAvatarCropControls(grid);
   $('#export-design-changes').onclick=()=>exportPhotoPack(true);$('#export-design-photos').onclick=()=>exportPhotoPack(false);updatePhotoSyncStatus();
 }
-function scrollToVoteHeading(){const heading=$('.vote-hub .section-heading');if(!heading)return 0;const header=$('#site-header'),headerHeight=header?.getBoundingClientRect().height||95,portraitPhone=matchMedia('(max-width:600px) and (orientation:portrait)').matches,topOffset=portraitPhone?Math.max(0,headerHeight+24):Math.max(118,headerHeight+10),target=Math.max(0,window.scrollY+heading.getBoundingClientRect().top-topOffset),distance=Math.abs(target-window.scrollY),reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;window.scrollTo({top:target,behavior:reducedMotion?'auto':'smooth'});return distance}
+function scrollToCategoryButtons(){const card=$('#category-primary');if(!card)return 0;const rect=card.getBoundingClientRect(),headerHeight=$('#site-header')?.getBoundingClientRect().height||95,desiredCenter=Math.max(headerHeight+rect.height/2+16,window.innerHeight*.58),maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),target=Math.min(maxScroll,Math.max(0,window.scrollY+rect.top+rect.height/2-desiredCenter)),distance=Math.abs(target-window.scrollY),reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;window.scrollTo({top:target,behavior:reducedMotion?'auto':'smooth'});return distance}
 let publicEventPollWinner=null,publicEventPollWinnerResolved=false,publicEventPollWinnerRequest=null;
 function loadPublicEventPollWinner(){
   if(publicEventPollWinnerResolved)return Promise.resolve(publicEventPollWinner);
@@ -637,19 +637,10 @@ async function showAdmin(){
     $('#admin-retry').onclick=showAdmin;
   }
 }
-let introNominationTimer=null,introScrollEndHandler=null;
-function cancelIntroCategoryOpen(){clearTimeout(introNominationTimer);introNominationTimer=null;if(introScrollEndHandler){document.removeEventListener('scrollend',introScrollEndHandler);introScrollEndHandler=null}}
-function openIntroCategoryAfterScroll(distance){
-  const open=()=>{cancelIntroCategoryOpen();if(state.session)renderNominations();else renderAuth()};
-  if(distance<4||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){introNominationTimer=setTimeout(open,80);return}
-  introScrollEndHandler=()=>{clearTimeout(introNominationTimer);introNominationTimer=setTimeout(open,80)};
-  document.addEventListener('scrollend',introScrollEndHandler,{once:true});
-  introNominationTimer=setTimeout(open,Math.min(1100,Math.max(420,220+Math.round(Math.sqrt(distance)*21))));
-}
 async function initializeSite(){
   await loadPhotoOverrides();
   $('#auth-button').onclick=async()=>{if(state.session){const current=state.session;state.session=null;localStorage.removeItem('flare-session');updateAccount();rpc('flare_logout',{p_token:current.token}).catch(()=>{});toast('Ты вышел из аккаунта.')}else{renderAuth()}};
-  $$('.intro-link[data-category]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();cancelIntroCategoryOpen();state.category=link.dataset.category;state.nominationListScrollTop=0;state.pendingCategory=state.session?null:state.category;history.replaceState(null,'',link.getAttribute('href'));openIntroCategoryAfterScroll(scrollToVoteHeading())}));
+  $$('.intro-link[data-category]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();history.replaceState(null,'',link.getAttribute('href'));scrollToCategoryButtons()}));
   $$('.category-card').forEach(b=>b.onclick=()=>{b.blur();if(!state.session){state.pendingCategory=b.dataset.category;renderAuth();return}state.category=b.dataset.category;state.nominationListScrollTop=0;renderNominations()});$('#winner-prev').onclick=()=>moveCarousel(-1);$('#winner-next').onclick=()=>moveCarousel(1);renderFaq();renderWinners();initWinnerSwipe();renderEventOptions();updateAccount();initCountdown();initFloatingHeader();window.addEventListener('resize',updateCarousel);if(state.session)loadVideoCatalog();
   document.addEventListener('keydown',e=>{if(e.altKey&&e.shiftKey&&e.key.toLowerCase()==='a'&&state.session?.nickname.toLowerCase()==='maronnix')showAdmin()});
 }
