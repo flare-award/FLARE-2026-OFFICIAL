@@ -6,10 +6,10 @@
   font-display:swap;
 }
 @font-face{
-  font-family:"Bowlby One SC";
-  src:url("assets/brand/BowlbyOneSC-Latin.woff2?v=1") format("woff2");
+  font-family:"League Spartan";
+  src:url("assets/brand/LeagueSpartan-Latin-800.woff2?v=1") format("woff2");
   font-style:normal;
-  font-weight:400;
+  font-weight:800;
   font-display:swap;
 }
 :root{--logo:"Roundo Cyrillic",sans-serif}
@@ -1523,13 +1523,13 @@ small{color:#bdb7ad;font-weight:500}
 @media(max-width:600px){.footer-bottom{margin-top:68px}}
 
 /* Dark outlined shortcuts use each category's accent, with no inherited yellow fill. */
-.brand-intro .intro-links>.intro-link,.brand-intro .intro-links>.intro-link:nth-child(2){min-height:60px;border:1px solid rgba(250,74,94,.68);border-radius:999px;background:#0A080B;box-shadow:none;color:#FA4A5E;filter:none;transform:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
-.brand-intro .intro-links>.intro-link[data-category="доп."]{border-color:rgba(223,70,234,.68);color:#DF46EA}
-.brand-intro .intro-links>.intro-link:hover,.brand-intro .intro-links>.intro-link:nth-child(2):hover{border-color:#FA4A5E;background:#151012;box-shadow:none;color:#FA4A5E;filter:none;transform:none}
-.brand-intro .intro-links>.intro-link[data-category="доп."]:hover{border-color:#DF46EA;background:#170E18;color:#DF46EA}
+.brand-intro .intro-links>.intro-link,.brand-intro .intro-links>.intro-link:nth-child(2){min-height:60px;border:1px solid rgba(242,84,103,.65);border-radius:999px;background:#0A080B;box-shadow:none;color:#F25467;filter:none;transform:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+.brand-intro .intro-links>.intro-link[data-category="доп."]{border-color:rgba(214,80,221,.65);color:#D650DD}
+.brand-intro .intro-links>.intro-link:hover,.brand-intro .intro-links>.intro-link:nth-child(2):hover{border-color:#F25467;background:#151012;box-shadow:none;color:#F25467;filter:none;transform:none}
+.brand-intro .intro-links>.intro-link[data-category="доп."]:hover{border-color:#D650DD;background:#170E18;color:#D650DD}
 
-/* Distinctive, extra-heavy display lettering for the FLARE wordmarks. */
-.intro-logo,.wordmark,.wordmark>span{font-family:"Bowlby One SC","Archivo Black",sans-serif;font-weight:400;font-synthesis:none}
+/* Crisp geometric display lettering: heavy and distinctive without a cartoon look. */
+.intro-logo,.wordmark,.wordmark>span{font-family:"League Spartan","Archivo Black",sans-serif;font-weight:800;font-synthesis:none}
 .intro-logo{letter-spacing:.01em}
 .wordmark,.wordmark>span{letter-spacing:.025em}
 
