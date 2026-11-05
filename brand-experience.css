@@ -673,7 +673,7 @@ html::-webkit-scrollbar-track:vertical{margin-top:95px}
 }
 @media(max-width:390px){.admin-modal>.admin-head .admin-tab{padding-inline:4px;font-size:9px}}
 
-/* Uniform outline SVG icons, centered directly on the tile with no art backdrop. */
+/* Rounded filled SVG symbols are centered directly on each tile without an art backdrop. */
 .nomination-art{position:relative;display:block;overflow:hidden;padding:0!important;background:none!important}
 .nomination-art-icon{position:absolute;z-index:0;left:50%;top:50%;display:block;width:112px;height:112px;max-width:90%;max-height:90%;transform:translate(-50%,-50%);object-fit:contain;filter:none}
 .nomination-art::after{display:none}
@@ -1502,7 +1502,7 @@ small{color:#bdb7ad;font-weight:500}
 .footer-bottom{margin-top:34px}
 
 /* Keep equal breathing room across the main content transitions. */
-:root{--content-section-spacing:clamp(148px,11vw,168px)}
+:root{--content-section-spacing:clamp(184px,13vw,216px)}
 .hero{padding-bottom:calc(var(--content-section-spacing)/2)}
 .hero-copy{margin-bottom:0}
 .vote-hub{padding-top:calc(var(--content-section-spacing)/2)}
@@ -1535,6 +1535,7 @@ small{color:#bdb7ad;font-weight:500}
 .hero-year{justify-self:start;overflow:visible;margin-left:clamp(20px,1.5vw,26px);padding-right:.14em;letter-spacing:-.055em}
 @media(min-width:701px){.hero-topline{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
 @media(max-width:700px){.hero-year{justify-self:start}}
+.hero-year{background:linear-gradient(145deg,#e6e3dd 0%,#c2bdb4 56%,#a9a498 100%);-webkit-background-clip:text;background-clip:text;filter:none;text-shadow:none;opacity:.94}
 
 /* Tighten the title-to-digits gap and keep the minute word directly tied to its value. */
 #countdown-section .countdown-heading{margin-bottom:0}
@@ -1544,3 +1545,10 @@ small{color:#bdb7ad;font-weight:500}
 /* Official filled marks use the same optical center inside each social circle. */
 .footer-social-link svg{width:28px;height:28px}
 .faq-intro p{position:relative;top:-4px}
+
+/* Category navigation gets a visible, smooth dim before its list settles in. */
+.modal-backdrop.category-navigation-backdrop{animation:category-navigation-dim .36s cubic-bezier(.2,.7,.2,1) both}
+.modal-backdrop.category-navigation-backdrop>.modal{animation:category-navigation-panel .24s cubic-bezier(.2,.7,.2,1) both}
+@keyframes category-navigation-dim{from{opacity:0}to{opacity:1}}
+@keyframes category-navigation-panel{from{opacity:.82;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.modal-backdrop.category-navigation-backdrop,.modal-backdrop.category-navigation-backdrop>.modal{animation:none}}
