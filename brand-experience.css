@@ -1504,6 +1504,7 @@ small{color:#bdb7ad;font-weight:500}
 /* Keep equal breathing room across the main content transitions. */
 :root{--content-section-spacing:clamp(148px,11vw,168px)}
 .hero{padding-bottom:calc(var(--content-section-spacing)/2)}
+.hero-copy{margin-bottom:0}
 .vote-hub{padding-top:calc(var(--content-section-spacing)/2)}
 #event-poll .event-poll{padding-top:var(--content-section-spacing);padding-bottom:calc(var(--content-section-spacing)/2)}
 #countdown-section{padding-block:calc(var(--content-section-spacing)/2);border-top:0}
