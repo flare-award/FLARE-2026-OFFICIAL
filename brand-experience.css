@@ -1261,14 +1261,16 @@ body::after{content:"";position:fixed;inset:0;z-index:9999;background:#010101;op
 
 .category-card.primary-category{border-color:rgba(250,74,94,.32);background:linear-gradient(125deg,rgba(250,74,94,.15),rgba(25,17,19,.98) 60%,#11100f 100%)}
 .category-card.primary-category:hover{border-color:rgba(250,74,94,.58);box-shadow:0 24px 60px rgba(250,74,94,.11),0 16px 40px rgba(0,0,0,.34)}
-.category-card.extra-category{border-color:rgba(196,112,190,.34);background:linear-gradient(125deg,rgba(186,88,180,.13),rgba(31,22,31,.98) 60%,#131113 100%)}
-.category-card.extra-category:hover{border-color:rgba(196,112,190,.52);box-shadow:0 24px 60px rgba(186,88,180,.1),0 16px 40px rgba(0,0,0,.34)}
+.category-card.extra-category{--extra-category-accent:#D65ED6;border-color:color-mix(in srgb,var(--extra-category-accent) 42%,transparent);background:linear-gradient(125deg,color-mix(in srgb,var(--extra-category-accent) 18%,transparent),rgba(35,25,36,.98) 60%,#151216 100%)}
+.category-card.extra-category:hover{border-color:color-mix(in srgb,var(--extra-category-accent) 64%,transparent);box-shadow:0 24px 60px color-mix(in srgb,var(--extra-category-accent) 14%,transparent),0 16px 40px rgba(0,0,0,.34)}
 .primary-category .card-index{color:#ffabb5}
-.extra-category .card-index{color:#e89be6}
+.extra-category .card-index{color:var(--extra-category-accent)}
 .primary-category .category-count{border-color:rgba(250,74,94,.42);background:rgba(250,74,94,.09);color:#ffb4be}
-.extra-category .category-count{border-color:rgba(204,1,203,.42);background:rgba(204,1,203,.10);color:#e9a0e8}
+.extra-category .category-count{border-color:color-mix(in srgb,var(--extra-category-accent) 52%,transparent);background:color-mix(in srgb,var(--extra-category-accent) 14%,transparent);color:var(--extra-category-accent)}
 .category-symbol img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 17px rgba(250,74,94,.2));}
-.extra-category .category-symbol img{filter:drop-shadow(0 0 17px rgba(204,1,203,.23))}
+.extra-category .category-symbol{color:var(--extra-category-accent);text-shadow:none}
+.extra-category:hover .category-symbol{text-shadow:none}
+.extra-category .category-symbol img{filter:drop-shadow(0 0 17px color-mix(in srgb,var(--extra-category-accent) 24%,transparent))}
 .category-card:hover .category-symbol{transform:translateY(-50%)}
 .category-card:hover .category-symbol img{transform:none}
 .nomination-art-icon{width:88px;height:88px;opacity:.88}
@@ -1512,5 +1514,36 @@ small{color:#bdb7ad;font-weight:500}
 
 /* Bring back the larger closing gap below the FAQ and emphasize the track title. */
 .footer-bottom{margin-top:94px}
-.winner-name-highlight{color:#f3eee4;font-weight:800}
+.winner-name{font-family:var(--font);font-weight:600;font-synthesis:none}
+.winner-name-highlight{color:#f3eee4;font-weight:700;font-synthesis:none}
 @media(max-width:600px){.footer-bottom{margin-top:68px}}
+
+/* Unify the intro shortcuts with the primary and extra category-card palettes. */
+.intro-links .intro-link[data-category="основная"]{--intro-category-accent:#FA4A5E}
+.intro-links .intro-link[data-category="доп."]{--intro-category-accent:#D65ED6}
+.intro-links .intro-link,.intro-links .intro-link:nth-child(2){min-height:58px;border:1px solid color-mix(in srgb,var(--intro-category-accent) 58%,transparent);border-radius:999px;background:color-mix(in srgb,var(--intro-category-accent) 13%,#0a080b);box-shadow:none;color:#fff2e9;filter:none;transition:background-color .2s ease,border-color .2s ease,color .2s ease}
+.intro-links .intro-link:hover,.intro-links .intro-link:nth-child(2):hover{transform:none;filter:none;background:color-mix(in srgb,var(--intro-category-accent) 23%,#0a080b);border-color:color-mix(in srgb,var(--intro-category-accent) 88%,transparent);box-shadow:none;color:#fff8f0}
+
+/* Use the bundled rounded display face for both FLARE wordmarks, not a system fallback. */
+.intro-logo,.wordmark,.wordmark>span{font-family:"Roundo Cyrillic",var(--logo),sans-serif;font-synthesis:weight}
+
+/* Optical inset aligns supporting copy and section labels with the display headings. */
+.hero-copy,.poll-copy>.eyebrow,.poll-copy>p,.winners-heading .eyebrow,.carousel-caption-copy,.faq-intro>.eyebrow,.faq-intro>p{transform:translateX(4px)}
+
+/* Give the copyright separator room on both sides without changing the copy. */
+.footer-credit-separator{display:inline-block;margin-inline:10px}
+@media(max-width:600px){.footer-credit-separator{display:inline-block;margin-inline:5px}}
+
+/* Slightly lower the deadline label and remove clipped glow from every countdown digit state. */
+#countdown-section .countdown-deadline{margin-top:12px}
+#countdown-section .countdown-unit strong,#countdown-section .countdown-digit-slot,#countdown-section .countdown-digit-roll{text-shadow:none}
+
+/* Taller, calmer poll choices; horizontal sizing and grid width stay unchanged. */
+.event-poll-section .poll-option{min-height:74px;padding-block:18px;border-color:rgba(255,255,255,.13);background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),#10100f;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.event-poll-section .poll-option:hover,.event-poll-section .poll-option.selected{border-color:rgba(255,193,7,.62);background:linear-gradient(135deg,rgba(255,193,7,.085),rgba(255,193,7,.025)),#17140e;box-shadow:inset 0 1px rgba(255,223,151,.08)}
+.event-poll-section .poll-option.has-results{padding-block:16px}
+
+/* A compact, deliberate admin entry that sits comfortably beside the account name. */
+.account-status .admin-entry-button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;margin-left:10px;padding:0 14px;border:1px solid rgba(255,193,7,.28);border-radius:999px;background:rgba(255,193,7,.055);color:#e8c879;font:600 12px/1 var(--font);letter-spacing:.045em;vertical-align:middle;transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease}
+.account-status .admin-entry-button:hover{border-color:rgba(255,193,7,.58);background:rgba(255,193,7,.12);color:#ffe4a0;box-shadow:0 0 16px rgba(255,193,7,.08)}
+.footer-social-link svg.telegram-plane-icon{width:28px;height:28px}
