@@ -93,13 +93,18 @@ create table if not exists public.flare_test_event_choices (
   choice_id text not null check(choice_id in ('dec-4','dec-5','dec-6')),
   updated_at timestamptz not null default now()
 );
+create table if not exists public.flare_account_preferences (
+  account_id uuid primary key references public.flare_accounts(id) on delete cascade,
+  nominee_view text not null default 'standard' check(nominee_view in ('standard','compact','list')),
+  updated_at timestamptz not null default now()
+);
 create table if not exists public.flare_access_settings (
   singleton boolean primary key default true check(singleton),
   accounts_closed boolean not null default false
 );
 INSERT INTO public.flare_access_settings(singleton,accounts_closed) VALUES(true,false) ON CONFLICT(singleton) DO NOTHING;
 
-REVOKE ALL ON public.flare_members, public.flare_authorized_emails, public.flare_accounts, public.flare_sessions, public.flare_login_attempts, public.flare_nominations, public.flare_options, public.flare_votes, public.flare_event_choices, public.flare_test_votes, public.flare_test_event_choices, public.flare_access_settings FROM anon, authenticated;
+REVOKE ALL ON public.flare_members, public.flare_authorized_emails, public.flare_accounts, public.flare_sessions, public.flare_login_attempts, public.flare_nominations, public.flare_options, public.flare_votes, public.flare_event_choices, public.flare_test_votes, public.flare_test_event_choices, public.flare_account_preferences, public.flare_access_settings FROM anon, authenticated;
 ALTER TABLE public.flare_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_authorized_emails ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_accounts ENABLE ROW LEVEL SECURITY;
@@ -111,6 +116,7 @@ ALTER TABLE public.flare_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_event_choices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_test_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_test_event_choices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.flare_account_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_access_settings ENABLE ROW LEVEL SECURITY;
 
 create or replace function public.flare_closed() returns boolean language sql stable as $$
@@ -261,6 +267,27 @@ begin
     'is_test_account',coalesce(v_is_test_account,false),
     'hidden_option_ids',v_hidden_options
   );
+end $$;
+
+create or replace function public.get_my_nominee_view(p_token text) returns text language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+  v_account uuid:=flare_session_account(p_token);
+  v_view text;
+begin
+  perform flare_assert_account_access(v_account);
+  select nominee_view into v_view from public.flare_account_preferences where account_id=v_account;
+  return v_view;
+end $$;
+
+create or replace function public.set_my_nominee_view(p_token text,p_view text) returns text language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+  v_account uuid:=flare_session_account(p_token);
+begin
+  perform flare_assert_account_access(v_account);
+  if p_view is null or p_view not in ('standard','compact','list') then raise exception 'Неизвестный вид списка номинантов.'; end if;
+  insert into public.flare_account_preferences(account_id,nominee_view,updated_at) values(v_account,p_view,now())
+  on conflict(account_id) do update set nominee_view=excluded.nominee_view,updated_at=now();
+  return p_view;
 end $$;
 
 create or replace function public.cast_vote(p_token text,p_nomination_id text,p_option_id text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
@@ -487,6 +514,8 @@ revoke all on function public.flare_access(text,text) from anon;
 revoke all on function public.flare_logout(text) from public,authenticated;
 
 revoke all on function public.get_my_ballot(text) from public,authenticated;
+revoke all on function public.get_my_nominee_view(text) from public,authenticated;
+revoke all on function public.set_my_nominee_view(text,text) from public,authenticated;
 revoke all on function public.cast_vote(text,text,text) from public,authenticated;
 revoke all on function public.save_event_choice(text,text) from public,authenticated;
 revoke all on function public.finalize_ballot(text) from public,authenticated;
@@ -503,6 +532,8 @@ grant execute on function public.flare_access(text,text) to anon;
 grant execute on function public.flare_logout(text) to anon;
 
 grant execute on function public.get_my_ballot(text) to anon;
+grant execute on function public.get_my_nominee_view(text) to anon;
+grant execute on function public.set_my_nominee_view(text,text) to anon;
 grant execute on function public.cast_vote(text,text,text) to anon;
 grant execute on function public.save_event_choice(text,text) to anon;
 grant execute on function public.finalize_ballot(text) to anon;
@@ -521,7 +552,7 @@ INSERT INTO public.flare_nominations (id,title,category,display_type,allow_self)
 ('game-of-year','ИГРА ГОДА','основная','Картинка',false),
 ('multigaming','MULTIGAMING ГОДА','основная','Участник',false),
 ('best-cs','ЛУЧШИЙ CS-УЧАСТНИК','основная','Участник',false),
-('best-rematch','ЛУЧШИЙ REMATCH-УЧАСТНИК','основная','Участник',false),
+('best-rematch','ЛУЧШИЙ RM-УЧАСТНИК','основная','Участник',false),
 ('conflict-of-year','КОНФЛИКТ ГОДА','основная','Картинка',true),
 ('meme-of-year','ЧЕЛОВЕК-МЕМ ГОДА','основная','Участник',false),
 ('breakthrough','ПРОРЫВ ГОДА','основная','Участник',false),
