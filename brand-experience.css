@@ -1291,9 +1291,9 @@ body.youtube-player-open .burst,body.youtube-player-open .burst-core{animation-p
 .visual-tester-locked{background:linear-gradient(145deg,#211e18,#141312)!important}
 
 /* Clearer copy, softened category accents, and a short dark entry reveal. */
-body::after{content:"";position:fixed;inset:0;z-index:9999;background:#010101;pointer-events:none;animation:flare-entry-reveal 1.05s cubic-bezier(.65,0,.35,1) both}
-@keyframes flare-entry-reveal{0%{opacity:1}42%{opacity:.72}100%{opacity:0}}
-@media(prefers-reduced-motion:reduce){body::after{animation:none;opacity:0}}
+body::after{content:"";position:fixed;inset:0;z-index:9999;background:#010101;opacity:0;pointer-events:none;transform:translateZ(0);backface-visibility:hidden;will-change:opacity;animation:flare-entry-reveal .72s ease-out 0s both}
+@keyframes flare-entry-reveal{from{opacity:1}to{opacity:0}}
+@media(prefers-reduced-motion:reduce){body::after{animation:none;opacity:0;will-change:auto}}
 
 .hero-copy,.carousel-caption-copy{font-family:"Manrope","DM Sans",sans-serif;font-weight:500;letter-spacing:-.012em}
 .hero-copy{color:#d0cbc3;font-size:19px;line-height:1.7}
@@ -1342,3 +1342,44 @@ body::after{content:"";position:fixed;inset:0;z-index:9999;background:#010101;po
 small{color:#bdb7ad;font-weight:500}
 .poll-option small{font-size:13px}
 .footer-bottom{color:#89847b;font-size:11.5px}
+
+/* A taller, calmer countdown face with larger figures and responsive room around each unit. */
+.hero-topline{grid-template-columns:minmax(0,1fr) minmax(440px,550px);gap:clamp(28px,4vw,64px)}
+.vote-countdown{max-width:550px}
+.countdown-unit strong{font-family:"Manrope","DM Sans",sans-serif;font-size:clamp(72px,5.2vw,96px);font-weight:500;letter-spacing:-.045em;line-height:.96;text-shadow:0 0 17px rgba(255,191,58,.1);font-variant-numeric:tabular-nums}
+.countdown-unit small{font-family:"Manrope","DM Sans",sans-serif;font-size:12px;font-weight:500;letter-spacing:.02em}
+.countdown-separator{font-family:"Manrope","DM Sans",sans-serif;font-size:42px;font-weight:400;line-height:1}
+@media(max-width:1200px) and (min-width:701px){
+  .hero-topline{grid-template-columns:minmax(0,1fr) minmax(300px,440px);gap:24px}
+  .vote-countdown{max-width:440px}
+  .countdown-unit strong{font-size:clamp(52px,5.8vw,70px)}
+  .countdown-values{gap:6px}
+}
+@media(max-width:700px){
+  .vote-countdown{width:100%;max-width:480px;margin:8px 0 28px;padding:10px 0}
+  .countdown-label{font-size:10.5px}
+  .countdown-values{justify-content:space-between;gap:clamp(4px,2vw,10px);margin:16px 0 13px}
+  .countdown-unit{min-width:0;flex:1 1 0;gap:6px}
+  .countdown-unit strong{font-size:clamp(48px,12vw,62px)}
+  .countdown-unit small{font-size:11.5px}
+  .countdown-separator{font-size:30px}
+}
+@media(max-width:390px){
+  .countdown-unit strong{font-size:clamp(46px,13.5vw,54px)}
+  .countdown-unit small{font-size:10.5px}
+  .countdown-values{gap:3px}
+}
+
+/* Add a little more vertical breathing room to stacked phone sections. */
+@media(max-width:600px){
+  .hero{padding-bottom:80px}
+  .vote-hub{padding-top:112px}
+  .winners-section{margin-top:136px;padding-block:84px}
+  .event-poll{row-gap:32px;padding-block:112px}
+  .faq-section{padding-top:90px}
+  .faq-layout{row-gap:48px}
+  .footer-bottom{margin-top:68px}
+}
+
+/* Larger vector viewport on desktop keeps the rounded icon strokes smooth at normal DPI. */
+@media(min-width:601px){.nomination-art-icon{width:104px;height:104px;opacity:.84}}
