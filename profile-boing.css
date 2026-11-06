@@ -524,7 +524,9 @@
 .topbar .account-button{right:auto;font-weight:700}
 
 /* Transparent header-only derivative: no dark canvas, blend mode, clipping or mask. */
-.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{mix-blend-mode:normal}
+/* Clip only the low-opacity halo, with a soft fade before the paint boundary.
+   Keep the original wordmark geometry and 250ms header reveal. */
+.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{mix-blend-mode:normal;overflow:hidden;contain:paint;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 7px,#000 calc(100% - 7px),transparent),linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,transparent,#000 7px,#000 calc(100% - 7px),transparent),linear-gradient(to right,transparent,#000 5px,#000 calc(100% - 5px),transparent);mask-composite:intersect}
 .topbar .wordmark .wordmark-logo{clip-path:none;mix-blend-mode:normal;filter:none;-webkit-mask-image:none;mask-image:none}
 @media(max-width:700px){
   .profile-title-line{gap:9px}

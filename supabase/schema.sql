@@ -700,8 +700,8 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('sos-5','sos-of-year','Сезон с Blue Lock в REMATCH','video',NULL) ,
 ('squad-1','squad-of-year','Akirakume, Dony_zq, Nodben','group',NULL) ,
 ('squad-2','squad-of-year','Eozik, Flourin, Maronnix','group',NULL) ,
-('squad-3','squad-of-year','Akirakume, Dony_zq, Maronnix, Nodben, Qusti','group',NULL) ,
-('squad-4','squad-of-year','Akirakume, Dony_zq, Maronnix, Rezo1n','group',NULL) ,
+('squad-3','squad-of-year','Akirakume, Dony_zq, Maronnix, Nodben','group',NULL) ,
+('squad-4','squad-of-year','Akirakume, Awal, Dony_zq, Maronnix, Rezo1n','group',NULL) ,
 ('squad-5','squad-of-year','Dony_zq, Maronnix, Rezo1n','group',NULL)
 ON CONFLICT (id) DO UPDATE SET nomination_id=excluded.nomination_id, name=case when excluded.nomination_id='clip-of-year' then existing_option.name else excluded.name end, kind=excluded.kind, person_nickname=excluded.person_nickname;
 
@@ -719,7 +719,7 @@ SET hidden_for_testers = CASE
 END
 WHERE nomination_id='clip-of-year'
    OR id IN ('event-1','event-2','squad-4','squad-5','sos-1','sos-2','sos-5','conflict-1')
-   OR name IN ('Akirakume получил права','Выживание в Minecraft','Akirakume, Dony_zq, Maronnix, Rezo1n','Dony_zq, Maronnix, Rezo1n','Камбэк CYBERSHOKE летом','Возвращение на сервер','Сезон с Blue Lock в REMATCH','Akirakume, Dony_zq, Nodben, Maronnix');
+   OR name IN ('Akirakume получил права','Выживание в Minecraft','Akirakume, Awal, Dony_zq, Maronnix, Rezo1n','Dony_zq, Maronnix, Rezo1n','Камбэк CYBERSHOKE летом','Возвращение на сервер','Сезон с Blue Lock в REMATCH','Akirakume, Dony_zq, Nodben, Maronnix');
 
 -- FLARE profiles and BOING!. Keep this block in sync with migrations/20261105_profiles_and_boing.sql.
 -- FLARE profiles and BOING! — server-owned progress, purchases and badges.
