@@ -512,19 +512,19 @@
 .social-profile-service svg[viewBox="0 0 448 512"]{width:19px;height:23px}
 
 /* The same compact, even surfaces for Panel and the account/login button. */
-.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:8px}
-.topbar .account-status .text-button{min-height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(255,255,255,.042);color:#d8d2c6;font-weight:600}
-.topbar .account-status .text-button:hover{border-color:rgba(255,255,255,.13);background:rgba(255,255,255,.075);color:#f3f0e9}
-.topbar .account-button{right:-10px;font-weight:700}
+.topbar .top-actions{position:relative}
+.topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:4px;right:-10px}
+.topbar .account-status .text-button{min-height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(255,255,255,.042);color:#f5ad3c;font-weight:600}
+.topbar .account-status .text-button:hover{border-color:rgba(255,255,255,.13);background:rgba(255,255,255,.075);color:#ffc15a}
+.topbar .account-button{right:auto;font-weight:700}
 
 /* Avoid additive brightening of the supplied PNG's dark canvas in the header only. */
 .topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{mix-blend-mode:normal}
 .topbar .wordmark .wordmark-logo{clip-path:none;mix-blend-mode:lighten;-webkit-mask-image:radial-gradient(ellipse 55% 43% at 50% 50%,#000 58%,rgba(0,0,0,.9) 75%,transparent 100%);mask-image:radial-gradient(ellipse 55% 43% at 50% 50%,#000 58%,rgba(0,0,0,.9) 75%,transparent 100%)}
 @media(max-width:700px){
   .profile-title-line{gap:9px}
-  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:6px}
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:3px;right:-6px}
   .topbar .account-status .text-button{min-height:40px;padding-inline:8px}
-  .topbar .account-button{right:-6px}
 }
 @media(max-width:380px){
   .profile-title-line{gap:7px}
@@ -532,9 +532,8 @@
   .profile-reputation-buttons{gap:6px}
   .profile-reputation-button{min-width:52px;padding-inline:7px}
   .profile-footer-actions .profile-logout{padding-inline:10px;font-size:10px}
-  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:4px}
+  .topbar.is-at-top .top-actions,.topbar.is-scrolled .top-actions{gap:2px;right:-4px}
   .topbar .account-status .text-button{min-height:38px;padding-inline:5px}
-  .topbar .account-button{right:-4px}
 }
 .social-profile-popover.is-compact .social-profile-list{gap:2px;padding:5px}
 .social-profile-popover.is-compact .social-profile-row{grid-template-columns:30px minmax(0,1fr);gap:7px;min-height:49px;padding:5px 7px}
