@@ -63,7 +63,7 @@ create table if not exists public.flare_options (
   kind text not null check(kind in ('person','image','video','game','group','conflict')),
   person_nickname text references public.flare_members(nickname),
   unique(nomination_id,id),
-  check ((kind='person' and person_nickname is not null) or (kind<>'person' and person_nickname is null))
+  check (kind='person' or (kind<>'person' and person_nickname is null))
 );
 alter table public.flare_options add column if not exists video_url text;
 alter table public.flare_options add column if not exists hidden_for_testers boolean not null default false;
@@ -676,7 +676,7 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('person-7-maronnix','vibe-of-year','Maronnix','person','Maronnix') ,
 ('person-7-qusti','vibe-of-year','Qusti','person','Qusti') ,
 ('person-7-rezo1n','vibe-of-year','Rezo1n','person','Rezo1n') ,
-('person-8-akirakume','scam-of-year','Akirakume','person','Akirakume') ,
+('person-8-akirakume','scam-of-year','Liwersi','person',NULL) ,
 ('person-8-eozik','scam-of-year','Eozik','person','Eozik') ,
 ('person-8-nodben','scam-of-year','Nodben','person','Nodben') ,
 ('person-8-qusti','scam-of-year','Qusti','person','Qusti') ,
@@ -1857,5 +1857,27 @@ alter table public.flare_member_socials drop column if exists vk_url;
 
 revoke all on function public.admin_set_member_social(text,text,text,text,text) from public,authenticated;
 grant execute on function public.admin_set_member_social(text,text,text,text,text) to anon;
+
+commit;
+
+-- Accountless Liwersi replaces only the standalone scam nominee; ID and votes stay intact.
+-- Replace only the standalone scam-of-year nominee while preserving its ID and votes.
+-- Liwersi is intentionally not a flare member and has no account or profile.
+begin;
+
+-- Accountless people are valid nominees: a NULL account link must not point
+-- to another member or create profile, social and winner-badge associations.
+alter table public.flare_options drop constraint if exists flare_options_check;
+alter table public.flare_options
+  add constraint flare_options_check
+  check (kind='person' or (kind<>'person' and person_nickname is null));
+
+insert into public.flare_options(id,nomination_id,name,kind,person_nickname)
+values('person-8-akirakume','scam-of-year','Liwersi','person',null)
+on conflict(id) do update set
+  nomination_id=excluded.nomination_id,
+  name=excluded.name,
+  kind=excluded.kind,
+  person_nickname=excluded.person_nickname;
 
 commit;
