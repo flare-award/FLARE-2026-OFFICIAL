@@ -82,9 +82,7 @@ function profileStatsMarkup(profile){
     ['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],
     ['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],
     ['COINS',formatProfileNumber(boing.coins),'доступно в магазине'],
-    ['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации'],
-    ['Всего кликов',formatProfileNumber(boing.total_clicks),'за все раунды BOING!'],
-    ['Опрос',profile.event_answered?'Ответ дан':'Ещё нет','дата посещения премии']
+    ['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации']
   ];
   return `<div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div>`;
 }
@@ -492,7 +490,7 @@ function publicProfileBadgeMarkup(badge,compact=false){return profileBadgeMarkup
 function renderPublicFlareProfile(){
   const profile=profileState.publicData;if(!profile?.boing)return;
   const boing=profile.boing,badges=Array.isArray(boing.badges)?boing.badges:[],created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
-  const stats=[['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],['COINS',formatProfileNumber(boing.coins),'баланс участника'],['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации'],['Всего кликов',formatProfileNumber(boing.total_clicks),'за все раунды BOING!']];
+  const stats=[['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],['COINS',formatProfileNumber(boing.coins),'баланс участника'],['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации']];
   const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><span>УЧАСТНИК FLARE</span></div><div class="profile-equipped-badges">${badges.length?badges.map(badge=>publicProfileBadgeMarkup(badge,true)).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div><dl class="profile-meta"><div><dt>Регистрация</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
   replaceModalView(content,'profile-modal public-profile-modal');$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();
 }
