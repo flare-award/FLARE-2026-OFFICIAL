@@ -215,10 +215,14 @@
 .bob-face-brushes i{display:block;width:5px;height:5px;border-radius:50%;background:currentColor}.bob-face-brushes [data-face-brush="6"] i{width:9px;height:9px}.bob-face-brushes [data-face-brush="11"] i{width:14px;height:14px}.bob-face-toolbar svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .bob-face-actions{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07)}.bob-face-actions>span{color:#65675f;font-size:9px;letter-spacing:.08em}.bob-face-actions>div{display:flex;align-items:center;gap:9px}.bob-face-actions .button{min-height:40px;padding:11px 17px;font-size:11px}.bob-face-actions .button:disabled{opacity:.5}
 
+.bob-face-upload-row{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:12px}.bob-face-upload-label{gap:7px;cursor:pointer}.bob-face-upload-label svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.bob-face-upload-label.is-disabled{opacity:.4;pointer-events:none}.bob-face-upload-row>span{color:#6f7168;font-size:9px}
+.bob-face-editor.has-upload .bob-face-stage{padding:16px 0 12px}.bob-face-editor.has-upload .bob-face-canvas-shell{width:min(288px,72vw)}.bob-face-editor.has-upload .bob-face-toolbar{margin-top:14px}.bob-face-editor.has-upload .bob-face-upload-row{margin-top:10px}.bob-face-editor.has-upload .bob-face-actions{padding-top:14px}
+
 /* Shop categories */
 .boing-shop-categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:14px;padding:4px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:#0e0f0d}
 .boing-shop-categories button{min-height:37px;padding:0 10px;border:1px solid transparent;border-radius:9px;background:transparent;color:#77796f;font-family:"Manrope","DM Sans",sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:color .18s ease,background-color .18s ease,border-color .18s ease}.boing-shop-categories button:hover{color:#d9c18a}.boing-shop-categories button.is-active{border-color:rgba(255,211,112,.16);background:#211d13;color:#edca79}
 .boing-shop-item.kind-leader{border-color:rgba(242,84,103,.16);background:linear-gradient(145deg,rgba(242,84,103,.04),transparent),#10110f}
+.boing-shop-item.kind-face{border-color:rgba(214,80,221,.18);background:linear-gradient(145deg,rgba(214,80,221,.045),transparent),#10110f}
 
 /* Public profiles from LEADERS */
 .boing-leader-name{display:block;max-width:100%;padding:0;border:0;background:none;text-align:left;cursor:pointer}.boing-leader-name strong{transition:color .18s ease}.boing-leader-name:hover strong{color:#f2ca72}.boing-leader-name:focus-visible{outline:1px solid #e7bd61;outline-offset:4px;border-radius:3px}

@@ -340,6 +340,39 @@ function bobFacePoint(editor,event){
   return{x:(event.clientX-rect.left)*editor.canvas.width/rect.width,y:(event.clientY-rect.top)*editor.canvas.height/rect.height};
 }
 function canvasToPng(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Не удалось подготовить рисунок.')),'image/png'))}
+async function prepareBobFaceUpload(file){
+  const isPng=file.type==='image/png'||(!file.type&&/\.png$/i.test(file.name||''));
+  if(!isPng)throw new Error('Для лица BOB можно загрузить только PNG.');
+  if(file.size>12*1024*1024)throw new Error('PNG должен быть меньше 12 МБ.');
+  const source=await readFileAsDataUrl(file),image=await loadImageElement(source),canvas=document.createElement('canvas'),size=320;
+  canvas.width=size;canvas.height=size;
+  const context=canvas.getContext('2d');context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
+  const scale=Math.max(size/image.naturalWidth,size/image.naturalHeight),width=image.naturalWidth*scale,height=image.naturalHeight*scale;
+  context.drawImage(image,(size-width)/2,(size-height)/2,width,height);
+  context.globalCompositeOperation='destination-in';context.beginPath();context.arc(size/2,size/2,size/2,0,Math.PI*2);context.fill();context.globalCompositeOperation='source-over';
+  let blob=await canvasToPng(canvas);
+  for(const nextSize of [256,224,192,160,128]){
+    if(blob.size<=150000)break;
+    const smaller=document.createElement('canvas');smaller.width=nextSize;smaller.height=nextSize;
+    const smallerContext=smaller.getContext('2d');smallerContext.imageSmoothingEnabled=true;smallerContext.imageSmoothingQuality='high';smallerContext.drawImage(canvas,0,0,nextSize,nextSize);
+    blob=await canvasToPng(smaller);
+  }
+  if(blob.size>150000)throw new Error('Эта PNG слишком сложная. Выбери изображение с меньшим количеством деталей.');
+  return await readFileAsDataUrl(blob);
+}
+async function handleBobFaceUpload(event,editor){
+  const input=event.currentTarget,file=input.files?.[0];
+  if(!file||!editor.ready||editor.busy)return;
+  const label=input.closest('label'),save=$('#bob-face-save');editor.busy=true;input.disabled=true;label?.classList.add('is-busy');if(save)save.disabled=true;
+  try{
+    const data=await prepareBobFaceUpload(file),image=await loadImageElement(data);
+    if(bobFaceEditor!==editor)return;
+    editor.context.clearRect(0,0,editor.canvas.width,editor.canvas.height);editor.context.drawImage(image,0,0,editor.canvas.width,editor.canvas.height);
+    editor.imported=true;pushBobFaceHistory(editor);toast('PNG добавлена. Сохрани лицо BOB.');
+  }catch(error){toast(error.message)}finally{
+    editor.busy=false;if(input.isConnected){input.disabled=false;input.value='';label?.classList.remove('is-busy')}if(save?.isConnected)save.disabled=false;
+  }
+}
 async function saveBobFaceEditor(editor){
   if(!editor||!editor.ready||editor.busy)return;
   const token=profileToken(),button=$('#bob-face-save');editor.busy=true;if(button){button.disabled=true;button.textContent='Сохраняем…'}
@@ -348,7 +381,7 @@ async function saveBobFaceEditor(editor){
     for(let i=3;i<pixels.length;i+=4){if(pixels[i]){hasDrawing=true;break}}
     let data=null;
     if(hasDrawing){const blob=await canvasToPng(editor.canvas);if(blob.size>150000)throw new Error('Рисунок получился слишком сложным. Удали часть штрихов.');data=await readFileAsDataUrl(blob)}
-    const result=await rpc('set_my_boing_face',{p_token:token,p_data:data});if(token!==profileToken())return;
+    const result=await rpc(editor.imported?'upload_my_boing_face':'set_my_boing_face',{p_token:token,p_data:data});if(token!==profileToken())return;
     mergeBoingState(result.boing);toast(data?'Лицо BOB сохранено.':'Стандартное лицо BOB возвращено.');
     if(profileViewIsActive('face'))renderBoingGame();
   }catch(error){toast(error.message);editor.busy=false;if(button?.isConnected){button.disabled=false;button.textContent='Сохранить лицо'}}
@@ -357,11 +390,13 @@ function showBoingFaceEditor(){
   const scene=boingScene,boing=profileState.data?.boing;
   if(!boing||!canEditBobFace(scene)){toast('Лицо можно менять перед началом нового раунда.');return}
   pauseBoingScene();profileState.view='face';
-  const content=`${boingHeader('game')}<section class="bob-face-editor"><div class="bob-face-editor-head"><span class="eyebrow">BOB FACE STUDIO</span><h3>Твой BOB. Твои правила.</h3><p>Нарисуй лицо прямо на круге. Пустой холст вернёт стандартную улыбку.</p></div><div class="bob-face-stage"><div class="bob-face-canvas-shell"><span class="bob-face-editor-body" aria-hidden="true"></span><canvas id="bob-face-canvas" width="320" height="320" aria-label="Холст для рисования лица BOB"></canvas></div><div class="bob-face-toolbar"><div class="bob-face-brushes" role="group" aria-label="Размер кисти"><button type="button" data-face-brush="3" aria-label="Тонкая кисть" title="Тонкая кисть"><i></i></button><button type="button" data-face-brush="6" class="is-active" aria-label="Средняя кисть" title="Средняя кисть"><i></i></button><button type="button" data-face-brush="11" aria-label="Толстая кисть" title="Толстая кисть"><i></i></button></div><span></span><button type="button" id="bob-face-undo" aria-label="Отменить штрих" title="Отменить штрих" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></svg></button><button type="button" id="bob-face-clear" aria-label="Очистить холст" title="Очистить холст"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg></button></div></div><div class="bob-face-actions"><span>PNG · прозрачный фон</span><div><button class="profile-small-button" id="bob-face-cancel" type="button">Не менять</button><button class="button" id="bob-face-save" type="button" disabled>Сохранить лицо</button></div></div></section>`;
+  const canUpload=(boing.inventory||[]).includes('bob-face-upload');
+  const uploadControls=canUpload?`<div class="bob-face-upload-row"><label class="profile-small-button bob-face-upload-label is-disabled" id="bob-face-upload-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M5 14v5h14v-5"/></svg>Загрузить PNG<input id="bob-face-upload-input" type="file" accept="image/png,.png" hidden disabled></label><span>до 12 МБ · кадрируется в круг</span></div>`:'';
+  const content=`${boingHeader('game')}<section class="bob-face-editor ${canUpload?'has-upload':''}"><div class="bob-face-editor-head"><span class="eyebrow">BOB FACE STUDIO</span><h3>Твой BOB. Твои правила.</h3><p>${canUpload?'Нарисуй лицо или загрузи свою PNG. Пустой холст вернёт стандартную улыбку.':'Нарисуй лицо прямо на круге. Пустой холст вернёт стандартную улыбку.'}</p></div><div class="bob-face-stage"><div class="bob-face-canvas-shell"><span class="bob-face-editor-body" aria-hidden="true"></span><canvas id="bob-face-canvas" width="320" height="320" aria-label="Холст для рисования лица BOB"></canvas></div><div class="bob-face-toolbar"><div class="bob-face-brushes" role="group" aria-label="Размер кисти"><button type="button" data-face-brush="3" aria-label="Тонкая кисть" title="Тонкая кисть"><i></i></button><button type="button" data-face-brush="6" class="is-active" aria-label="Средняя кисть" title="Средняя кисть"><i></i></button><button type="button" data-face-brush="11" aria-label="Толстая кисть" title="Толстая кисть"><i></i></button></div><span></span><button type="button" id="bob-face-undo" aria-label="Отменить штрих" title="Отменить штрих" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></svg></button><button type="button" id="bob-face-clear" aria-label="Очистить холст" title="Очистить холст"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg></button></div>${uploadControls}</div><div class="bob-face-actions"><span>PNG · прозрачный фон</span><div><button class="profile-small-button" id="bob-face-cancel" type="button">Не менять</button><button class="button" id="bob-face-save" type="button" disabled>Сохранить лицо</button></div></div></section>`;
   replaceModalView(content,'profile-modal boing-modal bob-face-modal');bindBoingNavigation('game');
   const canvas=$('#bob-face-canvas'),context=canvas.getContext('2d');context.lineCap='round';context.lineJoin='round';context.strokeStyle='#211c13';
-  const editor={canvas,context,history:[],index:-1,size:6,drawing:false,ready:false,busy:false};bobFaceEditor=editor;
-  const ready=()=>{if(bobFaceEditor!==editor)return;editor.ready=true;pushBobFaceHistory(editor);const save=$('#bob-face-save');if(save)save.disabled=false};
+  const editor={canvas,context,history:[],index:-1,size:6,drawing:false,ready:false,busy:false,imported:false};bobFaceEditor=editor;
+  const ready=()=>{if(bobFaceEditor!==editor)return;editor.ready=true;pushBobFaceHistory(editor);const save=$('#bob-face-save'),upload=$('#bob-face-upload-input');if(save)save.disabled=false;if(upload){upload.disabled=false;$('#bob-face-upload-label')?.classList.remove('is-disabled')}};
   if(boing.face)loadImageElement(boing.face).then(image=>{if(bobFaceEditor!==editor)return;context.drawImage(image,0,0,canvas.width,canvas.height);ready()}).catch(()=>ready());else ready();
   const finish=event=>{if(!editor.drawing)return;editor.drawing=false;try{if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}catch{}pushBobFaceHistory(editor)};
   canvas.addEventListener('pointerdown',event=>{if(!editor.ready||editor.busy)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);const point=bobFacePoint(editor,event);editor.drawing=true;context.lineWidth=editor.size;context.beginPath();context.moveTo(point.x,point.y);context.lineTo(point.x+.01,point.y);context.stroke()});
@@ -370,6 +405,7 @@ function showBoingFaceEditor(){
   $$('[data-face-brush]').forEach(button=>button.onclick=()=>{if(editor.busy)return;editor.size=Number(button.dataset.faceBrush);$$('[data-face-brush]').forEach(item=>item.classList.toggle('is-active',item===button))});
   $('#bob-face-undo').onclick=()=>restoreBobFaceHistory(editor);
   $('#bob-face-clear').onclick=()=>{if(!editor.ready||editor.busy)return;context.clearRect(0,0,canvas.width,canvas.height);pushBobFaceHistory(editor)};
+  $('#bob-face-upload-input')?.addEventListener('change',event=>handleBobFaceUpload(event,editor));
   $('#bob-face-cancel').onclick=renderBoingGame;$('#bob-face-save').onclick=()=>saveBobFaceEditor(editor);
 }
 function shopItemButton(item,boing){
@@ -382,15 +418,15 @@ function shopItemButton(item,boing){
   }else if(item.owned)return '<button type="button" disabled>Куплено</button>';
   return `<button type="button" data-buy-item="${esc(item.id)}">${formatProfileNumber(item.price)} COINS</button>`;
 }
-const boingShopGroups={upgrades:{label:'Апгрейды',kinds:['click','coin']},cosmetics:{label:'Косметика',kinds:['accessory','leader']},profile:{label:'Профиль',kinds:['frame','banner','badge']}};
-const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'LEADERS',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
+const boingShopGroups={upgrades:{label:'Апгрейды',kinds:['click','coin']},cosmetics:{label:'Косметика',kinds:['accessory','leader','face']},profile:{label:'Профиль',kinds:['frame','banner','badge']}};
+const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'LEADERS',face:'BOB PNG',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
 function showBoingShop(category=profileState.shopCategory||'upgrades'){
   const boing=profileState.data?.boing;if(!boing)return;
   if(!boingShopGroups[category])category='upgrades';
   pauseBoingScene();profileState.view='shop';profileState.shopCategory=category;
   const allItems=Array.isArray(boing.shop)?boing.shop:[],items=allItems.filter(item=>boingShopGroups[category].kinds.includes(item.kind));
   const tabs=Object.entries(boingShopGroups).map(([id,group])=>`<button type="button" data-shop-category="${id}" class="${id===category?'is-active':''}">${group.label}</button>`).join('');
-  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3><p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?'Улучшения действуют на все следующие клики и начисления COINS.':category==='cosmetics'?'Аксессуары можно надевать и снимать. Пункт BOB NAME IN LEADERS открывает имя BOB в таблице лидеров.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
+  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3><p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?'Улучшения действуют на все следующие клики и начисления COINS.':category==='cosmetics'?'Аксессуары можно надевать и снимать. BOB NAME IN LEADERS открывает имя в таблице, а BOB PNG FACE — загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
   bindBoingNavigation('shop');
   $$('[data-shop-category]').forEach(button=>button.onclick=()=>showBoingShop(button.dataset.shopCategory));
   $$('[data-buy-item]').forEach(button=>button.onclick=async()=>{
