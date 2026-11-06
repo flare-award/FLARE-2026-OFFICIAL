@@ -1333,7 +1333,7 @@ small{color:#bdb7ad;font-weight:500}
 @media(min-width:601px){.nomination-art-icon{width:104px;height:104px;opacity:.84}}
 
 /* Slow, restrained color drift for the FAQ closing line. */
-.faq-intro h2 em{background-image:linear-gradient(100deg,#FE613F 0%,#FF4B83 25%,#EE01C6 52%,#B400D1 76%,#6801D7 100%);background-size:200% 100%;background-position:0% 50%;background-repeat:no-repeat;animation:faq-heading-gradient-drift 14s ease-in-out infinite alternate}
+.faq-intro h2 em{background-image:linear-gradient(100deg,#FE613F 0%,#FF4B83 25%,#EE01C6 52%,#B400D1 76%,#6801D7 100%);background-size:200% 100%;background-position:0% 50%;background-repeat:no-repeat;animation:faq-heading-gradient-drift 13s ease-in-out infinite alternate}
 @keyframes faq-heading-gradient-drift{from{background-position:0% 50%}to{background-position:100% 50%}}
 @media(prefers-reduced-motion:reduce){.faq-intro h2 em{animation:none;background-position:50% 50%}}
 
@@ -1563,3 +1563,18 @@ small{color:#bdb7ad;font-weight:500}
 @media(max-width:975px){.topbar .wordmark{left:27.5px}}
 @media(max-width:700px){.topbar .wordmark{left:max(14px,env(safe-area-inset-left))}}
 @media(prefers-reduced-motion:reduce){.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{transition:none}}
+
+
+/* Centered campaign entry and a clean fallback for photos not supplied yet. */
+.brand-intro .intro-logo{align-self:center;margin-inline:auto;transform:none;text-align:center}
+.brand-intro .intro-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;width:min(calc(100% - 40px),640px);margin-inline:auto;padding:0}
+.brand-intro .intro-links>.intro-link{width:100%;text-align:center}
+.visual-photo.is-missing{display:none}
+@media(min-width:701px){
+  .topbar>.top-actions{margin-left:auto}
+  .topbar .wordmark{position:absolute;left:50%;right:auto;transform:translate3d(-50%,0,0)}
+  .topbar.is-at-top .wordmark{transform:translate3d(-50%,-6.25px,0)}
+  .topbar.is-scrolled .wordmark{transform:translate3d(-50%,0,0)}
+  .topbar.is-faq-hidden.is-scrolled .wordmark{transform:translate3d(-50%,-6.25px,0)}
+}
+@media(max-width:600px){.brand-intro .intro-links{grid-template-columns:1fr;width:min(calc(100% - 40px),320px)}}

@@ -264,3 +264,102 @@
 }
 @media(max-width:380px){.bob-face-toolbar{gap:3px}.bob-face-toolbar button{width:28px;height:32px}.bob-face-brushes{gap:2px}.bob-face-transparency{gap:8px}.public-profile-layout{padding:14px 104px 18px 10px}.public-profile-bob-card{right:10px;bottom:10px;width:94px}.public-bob-character{width:78px;height:78px}.public-profile-info .profile-stats{grid-template-columns:1fr}.public-profile-bob-card>span{font-size:6px}.bob-face-actions>div{gap:6px}.bob-face-actions .profile-small-button{padding-inline:9px}}
 @media(prefers-reduced-motion:reduce){.bob-face-edit,.boing-shop-categories button,.boing-leader-name strong{transition:none}}
+
+/* Compact account entry and unified profile appearance editor. */
+.account-button{min-width:0;min-height:44px;max-width:220px;padding:0 17px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:#12110f;color:#d8d2c6;font-family:"Manrope","DM Sans",sans-serif;font-size:13px;font-weight:700;letter-spacing:0}
+.account-button:hover{border-color:rgba(255,255,255,.3);background:#1b1916;color:#fff}
+.account-button:active{background:#24211c}
+.account-button:focus-visible{outline-color:#d8d2c6}
+.account-button.is-signed-in{border-color:rgba(255,255,255,.18);color:#eee8dc}
+.modal.account-profile-modal{width:min(960px,calc(100vw - 40px));height:min(760px,calc(100vh - 40px));height:min(760px,calc(100dvh - 40px))}
+.profile-menu-head{padding:25px 28px 22px}
+.profile-title-line{display:flex;align-items:center;gap:20px}
+.profile-title-line .profile-mystery{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:auto;min-width:42px;height:42px;margin:-6px 0;padding:0 4px;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;font-family:"Manrope","DM Sans",sans-serif;font-size:29px;font-weight:800;letter-spacing:.02em;line-height:1;cursor:pointer;transition:none}
+.profile-title-line .profile-mystery:hover,.profile-title-line .profile-mystery:active{border:0;background:transparent;box-shadow:none;color:#fff;transform:none}
+.profile-head-actions>.close-button,.profile-head-actions>.profile-badge-edit-toggle{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;margin:0;padding:0;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:#171614;color:#d7d1c8;font-size:27px;line-height:1}
+.profile-head-actions>.close-button:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.13);color:#ff8585}
+.profile-head-actions>.profile-badge-edit-toggle:hover{border-color:rgba(255,211,112,.42);background:rgba(255,211,112,.06);color:#e5c36f}
+.profile-head-actions>.profile-badge-edit-toggle.is-save{border-color:rgba(112,220,151,.36);background:rgba(112,220,151,.07);color:#86dfa6}
+.profile-head-actions>.profile-badge-edit-toggle.is-save:hover{border-color:#86dfa6;background:rgba(112,220,151,.12);color:#a3edbd}
+.profile-head-actions>.profile-badge-edit-toggle svg{width:18px;height:18px}
+.profile-identity{margin:24px 28px 0}
+.profile-identity-main{gap:30px;padding:36px}
+.profile-avatar{width:142px;height:142px}
+.profile-avatar-fallback{font-size:46px}
+.profile-nickname-line{gap:12px 14px;flex-wrap:nowrap}
+.profile-nickname-line h3{font-size:38px}
+.profile-equipped-badges{flex:1 1 auto;gap:8px;min-width:0;min-height:34px;margin:0}
+.profile-equipped-badges:empty{display:none}
+.profile-equipped-badges .profile-badge{width:34px;height:34px;min-height:34px;padding:5px;border-radius:9px}
+.profile-equipped-badges .profile-badge-icon,.profile-equipped-badges .profile-badge-icon svg{width:21px;height:21px}
+.profile-equipped-badges .profile-badge-action{top:-7px;right:-7px;width:20px;height:20px}
+.profile-equipped-badges .profile-badge-action svg{width:12px;height:12px}
+.profile-badge.is-draft-removed{border-color:rgba(var(--badge-rgb),.13);background:#101010;color:#777}
+.profile-badge.is-draft-removed>.profile-badge-icon{opacity:.35}
+.profile-badge.is-draft-removed:hover{border-color:rgba(var(--badge-rgb),.38)}
+.profile-meta{margin-top:22px}
+.profile-appearance-controls{margin:12px 28px 0;padding:18px;border:1px solid rgba(255,255,255,.085);border-radius:15px;background:#10100f}
+.profile-appearance-title{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.profile-appearance-title>span,.profile-appearance-label{color:#a78c56;font-family:"Sora",sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em}
+.profile-appearance-title>small{color:#77736b;font-size:10px;line-height:1.4;text-align:right}
+.profile-frame-editor{margin-top:15px}
+.profile-appearance-label{display:block;margin-bottom:8px;color:#77736b}
+.profile-frame-options{display:flex;flex-wrap:wrap;gap:8px}
+.profile-frame-choice{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 11px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#151513;color:#9b968d;font-family:"Manrope","DM Sans",sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:border-color .18s ease,background-color .18s ease,color .18s ease}
+.profile-frame-choice:hover{border-color:rgba(255,211,112,.32);color:#ddd3bd}
+.profile-frame-choice.is-selected{border-color:rgba(240,199,107,.5);background:#211c12;color:#f0d58f}
+.profile-frame-choice-swatch{display:block;flex:0 0 24px;width:24px;height:24px;border:2px solid rgba(255,255,255,.25);border-radius:50%;background:#0c0c0b}
+.profile-frame-choice-swatch.frame-default{border-style:dashed}
+.profile-frame-choice-swatch.frame-gold{border-color:#ffd263;box-shadow:0 0 0 2px rgba(255,190,55,.12)}
+.profile-frame-choice-swatch.frame-aurora{border-color:#8ce9ee;box-shadow:0 0 0 2px rgba(170,91,255,.4)}
+.profile-frame-choice-swatch.frame-inferno{border-color:#ffbd4a;box-shadow:0 0 0 2px rgba(255,77,34,.45)}
+.profile-appearance-controls .profile-banner-controls{margin:14px 0 0;background:#0c0c0b}
+.profile-stats{gap:12px;margin:16px 28px 0}
+.profile-stat{padding:18px 19px}
+.profile-stat strong{font-size:22px}
+.profile-footer-actions{justify-content:flex-end;padding:22px 28px 26px}
+
+/* A slightly smaller BOB keeps the same circular body and collision-driven physics. */
+.boing-arena .bob{width:92px;height:92px}
+.boing-arena .bob-crown{left:11px;top:-20px;width:70px;height:33px}
+.boing-arena .bob-cap{left:14px;top:-10px;width:66px;height:34px}
+.boing-arena .bob-cap::after{right:-14px;width:42px;height:10px}
+.boing-arena .bob-shades{left:11px;top:28px;gap:7px;width:70px;height:22px}
+.boing-arena .bob-shades::before{left:30px;top:6px;width:11px;height:4px}
+.boing-arena .bob-shades i{width:31px;height:21px}
+
+@media(max-width:700px){
+  .account-button{min-height:42px;max-width:40vw;padding-inline:12px;font-size:12px}
+  .modal.account-profile-modal{width:calc(100vw - 20px);height:calc(100vh - 20px);height:calc(100dvh - 20px)}
+  .profile-menu-head{padding:18px 18px 15px}
+  .profile-title-line{gap:12px}
+  .profile-title-line .profile-mystery{min-width:36px;height:38px;font-size:25px}
+  .profile-head-actions>.close-button,.profile-head-actions>.profile-badge-edit-toggle{flex-basis:40px;width:40px;height:40px}
+  .profile-identity{margin:15px 14px 0}
+  .profile-identity-main{gap:20px;padding:24px}
+  .profile-avatar{width:104px;height:104px}
+  .profile-avatar-fallback{font-size:36px}
+  .profile-nickname-line h3{font-size:29px}
+  .profile-equipped-badges .profile-badge{width:32px;height:32px;min-height:32px}
+  .profile-meta{margin-top:16px}
+  .profile-appearance-controls{margin:10px 14px 0;padding:14px}
+  .profile-appearance-title{align-items:flex-start;flex-direction:column;gap:5px}
+  .profile-appearance-title>small{text-align:left}
+  .profile-stats{gap:8px;margin:12px 14px 0}
+  .profile-stat{padding:14px}
+  .profile-stat strong{font-size:18px}
+  .profile-footer-actions{padding:18px 14px 22px}
+  .profile-footer-actions .profile-logout{width:100%}
+}
+@media(max-width:420px){
+  .account-profile-modal .profile-identity-main{align-items:flex-start;flex-direction:column}
+  .account-profile-modal .profile-details{width:100%}
+  .account-profile-modal .profile-avatar{width:96px;height:96px}
+  .profile-frame-choice{padding-inline:9px;font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){.profile-frame-choice{transition:none}.profile-title-line .profile-mystery{transition:none}}
+@media(max-width:420px){
+  .account-profile-modal .profile-nickname-line h3{font-size:27px}
+  .account-profile-modal .profile-equipped-badges{gap:6px}
+  .account-profile-modal .profile-equipped-badges .profile-badge{flex-basis:30px;width:30px;height:30px;min-height:30px}
+}
