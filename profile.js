@@ -1,6 +1,6 @@
-const profileState={data:null,request:0,view:'profile',email:null,leaderSort:'score',leaders:[],busy:false};
+const profileState={data:null,request:0,view:'profile',email:null,leaderSort:'score',leaders:[],busy:false,shopCategory:'upgrades',publicData:null};
 state.profile=profileState;
-let boingScene=null;
+let boingScene=null,bobFaceEditor=null;
 const numberFormat=new Intl.NumberFormat('ru-RU');
 const dateFormat=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'});
 const formatProfileNumber=value=>numberFormat.format(Math.max(0,Number(value)||0));
@@ -11,11 +11,13 @@ const boingSeenKey=nickname=>`flare-boing-intro:${String(nickname||'').toLowerCa
 function readBoingSeen(nickname){try{return localStorage.getItem(boingSeenKey(nickname))==='1'}catch{return false}}
 function writeBoingSeen(nickname){try{localStorage.setItem(boingSeenKey(nickname),'1')}catch{}}
 function clearProfileState(){
-  profileState.request++;profileState.data=null;profileState.email=null;profileState.leaders=[];profileState.view='profile';profileState.busy=false;
+  profileState.request++;profileState.data=null;profileState.email=null;profileState.leaders=[];profileState.publicData=null;profileState.view='profile';profileState.busy=false;
   teardownBoing(false);
 }
 function mergeBoingState(boing){
   if(!boing)return;
+  const previousFace=profileState.data?.boing?.face;
+  if(typeof boing.face==='undefined'&&typeof previousFace!=='undefined')boing={...boing,face:previousFace};
   profileState.data={...(profileState.data||{}),boing};
   updateBoingHud();
 }
@@ -152,24 +154,31 @@ function bobAccessoryMarkup(accessory){
   if(accessory==='bob-shades')return '<span class="bob-shades" aria-hidden="true"><i></i><i></i></span>';
   return '';
 }
+function bobFaceMarkup(boing){
+  if(boing?.face)return `<img class="bob-custom-face" src="${esc(boing.face)}" alt="" draggable="false">`;
+  return '<i class="bob-eye bob-eye-left"></i><i class="bob-eye bob-eye-right"></i><i class="bob-mouth"></i><i class="bob-cheek bob-cheek-left"></i><i class="bob-cheek bob-cheek-right"></i>';
+}
+function bobCharacterMarkup(boing){return `${bobAccessoryMarkup(boing?.selected_accessory)}<span class="bob-body">${bobFaceMarkup(boing)}</span>`}
+function canEditBobFace(scene){return Boolean(scene&&!scene.runId&&!scene.clicks&&!scene.starting&&!scene.failed)}
 function ensureBoingScene(){
   if(boingScene)return boingScene;
   const active=profileState.data?.boing?.active_run;
-  boingScene={runId:active?.id||null,score:Number(active?.score)||0,clicks:Number(active?.clicks)||0,syncedClicks:Number(active?.clicks)||0,running:false,starting:false,locked:false,failed:false,destroyed:false,x:0,y:0,vx:0,vy:0,rotation:0,size:104,raf:0,last:0,queue:Promise.resolve(),syncTimer:null,syncScheduled:false,element:null,arena:null,observer:null};
+  boingScene={runId:active?.id||null,score:Number(active?.score)||0,clicks:Number(active?.clicks)||0,syncedClicks:Number(active?.clicks)||0,running:false,starting:false,locked:false,failed:false,destroyed:false,x:0,y:0,vx:0,vy:0,rotation:0,spin:0,size:104,raf:0,last:0,queue:Promise.resolve(),syncTimer:null,syncScheduled:false,element:null,arena:null,observer:null};
   return boingScene;
 }
 function pauseBoingScene(){
+  bobFaceEditor=null;
   const scene=boingScene;if(!scene)return;
   scene.running=false;cancelAnimationFrame(scene.raf);scene.raf=0;
   if(scene.runId)queueBoingSync(scene,false);
 }
 function renderBoingGame(){
   if(!profileState.data?.boing)return;
-  profileState.view='game';
+  bobFaceEditor=null;profileState.view='game';
   const scene=ensureBoingScene(),boing=profileState.data.boing;
   scene.running=false;cancelAnimationFrame(scene.raf);scene.raf=0;
   const hint=scene.score>0?'НАЖМИ НА BOB, ЧТОБЫ ПРОДОЛЖИТЬ':'НАЖМИ НА BOB, ЧТОБЫ НАЧАТЬ';
-  const content=`${boingHeader('game')}<div class="boing-game-layout"><div class="boing-hud"><div><span>SCORE</span><strong id="boing-score">${formatProfileNumber(scene.score)}</strong></div><div><span>BEST</span><strong id="boing-best">${formatProfileNumber(Math.max(boing.best_score,scene.score))}</strong></div><div><span>COINS</span><strong id="boing-coins">${formatProfileNumber(boing.coins)}</strong></div></div><div class="boing-arena" id="boing-arena"><div class="boing-level">LEVEL 1 <span>НЕ УРОНИ BOB</span></div><div class="boing-hint" id="boing-hint">${hint}</div><button class="bob" id="bob" type="button" aria-label="Кликнуть по BOB и получить очки"><span class="bob-name" id="bob-name">${esc(boing.bob_name)}</span>${bobAccessoryMarkup(boing.selected_accessory)}<span class="bob-body"><i class="bob-eye bob-eye-left"></i><i class="bob-eye bob-eye-right"></i><i class="bob-mouth"></i><i class="bob-cheek bob-cheek-left"></i><i class="bob-cheek bob-cheek-right"></i></span></button><div class="boing-impact" id="boing-impact" aria-live="polite"></div><div class="boing-floor"><span>FLOOR</span></div></div><div class="boing-game-footer"><button class="boing-rename" id="boing-rename" type="button">Переименовать BOB <span id="boing-rename-price">${boing.free_renames_left?`бесплатно · ${boing.free_renames_left}`:'10 000 COINS'}</span></button><div class="boing-milestone-wrap"><div class="boing-milestone"><span id="boing-milestone-label">До следующей цели</span><div><i id="boing-milestone-fill"></i></div></div><small>COINS за каждые 100 общих очков · больше после 1 000, 10 000, 50 000 и 100 000</small></div></div></div>`;
+  const content=`${boingHeader('game')}<div class="boing-game-layout"><div class="boing-hud"><div><span>SCORE</span><strong id="boing-score">${formatProfileNumber(scene.score)}</strong></div><div><span>BEST</span><strong id="boing-best">${formatProfileNumber(Math.max(boing.best_score,scene.score))}</strong></div><div><span>COINS</span><strong id="boing-coins">${formatProfileNumber(boing.coins)}</strong></div></div><div class="boing-arena" id="boing-arena"><div class="boing-level">LEVEL 1 <span>НЕ УРОНИ BOB</span></div><div class="boing-hint" id="boing-hint">${hint}</div><button class="bob" id="bob" type="button" aria-label="Кликнуть по BOB и получить очки"><span class="bob-name" id="bob-name">${esc(boing.bob_name)}</span>${bobCharacterMarkup(boing)}</button><button class="bob-face-edit" id="bob-face-edit" type="button" aria-label="Нарисовать лицо BOB" title="Нарисовать лицо" ${canEditBobFace(scene)?'':'hidden'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/></svg></button><div class="boing-impact" id="boing-impact" aria-live="polite"></div><div class="boing-floor"><span>FLOOR</span></div></div><div class="boing-game-footer"><button class="boing-rename" id="boing-rename" type="button">Переименовать BOB <span id="boing-rename-price">${boing.free_renames_left?`бесплатно · ${boing.free_renames_left}`:'10 000 COINS'}</span></button><div class="boing-milestone-wrap"><div class="boing-milestone"><span id="boing-milestone-label">До следующей цели</span><div><i id="boing-milestone-fill"></i></div></div><small>COINS за каждые 100 общих очков · больше после 1 000, 10 000, 50 000 и 100 000</small></div></div></div>`;
   replaceModalView(content,'profile-modal boing-modal');
   bindBoingNavigation('game');
   scene.element=$('#bob');scene.arena=$('#boing-arena');
@@ -177,17 +186,23 @@ function renderBoingGame(){
   if('ResizeObserver'in window){scene.observer=new ResizeObserver(()=>resetBobPosition(scene,false));scene.observer.observe(scene.arena)}
   resetBobPosition(scene,true);updateBoingHud();
   scene.element.addEventListener('click',()=>clickBob(scene));
+  $('#bob-face-edit').onclick=showBoingFaceEditor;
   $('#boing-rename').onclick=showBoingRename;
 }
 function resetBobPosition(scene,force=false){
   if(!scene?.arena?.isConnected||!scene.element)return;
   const width=scene.arena.clientWidth,height=scene.arena.clientHeight;if(!width||!height)return;
   scene.size=scene.element.offsetWidth||104;
-  if(force||!scene.running){scene.x=Math.max(0,(width-scene.size)/2);scene.y=Math.max(32,(height-scene.size)*.38);scene.vx=0;scene.vy=0;scene.rotation=0}
+  if(force||!scene.running){scene.x=Math.max(0,(width-scene.size)/2);scene.y=Math.max(32,(height-scene.size)*.38);scene.vx=0;scene.vy=0;scene.rotation=0;scene.spin=0}
   else{scene.x=clamp(scene.x,0,Math.max(0,width-scene.size));scene.y=clamp(scene.y,0,Math.max(0,height-scene.size))}
   paintBob(scene);
 }
-function paintBob(scene){if(scene?.element?.isConnected)scene.element.style.transform=`translate3d(${scene.x}px,${scene.y}px,0) rotate(${scene.rotation}deg)`}
+function paintBob(scene){
+  if(!scene?.element?.isConnected)return;
+  scene.element.style.transform=`translate3d(${scene.x}px,${scene.y}px,0) rotate(${scene.rotation}deg)`;
+  const edit=$('#bob-face-edit');
+  if(edit){edit.hidden=!canEditBobFace(scene);edit.style.transform=`translate3d(${scene.x+scene.size-7}px,${scene.y+5}px,0)`}
+}
 function updateBoingHud(){
   const boing=profileState.data?.boing;if(!boing)return;
   const scene=boingScene,score=scene?.score||0;
@@ -241,8 +256,9 @@ function clickBob(scene){
   if(!scene.runId)startBoingRun(scene);
   const boing=profileState.data.boing,points=Math.max(1,Number(boing.points_per_click)||1);
   scene.score+=points;scene.clicks++;scene.running=true;
-  scene.vy=-Math.min(790,620+Math.random()*90);scene.vx=clamp(scene.vx*.35+(Math.random()*360-180),-340,340);scene.rotation+=scene.vx*.025;
-  scene.arena.classList.add('is-playing');$('#boing-hint').textContent='';
+  scene.vy=-Math.min(790,620+Math.random()*90);scene.vx=clamp(scene.vx*.35+(Math.random()*360-180),-340,340);
+  const spinDirection=Math.sign(scene.vx)||(Math.random()<.5?-1:1);scene.spin=clamp(scene.spin*.25+spinDirection*(280+Math.abs(scene.vx)*1.15),-760,760);
+  scene.arena.classList.add('is-playing');$('#boing-hint').textContent='';paintBob(scene);
   if(!scene.raf){scene.last=performance.now();scene.raf=requestAnimationFrame(now=>stepBoing(scene,now))}
   updateBoingHud();if(scene.runId)scheduleBoingSync(scene);
 }
@@ -261,13 +277,14 @@ function stepBoing(scene,now){
   if(!scene.running||scene.destroyed||!scene.arena?.isConnected){scene.raf=0;return}
   const dt=Math.min(.032,Math.max(.001,(now-scene.last)/1000));scene.last=now;
   const width=scene.arena.clientWidth,height=scene.arena.clientHeight,floor=height-scene.size-8;
-  scene.vy+=1540*dt;scene.x+=scene.vx*dt;scene.y+=scene.vy*dt;scene.rotation+=scene.vx*dt*.025;
+  scene.vy+=1540*dt;scene.x+=scene.vx*dt;scene.y+=scene.vy*dt;scene.rotation+=scene.spin*dt;
   if(scene.x<=0){scene.x=0;scene.vx=Math.abs(scene.vx)*.82}else if(scene.x>=width-scene.size){scene.x=width-scene.size;scene.vx=-Math.abs(scene.vx)*.82}
   if(scene.y<=0){scene.y=0;scene.vy=Math.abs(scene.vy)*.72}
   if(scene.y>=floor){scene.y=floor;paintBob(scene);failBoingRound(scene);return}
   paintBob(scene);scene.raf=requestAnimationFrame(time=>stepBoing(scene,time));
 }
 function teardownBoing(sync=true){
+  bobFaceEditor=null;
   const scene=boingScene;if(!scene)return;
   boingScene=null;scene.destroyed=true;scene.running=false;clearTimeout(scene.syncTimer);cancelAnimationFrame(scene.raf);scene.observer?.disconnect();
   if(sync&&scene.runId&&profileToken())queueBoingSync(scene,true);
@@ -306,6 +323,55 @@ function showBoingRename(){
   };
   $('#boing-name-input').focus();$('#boing-name-input').select();
 }
+function pushBobFaceHistory(editor){
+  if(!editor?.ready)return;
+  editor.history=editor.history.slice(0,editor.index+1);
+  editor.history.push(editor.context.getImageData(0,0,editor.canvas.width,editor.canvas.height));
+  if(editor.history.length>25)editor.history.shift();else editor.index++;
+  const undo=$('#bob-face-undo');if(undo)undo.disabled=editor.index<=0;
+}
+function restoreBobFaceHistory(editor){
+  if(!editor||editor.index<=0||editor.busy)return;
+  editor.index--;editor.context.putImageData(editor.history[editor.index],0,0);
+  const undo=$('#bob-face-undo');if(undo)undo.disabled=editor.index<=0;
+}
+function bobFacePoint(editor,event){
+  const rect=editor.canvas.getBoundingClientRect();
+  return{x:(event.clientX-rect.left)*editor.canvas.width/rect.width,y:(event.clientY-rect.top)*editor.canvas.height/rect.height};
+}
+function canvasToPng(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Не удалось подготовить рисунок.')),'image/png'))}
+async function saveBobFaceEditor(editor){
+  if(!editor||!editor.ready||editor.busy)return;
+  const token=profileToken(),button=$('#bob-face-save');editor.busy=true;if(button){button.disabled=true;button.textContent='Сохраняем…'}
+  try{
+    const pixels=editor.context.getImageData(0,0,editor.canvas.width,editor.canvas.height).data;let hasDrawing=false;
+    for(let i=3;i<pixels.length;i+=4){if(pixels[i]){hasDrawing=true;break}}
+    let data=null;
+    if(hasDrawing){const blob=await canvasToPng(editor.canvas);if(blob.size>150000)throw new Error('Рисунок получился слишком сложным. Удали часть штрихов.');data=await readFileAsDataUrl(blob)}
+    const result=await rpc('set_my_boing_face',{p_token:token,p_data:data});if(token!==profileToken())return;
+    mergeBoingState(result.boing);toast(data?'Лицо BOB сохранено.':'Стандартное лицо BOB возвращено.');
+    if(profileViewIsActive('face'))renderBoingGame();
+  }catch(error){toast(error.message);editor.busy=false;if(button?.isConnected){button.disabled=false;button.textContent='Сохранить лицо'}}
+}
+function showBoingFaceEditor(){
+  const scene=boingScene,boing=profileState.data?.boing;
+  if(!boing||!canEditBobFace(scene)){toast('Лицо можно менять перед началом нового раунда.');return}
+  pauseBoingScene();profileState.view='face';
+  const content=`${boingHeader('game')}<section class="bob-face-editor"><div class="bob-face-editor-head"><span class="eyebrow">BOB FACE STUDIO</span><h3>Твой BOB. Твои правила.</h3><p>Нарисуй лицо прямо на круге. Пустой холст вернёт стандартную улыбку.</p></div><div class="bob-face-stage"><div class="bob-face-canvas-shell"><span class="bob-face-editor-body" aria-hidden="true"></span><canvas id="bob-face-canvas" width="320" height="320" aria-label="Холст для рисования лица BOB"></canvas></div><div class="bob-face-toolbar"><div class="bob-face-brushes" role="group" aria-label="Размер кисти"><button type="button" data-face-brush="3" aria-label="Тонкая кисть" title="Тонкая кисть"><i></i></button><button type="button" data-face-brush="6" class="is-active" aria-label="Средняя кисть" title="Средняя кисть"><i></i></button><button type="button" data-face-brush="11" aria-label="Толстая кисть" title="Толстая кисть"><i></i></button></div><span></span><button type="button" id="bob-face-undo" aria-label="Отменить штрих" title="Отменить штрих" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></svg></button><button type="button" id="bob-face-clear" aria-label="Очистить холст" title="Очистить холст"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg></button></div></div><div class="bob-face-actions"><span>PNG · прозрачный фон</span><div><button class="profile-small-button" id="bob-face-cancel" type="button">Не менять</button><button class="button" id="bob-face-save" type="button" disabled>Сохранить лицо</button></div></div></section>`;
+  replaceModalView(content,'profile-modal boing-modal bob-face-modal');bindBoingNavigation('game');
+  const canvas=$('#bob-face-canvas'),context=canvas.getContext('2d');context.lineCap='round';context.lineJoin='round';context.strokeStyle='#211c13';
+  const editor={canvas,context,history:[],index:-1,size:6,drawing:false,ready:false,busy:false};bobFaceEditor=editor;
+  const ready=()=>{if(bobFaceEditor!==editor)return;editor.ready=true;pushBobFaceHistory(editor);const save=$('#bob-face-save');if(save)save.disabled=false};
+  if(boing.face)loadImageElement(boing.face).then(image=>{if(bobFaceEditor!==editor)return;context.drawImage(image,0,0,canvas.width,canvas.height);ready()}).catch(()=>ready());else ready();
+  const finish=event=>{if(!editor.drawing)return;editor.drawing=false;try{if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}catch{}pushBobFaceHistory(editor)};
+  canvas.addEventListener('pointerdown',event=>{if(!editor.ready||editor.busy)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);const point=bobFacePoint(editor,event);editor.drawing=true;context.lineWidth=editor.size;context.beginPath();context.moveTo(point.x,point.y);context.lineTo(point.x+.01,point.y);context.stroke()});
+  canvas.addEventListener('pointermove',event=>{if(!editor.drawing||editor.busy)return;event.preventDefault();const point=bobFacePoint(editor,event);context.lineTo(point.x,point.y);context.stroke()});
+  canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);
+  $$('[data-face-brush]').forEach(button=>button.onclick=()=>{if(editor.busy)return;editor.size=Number(button.dataset.faceBrush);$$('[data-face-brush]').forEach(item=>item.classList.toggle('is-active',item===button))});
+  $('#bob-face-undo').onclick=()=>restoreBobFaceHistory(editor);
+  $('#bob-face-clear').onclick=()=>{if(!editor.ready||editor.busy)return;context.clearRect(0,0,canvas.width,canvas.height);pushBobFaceHistory(editor)};
+  $('#bob-face-cancel').onclick=renderBoingGame;$('#bob-face-save').onclick=()=>saveBobFaceEditor(editor);
+}
 function shopItemButton(item,boing){
   if(item.kind==='click'||item.kind==='coin'){
     if(item.sold_out)return '<button type="button" disabled>MAX</button>';
@@ -316,12 +382,17 @@ function shopItemButton(item,boing){
   }else if(item.owned)return '<button type="button" disabled>Куплено</button>';
   return `<button type="button" data-buy-item="${esc(item.id)}">${formatProfileNumber(item.price)} COINS</button>`;
 }
-function showBoingShop(){
+const boingShopGroups={upgrades:{label:'Апгрейды',kinds:['click','coin']},cosmetics:{label:'Косметика',kinds:['accessory','leader']},profile:{label:'Профиль',kinds:['frame','banner','badge']}};
+const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'LEADERS',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
+function showBoingShop(category=profileState.shopCategory||'upgrades'){
   const boing=profileState.data?.boing;if(!boing)return;
-  pauseBoingScene();profileState.view='shop';
-  const items=Array.isArray(boing.shop)?boing.shop:[];
-  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3><p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">Купленные рамки и аксессуары можно менять здесь. Баннер загружается в профиле. Новый бейдж надевается автоматически.</p></div>`,'profile-modal boing-modal');
+  if(!boingShopGroups[category])category='upgrades';
+  pauseBoingScene();profileState.view='shop';profileState.shopCategory=category;
+  const allItems=Array.isArray(boing.shop)?boing.shop:[],items=allItems.filter(item=>boingShopGroups[category].kinds.includes(item.kind));
+  const tabs=Object.entries(boingShopGroups).map(([id,group])=>`<button type="button" data-shop-category="${id}" class="${id===category?'is-active':''}">${group.label}</button>`).join('');
+  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3><p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?'Улучшения действуют на все следующие клики и начисления COINS.':category==='cosmetics'?'Аксессуары можно надевать и снимать. Пункт BOB NAME IN LEADERS открывает имя BOB в таблице лидеров.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
   bindBoingNavigation('shop');
+  $$('[data-shop-category]').forEach(button=>button.onclick=()=>showBoingShop(button.dataset.shopCategory));
   $$('[data-buy-item]').forEach(button=>button.onclick=async()=>{
     const token=profileToken(),itemId=button.dataset.buyItem;button.disabled=true;
     try{const result=await rpc('buy_boing_item',{p_token:token,p_item_id:itemId});if(token!==profileToken())return;mergeBoingState(result.boing);toast('Покупка сохранена.');if(profileViewIsActive('shop'))showBoingShop()}catch(error){toast(error.message);if(button.isConnected)button.disabled=false}
@@ -332,17 +403,44 @@ function showBoingShop(){
   });
 }
 async function showBoingLeaders(sort=profileState.leaderSort||'score'){
-  pauseBoingScene();profileState.view='leaders';profileState.leaderSort=sort;
+  pauseBoingScene();const request=++profileState.request;profileState.view='leaders';profileState.leaderSort=sort;
   replaceModalView(`${boingHeader('leaders')}<div class="boing-leaders-panel"><div class="boing-leaders-head"><div><span class="eyebrow">ТОЛЬКО ИГРОКИ</span><h3>LEADERS</h3></div><div class="boing-leader-sort"><button type="button" data-leader-sort="score" class="${sort==='score'?'is-active':''}">По очкам</button><button type="button" data-leader-sort="coins" class="${sort==='coins'?'is-active':''}">По COINS</button></div></div><div class="boing-leaders-loading"><span class="profile-loading-orbit"></span><p>Считаем рекорды…</p></div></div>`,'profile-modal boing-modal');
   bindBoingNavigation('leaders');$$('[data-leader-sort]').forEach(button=>button.onclick=()=>showBoingLeaders(button.dataset.leaderSort));
   try{
     const token=profileToken(),result=await rpc('get_boing_leaders',{p_token:token,p_sort:sort});
-    if(token!==profileToken()||profileState.view!=='leaders'||sort!==profileState.leaderSort)return;
+    if(request!==profileState.request||token!==profileToken()||!profileViewIsActive('leaders')||sort!==profileState.leaderSort)return;
     profileState.leaders=result.leaders||[];renderBoingLeaderRows();
-  }catch(error){if(profileState.view==='leaders')$('.boing-leaders-loading').innerHTML=`<p>${esc(error.message)}</p>`}
+  }catch(error){const loading=$('.boing-leaders-loading');if(request===profileState.request&&profileViewIsActive('leaders')&&loading)loading.innerHTML=`<p>${esc(error.message)}</p>`}
 }
 function renderBoingLeaderRows(){
   const panel=$('.boing-leaders-panel');if(!panel)return;
-  const rows=profileState.leaders.length?profileState.leaders.map(player=>`<div class="boing-leader-row ${player.nickname===state.session?.nickname?'is-me':''}"><span class="boing-leader-rank">${String(player.rank).padStart(2,'0')}</span><div><strong>${esc(player.nickname)}</strong><small>BOB: ${esc(player.bob_name)}</small></div><span><b>${formatProfileNumber(player.best_score)}</b><small>очков</small></span><span><b>${formatProfileNumber(player.coins)}</b><small>COINS</small></span></div>`).join(''):'<div class="boing-leaders-empty"><strong>Пока никто не играл</strong><p>Первый рекорд может быть твоим.</p></div>';
+  const rows=profileState.leaders.length?profileState.leaders.map(player=>`<div class="boing-leader-row ${player.nickname===state.session?.nickname?'is-me':''}"><span class="boing-leader-rank">${String(player.rank).padStart(2,'0')}</span><div><button class="boing-leader-name" type="button" data-public-profile="${esc(player.nickname)}" aria-label="Открыть профиль ${esc(player.nickname)}"><strong>${esc(player.nickname)}</strong></button><small>${player.bob_name?`BOB: ${esc(player.bob_name)}`:'Имя BOB скрыто'}</small></div><span><b>${formatProfileNumber(player.best_score)}</b><small>очков</small></span><span><b>${formatProfileNumber(player.coins)}</b><small>COINS</small></span></div>`).join(''):'<div class="boing-leaders-empty"><strong>Пока никто не играл</strong><p>Первый рекорд может быть твоим.</p></div>';
   $('.boing-leaders-loading',panel)?.remove();panel.insertAdjacentHTML('beforeend',`<div class="boing-leader-list">${rows}</div>`);
+  $$('[data-public-profile]',panel).forEach(button=>button.onclick=()=>showPublicFlareProfile(button.dataset.publicProfile));
+}
+function publicProfileHeader(nickname='Профиль участника'){
+  return `<header class="public-profile-head"><button class="boing-back" id="public-profile-back" type="button" aria-label="Вернуться к лидерам"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"/></svg><span>LEADERS</span></button><div><span class="eyebrow">FLARE ID</span><h2>${esc(nickname)}</h2></div><button class="close-button" type="button" aria-label="Закрыть">×</button></header>`;
+}
+function publicProfileBadgeMarkup(badge){return `<span class="profile-badge is-equipped rarity-${esc(badge.rarity)}" title="${esc(badge.description)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span><span>${esc(badge.name)}</span></span>`}
+function renderPublicFlareProfile(){
+  const profile=profileState.publicData;if(!profile?.boing)return;
+  const boing=profile.boing,badges=Array.isArray(boing.badges)?boing.badges:[],created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
+  const stats=[['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],['COINS',formatProfileNumber(boing.coins),'баланс участника'],['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации'],['Всего кликов',formatProfileNumber(boing.total_clicks),'за все раунды BOING!']];
+  const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><span>УЧАСТНИК FLARE</span></div><div class="profile-equipped-badges">${badges.length?badges.map(publicProfileBadgeMarkup).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div><dl class="profile-meta"><div><dt>Регистрация</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div><section class="profile-badges-section"><div class="profile-section-title"><div><span class="eyebrow">КОЛЛЕКЦИЯ</span><h3>Бейджи</h3></div><span>${badges.length} получено</span></div><div class="profile-badges-list">${badges.length?badges.map(publicProfileBadgeMarkup).join(''):'<p class="profile-empty-copy">Пока нет полученных бейджей.</p>'}</div></section></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
+  replaceModalView(content,'profile-modal public-profile-modal');$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();
+}
+async function showPublicFlareProfile(nickname){
+  if(!nickname)return;
+  pauseBoingScene();const request=++profileState.request,token=profileToken();profileState.view='public-profile';profileState.publicData=null;
+  replaceModalView(`${publicProfileHeader(nickname)}<div class="profile-loading"><span class="profile-loading-orbit"></span><strong>${esc(nickname)}</strong><span>Открываем профиль участника…</span></div>`,'profile-modal public-profile-modal');
+  $('#public-profile-back').onclick=()=>showBoingLeaders();
+  try{
+    const profile=await rpc('get_public_flare_profile',{p_token:token,p_nickname:nickname});
+    if(request!==profileState.request||token!==profileToken()||!profileViewIsActive('public-profile'))return;
+    profileState.publicData=profile;renderPublicFlareProfile();
+  }catch(error){
+    if(request!==profileState.request||!profileViewIsActive('public-profile'))return;
+    replaceModalView(`${publicProfileHeader(nickname)}<div class="profile-error"><h3>${esc(nickname)}</h3><p>${esc(error.message)}</p><div><button class="button" id="public-profile-retry" type="button">Повторить</button></div></div>`,'profile-modal public-profile-modal');
+    $('#public-profile-back').onclick=()=>showBoingLeaders();$('#public-profile-retry').onclick=()=>showPublicFlareProfile(nickname);
+  }
 }
