@@ -44,9 +44,11 @@ function profileBadgeIcon(id){
     tester:'<path d="M9 3h6M10 3v6l-5 8c-1.2 2 .1 4 2.4 4h9.2c2.3 0 3.6-2 2.4-4l-5-8V3"/><path d="m8.5 15 2.2 2.2 4.8-5"/>',
     legend:'<path d="m12 2 8 7-8 13L4 9l8-7Z"/><path d="m4 9 8 3 8-3M12 12v10"/>',
     'boing-10k':'<path d="M8 4h8v5c0 3-1.8 5-4 5s-4-2-4-5V4Z"/><path d="M8 6H4v2c0 2 1.5 3 4 3m8-5h4v2c0 2-1.5 3-4 3M12 14v4m-4 3h8m-6-3h4"/>',
-    'boing-100k':'<path d="m12 2 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 2Z"/>'
+    'boing-100k':'<path d="m12 2 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 2Z"/>',
+    'community-favorite':'<path d="M8 11H4v10h4V11Zm4 10h6.2a2 2 0 0 0 2-1.6l1.1-6a2 2 0 0 0-2-2.4h-4.5l.7-4.1A2.4 2.4 0 0 0 13.3 4L12 4.8 8 11v10h4Z"/>',
+    winner:'<path d="M8 4h8v5c0 3-1.8 5-4 5s-4-2-4-5V4Z"/><path d="M8 6H4v2c0 2 1.5 3 4 3m8-5h4v2c0 2-1.5 3-4 3M12 14v4m-4 3h8m-6-3h4"/>'
   };
-  return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[id]||paths.legend}</svg>`;
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[id]||(id.startsWith('winner-')?paths.winner:paths.legend)}</svg>`;
 }
 const profileBadgeRarityRank={special:0,rare:1,legendary:2};
 function sortProfileBadges(badges){return [...badges].sort((a,b)=>(profileBadgeRarityRank[a.rarity]??99)-(profileBadgeRarityRank[b.rarity]??99)||a.name.localeCompare(b.name,'ru',{sensitivity:'base'})||a.id.localeCompare(b.id))}
@@ -119,6 +121,11 @@ function profileStatsMarkup(profile){
   ];
   return `<div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div>`;
 }
+function profileReputationMarkup(profile,own=false){
+  const reputation=profile.reputation||{},up=Math.max(0,Number(reputation.up)||0),down=Math.max(0,Number(reputation.down)||0),viewerValue=Number(reputation.viewer_value)||0,canRate=!own&&reputation.can_rate!==false;
+  const button=(value,label,path)=>`<button class="profile-reputation-button ${value===1?'is-like':'is-dislike'} ${viewerValue===value?'is-active':''}" type="button" data-reputation-value="${value}" aria-label="${label}" aria-pressed="${viewerValue===value}" ${canRate?'':'disabled'} ${own?'title="Нельзя оценить собственный профиль"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg><span>${formatProfileNumber(value===1?up:down)}</span></button>`;
+  return `<div class="profile-reputation" data-reputation-nickname="${esc(profile.nickname||'')}"><span class="profile-reputation-label">РЕПУТАЦИЯ</span><div class="profile-reputation-buttons">${button(1,'Большой палец вверх','<path d="M8 11H4v10h4V11Zm4 10h6.2a2 2 0 0 0 2-1.6l1.1-6a2 2 0 0 0-2-2.4h-4.5l.7-4.1A2.4 2.4 0 0 0 13.3 4L12 4.8 8 11v10h4Z"/>')}${button(-1,'Большой палец вниз','<path d="M16 13h4V3h-4v10Zm-4-10H5.8a2 2 0 0 0-2 1.6l-1.1 6a2 2 0 0 0 2 2.4h4.5l-.7 4.1a2.4 2.4 0 0 0 2.2 2.9L12 19.2 16 13V3h-4Z"/>')}</div></div>`;
+}
 function renderProfile(preserveScroll=false){
   const previousScroll=preserveScroll?($('.profile-scroll')?.scrollTop||0):0,profile=profileState.data;
   if(!profile?.boing)return;
@@ -130,7 +137,7 @@ function renderProfile(preserveScroll=false){
   const created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   syncBoingUnlock();
   const previewProfile={...profile,boing:{...boing,selected_frame:previewFrame}};
-  const content=`${profileHeader('Ваш аккаунт',true,canEdit)}<div class="profile-scroll"><section class="profile-identity ${previewBanner?'has-custom-banner':''} ${editing?'is-appearance-editing':''}">${previewBanner?`<img class="profile-banner" src="${esc(previewBanner)}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(previewProfile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badgeList}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div><div><dt>Email</dt><dd><span id="profile-email-value">${esc(profileState.email||profile.email_masked)}</span><button class="profile-email-toggle" id="profile-email-toggle" type="button">${profileState.email?'Скрыть':'Показать'}</button></dd></div></dl></div></div></section>${appearanceEditor}${profileStatsMarkup(profile)}<div class="profile-footer-actions"><button class="profile-logout" id="profile-logout" type="button">Выйти из аккаунта</button></div></div>`;
+  const content=`${profileHeader('Ваш аккаунт',true,canEdit)}<div class="profile-scroll"><section class="profile-identity ${previewBanner?'has-custom-banner':''} ${editing?'is-appearance-editing':''}">${previewBanner?`<img class="profile-banner" src="${esc(previewBanner)}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(previewProfile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badgeList}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div><div><dt>Email</dt><dd><span id="profile-email-value">${esc(profileState.email||profile.email_masked)}</span><button class="profile-email-toggle" id="profile-email-toggle" type="button">${profileState.email?'Скрыть':'Показать'}</button></dd></div></dl></div></div></section>${appearanceEditor}${profileStatsMarkup(profile)}<div class="profile-footer-actions">${profileReputationMarkup(profile,true)}<button class="profile-logout" id="profile-logout" type="button">Выйти из аккаунта</button></div></div>`;
   replaceModalView(content,'profile-modal account-profile-modal');
   bindProfileControls();if(preserveScroll&&$('.profile-scroll'))$('.profile-scroll').scrollTop=previousScroll;
 }
@@ -148,9 +155,10 @@ async function showProfile(){
   replaceModalView(profileLoadingMarkup(),'profile-modal account-profile-modal');
   $('#open-boing').onclick=()=>{const button=$('#open-boing');if(button)button.disabled=true;openBoingQuickEntry()};
   try{
+    const reputation=await rpc('prepare_flare_profile',{p_token:token,p_nickname:null});
     const profile=await rpc('get_my_profile',{p_token:token});
     if(request!==profileState.request||token!==profileToken())return;
-    profileState.data=profile;renderProfile();
+    profileState.data={...profile,reputation};renderProfile();
   }catch(error){if(request===profileState.request&&token===profileToken())renderProfileError(error)}
 }
 async function logoutAccount(){
@@ -574,8 +582,20 @@ function renderPublicFlareProfile(){
   const profile=profileState.publicData;if(!profile?.boing)return;
   const boing=profile.boing,badges=sortProfileBadges(Array.isArray(boing.badges)?boing.badges:[]).filter(badge=>badge.equipped),created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   const stats=[['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],['COINS',formatProfileNumber(boing.coins),'баланс участника'],['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации']];
-  const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badges.length?badges.map(badge=>publicProfileBadgeMarkup(badge,true)).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
-  replaceModalView(content,'profile-modal public-profile-modal');$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();
+  const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badges.length?badges.map(badge=>publicProfileBadgeMarkup(badge,true)).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div><div class="profile-footer-actions public-profile-footer">${profileReputationMarkup(profile)}</div></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
+  replaceModalView(content,'profile-modal public-profile-modal');$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();bindPublicReputationControls();
+}
+function bindPublicReputationControls(){
+  $$('[data-reputation-value]',$('.public-profile-modal')||document).forEach(button=>button.onclick=()=>ratePublicProfile(Number(button.dataset.reputationValue)));
+}
+async function ratePublicProfile(value){
+  const profile=profileState.publicData;if(!profile||profileState.busy||!profile.reputation?.can_rate)return;
+  const nickname=profile.nickname,token=profileToken(),request=profileState.request;profileState.busy=true;$$('[data-reputation-value]',$('.public-profile-modal')||document).forEach(button=>button.disabled=true);
+  try{
+    const result=await rpc('set_profile_reputation',{p_token:token,p_nickname:nickname,p_value:value});if(token!==profileToken()||request!==profileState.request)return;
+    let current=profile;if(result.awarded)current=await rpc('get_public_flare_profile',{p_token:token,p_nickname:nickname});
+    profileState.publicData={...current,reputation:result.reputation};renderPublicFlareProfile();toast(result.value===0?'Оценка снята.':'Оценка сохранена.');
+  }catch(error){toast(error.message);if(profileViewIsActive('public-profile'))$$('[data-reputation-value]',$('.public-profile-modal')||document).forEach(button=>button.disabled=false)}finally{profileState.busy=false}
 }
 async function showPublicFlareProfile(nickname){
   if(!nickname)return;
@@ -583,9 +603,10 @@ async function showPublicFlareProfile(nickname){
   replaceModalView(`${publicProfileHeader(nickname)}<div class="profile-loading"><span class="profile-loading-orbit"></span><strong>${esc(nickname)}</strong><span>Открываем профиль участника…</span></div>`,'profile-modal public-profile-modal');
   $('#public-profile-back').onclick=()=>showBoingLeaders();
   try{
+    const reputation=await rpc('prepare_flare_profile',{p_token:token,p_nickname:nickname});
     const profile=await rpc('get_public_flare_profile',{p_token:token,p_nickname:nickname});
     if(request!==profileState.request||token!==profileToken()||!profileViewIsActive('public-profile'))return;
-    profileState.publicData=profile;renderPublicFlareProfile();
+    profileState.publicData={...profile,reputation};renderPublicFlareProfile();
   }catch(error){
     if(request!==profileState.request||!profileViewIsActive('public-profile'))return;
     replaceModalView(`${publicProfileHeader(nickname)}<div class="profile-error"><h3>${esc(nickname)}</h3><p>${esc(error.message)}</p><div><button class="button" id="public-profile-retry" type="button">Повторить</button></div></div>`,'profile-modal public-profile-modal');

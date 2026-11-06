@@ -1594,3 +1594,54 @@ small{color:#bdb7ad;font-weight:500}
   .topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{width:92px;height:34px}
   .topbar .wordmark .wordmark-logo{width:184px}
 }
+
+/* Final header and entry refinements: compact artwork, balanced account controls. */
+.topbar .wordmark .wordmark-logo{width:320px;transform:translate(-50%,-50%) translateY(5px)}
+.topbar .account-status .text-button{min-height:40px;padding:0 11px;background:rgba(255,174,44,.055);color:#f5ad3c}
+.topbar .account-status .text-button:hover{background:rgba(255,174,44,.11);color:#ffc15a}
+.topbar .account-button{min-height:40px;padding:0 14px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.042);font-size:15px}
+.topbar .account-button:hover{border-color:rgba(255,255,255,.13);background:rgba(255,255,255,.075)}
+
+/* A little more air below the artwork and a dark diagonal tint on each CTA. */
+.brand-intro .intro-links{transform:translateY(-34px)}
+.brand-intro .intro-links>.intro-link{background:linear-gradient(135deg,rgba(242,84,103,.19) 0%,rgba(91,29,39,.1) 42%,rgba(10,8,11,0) 78%),#0A080B}
+.brand-intro .intro-links>.intro-link[data-category="доп."]{background:linear-gradient(135deg,rgba(214,80,221,.18) 0%,rgba(78,25,83,.1) 42%,rgba(10,8,11,0) 78%),#0A080B}
+.brand-intro .intro-links>.intro-link:hover,.brand-intro .intro-links>.intro-link:nth-child(2):hover{background:linear-gradient(135deg,rgba(242,84,103,.26),rgba(21,16,18,.25) 76%),#100b0e}
+.brand-intro .intro-links>.intro-link[data-category="доп."]:hover{background:linear-gradient(135deg,rgba(214,80,221,.25),rgba(23,14,24,.25) 76%),#120c14}
+@media(max-width:700px){
+  .topbar .wordmark .wordmark-logo{width:230px;transform:translate(-50%,-50%) translateY(4px)}
+  .topbar .account-status .text-button{min-height:38px;padding-inline:8px}
+  .topbar .account-button{min-height:40px;padding-inline:10px;font-size:13px}
+}
+@media(max-width:600px){.brand-intro .intro-links{transform:translateY(-20px)}}
+@media(max-width:380px){.topbar .wordmark .wordmark-logo{width:170px;transform:translate(-50%,-50%) translateY(3px)}.topbar .account-button{padding-inline:8px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){.brand-intro .intro-links>.intro-link{transition:none}}
+
+/* Organizer-managed social profiles. */
+.admin-social-panel{color:#eee9e0}
+.admin-social-intro{padding:22px 24px;border:1px solid rgba(255,193,7,.18);border-radius:16px;background:linear-gradient(135deg,rgba(30,27,21,.94),rgba(17,17,16,.98))}
+.admin-social-intro h3{margin:0 0 10px;color:#f5f0e7;font-size:21px}
+.admin-social-intro p{max-width:760px;margin:0;color:#b9b2a6;font-size:14px;line-height:1.6}
+.admin-social-form{display:grid;gap:18px;margin-top:20px}
+.admin-social-member{display:grid;grid-template-columns:150px minmax(0,340px);align-items:center;gap:16px;color:#c6a96e;font-size:12px;font-weight:700}
+.admin-social-member select{min-height:46px;padding:0 13px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:#171614;color:#f3eee5;font:600 14px var(--font)}
+.admin-social-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.admin-social-field,.admin-social-photo-field{min-width:0;padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:#141312}
+.admin-social-field{display:grid;gap:14px}
+.admin-social-field>span,.admin-social-photo-field>div:first-child{display:grid;gap:4px}
+.admin-social-field b,.admin-social-photo-field b{color:#eee8dc;font-size:14px}
+.admin-social-field small,.admin-social-photo-field small{color:#8f887e;font-size:11px;line-height:1.4}
+.admin-social-field input{width:100%;min-width:0;min-height:44px;padding:0 12px;border:1px solid rgba(255,255,255,.13);border-radius:9px;background:#0e0e0d;color:#eee9df;font:13px var(--font)}
+.admin-social-photo-field{display:grid;grid-template-columns:minmax(0,1fr) 84px;align-items:center;gap:14px}
+.admin-social-photo-preview{display:grid;place-items:center;grid-row:span 2;width:84px;height:84px;overflow:hidden;border:1px dashed rgba(255,255,255,.16);border-radius:12px;background:#0d0d0c;color:#6f6a62;font-size:9px;text-align:center}
+.admin-social-photo-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.admin-social-photo-preview span{padding:8px}
+.admin-social-photo-actions{display:flex;flex-wrap:wrap;gap:8px}
+.admin-social-photo-actions .admin-design-upload,.admin-social-photo-actions .admin-design-reset{min-height:38px;padding:0 11px;font-size:11px}
+.admin-social-submit{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:4px}
+.admin-social-submit p{margin:0;color:#8f887e;font-size:12px}
+.admin-social-submit .button{min-width:190px}
+@media(max-width:760px){.admin-social-fields{grid-template-columns:1fr}.admin-social-member{grid-template-columns:1fr;gap:8px}.admin-social-submit{align-items:stretch;flex-direction:column}.admin-social-submit .button{width:100%}}
+@media(max-width:420px){.admin-social-intro{padding:18px}.admin-social-photo-field{grid-template-columns:minmax(0,1fr) 70px;padding:14px}.admin-social-photo-preview{width:70px;height:70px}.admin-social-photo-actions{grid-column:1/-1}.admin-social-photo-actions>*{flex:1}}
+@media(max-width:650px){.admin-modal>.admin-head .admin-tab{flex:0 0 auto}}
+@media(max-width:380px){.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{width:80px}.topbar .wordmark .wordmark-logo{width:160px}}

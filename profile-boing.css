@@ -408,3 +408,86 @@
   .topbar .account-status .text-button{padding-inline:4px;font-size:11px}
   .topbar .account-button{padding-inline:6px;font-size:12px}
 }
+
+/* Compact account hierarchy and metadata without decorative chips. */
+.modal.account-profile-modal{height:auto;min-height:0}
+.account-profile-modal .profile-scroll{flex:0 1 auto}
+.profile-menu-heading .eyebrow{margin-bottom:6px;color:#c9ad73;font-size:10px;font-weight:800;letter-spacing:.19em;text-shadow:0 1px 5px #000}
+.profile-title-divider{flex-basis:2px;width:2px;background:rgba(243,240,233,.34)}
+.profile-title-line .profile-mystery{font-family:"Manrope","DM Sans",sans-serif;font-weight:800;letter-spacing:-.035em}
+.profile-meta{gap:22px}
+.profile-meta>div,.account-profile-modal .profile-meta>div,.public-profile-modal .profile-meta>div{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.profile-meta dt{color:#d5c9b2;text-shadow:0 1px 5px #000,0 0 1px rgba(0,0,0,.8)}
+.profile-meta dd{color:#fffaf0;text-shadow:0 1px 5px #000,0 0 1px rgba(0,0,0,.8)}
+.profile-email-toggle{color:#f0cd7d;text-shadow:0 1px 5px #000}
+.profile-footer-actions{justify-content:space-between;padding-bottom:20px}
+
+/* Maronnix's owned GOLD FRAME: a segmented ornamental ring with four gems. */
+.profile-avatar.frame-gold{border-color:#f3d27a;box-shadow:0 0 0 2px #6e4b16,0 0 0 4px rgba(255,219,123,.2),0 12px 38px rgba(255,166,0,.2)}
+.profile-avatar.frame-gold::before{content:"";position:absolute;z-index:3;inset:-13px;border-radius:50%;background:repeating-conic-gradient(from -3deg,transparent 0deg 5deg,#8d631e 5deg 7deg,#ffe39a 7deg 10deg,#b17b28 10deg 12deg,transparent 12deg 15deg);-webkit-mask:radial-gradient(circle,transparent 0 70%,#000 71% 77%,transparent 78%);mask:radial-gradient(circle,transparent 0 70%,#000 71% 77%,transparent 78%);pointer-events:none;animation:profileGoldFrameTurn 24s linear infinite}
+.profile-avatar.frame-gold::after{content:"";position:absolute;z-index:4;inset:-8px;border:1px solid rgba(255,222,139,.72);border-radius:50%;background:radial-gradient(circle at 50% -1%,#fff3bd 0 2px,#b67819 2.5px 4px,transparent 4.5px),radial-gradient(circle at 101% 50%,#fff3bd 0 2px,#b67819 2.5px 4px,transparent 4.5px),radial-gradient(circle at 50% 101%,#fff3bd 0 2px,#b67819 2.5px 4px,transparent 4.5px),radial-gradient(circle at -1% 50%,#fff3bd 0 2px,#b67819 2.5px 4px,transparent 4.5px);box-shadow:inset 0 0 0 2px rgba(75,44,8,.55),0 0 12px rgba(255,192,69,.16);pointer-events:none}
+@keyframes profileGoldFrameTurn{to{transform:rotate(360deg)}}
+
+/* Reputation sits opposite logout and stays read-only on one's own profile. */
+.profile-reputation{display:grid;gap:7px;min-width:0}
+.profile-reputation-label{color:#9d8b68;font-family:"Sora",sans-serif;font-size:8px;font-weight:800;letter-spacing:.13em}
+.profile-reputation-buttons{display:flex;align-items:center;gap:8px}
+.profile-reputation-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:68px;min-height:38px;padding:0 10px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#131311;color:#b9b3a9;cursor:pointer;transition:border-color .18s,background-color .18s,color .18s}
+.profile-reputation-button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.profile-reputation-button span{font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.profile-reputation-button.is-like:hover,.profile-reputation-button.is-like.is-active{border-color:rgba(112,220,151,.44);background:rgba(112,220,151,.07);color:#88dfa6}
+.profile-reputation-button.is-dislike:hover,.profile-reputation-button.is-dislike.is-active{border-color:rgba(242,84,103,.44);background:rgba(242,84,103,.07);color:#f27d8d}
+.profile-reputation-button:disabled{cursor:not-allowed;opacity:.78}
+.profile-reputation-button:disabled:hover{border-color:rgba(255,255,255,.11);background:#131311;color:#b9b3a9}
+.public-profile-footer{justify-content:flex-start;padding:16px 0 0}
+.public-profile-info .public-profile-footer .profile-reputation{width:max-content}
+
+/* Style-of-year social entry: only a bare vector sparkle on the nominee card. */
+.style-profile-card .nominee-name{padding-right:20px}
+.nominee-social-toggle{position:absolute;z-index:5;right:7px;bottom:7px;display:grid;place-items:center;width:30px;height:30px;padding:3px;border:0;border-radius:0;background:transparent;box-shadow:none;color:#d9bd78;cursor:pointer;transition:color .18s,transform .18s}
+.nominee-social-toggle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}
+.nominee-social-toggle:hover,.nominee-social-toggle[aria-expanded="true"]{background:transparent;color:#ffe29a;transform:scale(1.08)}
+.nominee-social-toggle:focus-visible{outline:2px solid #f0c66d;outline-offset:1px;border-radius:4px}
+.social-profile-popover{position:fixed;z-index:45;overflow:hidden;border:1px solid rgba(255,255,255,.13);border-radius:15px;background:rgba(15,15,14,.98);box-shadow:0 18px 55px rgba(0,0,0,.62);color:#eee9df;animation:socialProfileIn .16s ease}
+.social-profile-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;border-bottom:1px solid rgba(255,255,255,.075)}
+.social-profile-head strong{font-family:"Manrope","DM Sans",sans-serif;font-size:14px}
+.social-profile-head>span{color:#a78c56;font-family:"Sora",sans-serif;font-size:8px;font-weight:800;letter-spacing:.14em}
+.social-profile-list{display:grid;gap:3px;padding:7px}
+.social-profile-row{display:grid;grid-template-columns:40px minmax(0,1fr) 18px;align-items:center;gap:11px;width:100%;min-height:54px;padding:6px 9px;border:0;border-radius:10px;background:transparent;color:#dcd6ca;text-align:left;cursor:pointer;transition:background-color .16s,color .16s}
+.social-profile-row:hover{background:rgba(255,255,255,.055);color:#fff}
+.social-profile-row>span:nth-child(2){display:grid;gap:2px;min-width:0}
+.social-profile-row strong{font-size:12px}
+.social-profile-row small{color:#888278;font-size:10px}
+.social-profile-service{display:grid;place-items:center;width:38px;height:38px;color:#d8bd7e}
+.social-profile-service svg,.social-profile-arrow{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+.social-profile-thumb{display:block;width:38px;height:38px;border-radius:9px;object-fit:cover}
+.social-profile-arrow{width:16px;color:#716c64}
+.social-profile-loading{display:flex;align-items:center;justify-content:center;gap:9px;min-height:76px;padding:18px;color:#a9a196;font-size:12px}
+.social-profile-loading>span{width:15px;height:15px;border:2px solid rgba(255,255,255,.15);border-top-color:#d9bd78;border-radius:50%;animation:socialProfileSpin .8s linear infinite}
+.social-profile-empty{margin:0;padding:20px 16px;color:#a9a196;font-size:12px;line-height:1.5;text-align:center}
+.social-photo-overlay{position:fixed;z-index:60;inset:0;display:grid;place-items:center;padding:52px 24px 28px;background:rgba(0,0,0,.88);animation:fadeIn .16s ease}
+.social-photo-overlay figure{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px;width:min(780px,100%);height:min(760px,100%);margin:0}
+.social-photo-overlay figure>img{display:block;width:100%;height:100%;min-height:0;border-radius:15px;object-fit:contain}
+.social-photo-overlay figcaption{display:flex;align-items:center;justify-content:center;gap:10px;color:#f1ece2;font-size:14px}
+.social-photo-overlay figcaption span{color:#b69b65;font-size:11px}
+.social-photo-close{position:absolute;top:14px;right:18px;display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:#171614;color:#e2ddd4;font-size:27px;cursor:pointer}
+@keyframes socialProfileSpin{to{transform:rotate(360deg)}}
+@keyframes socialProfileIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.profile-badge[data-badge-id="community-favorite"]{--badge-accent:#8ce69b;--badge-rgb:140,230,155;--badge-secondary-rgb:88,179,132}
+@media(max-width:700px){.profile-footer-actions{gap:14px}.profile-reputation-buttons{gap:7px}.profile-reputation-button{min-width:64px}.social-photo-overlay{padding:58px 12px 20px}.social-photo-close{right:12px}}
+@media(max-width:380px){.profile-meta{gap:16px}.profile-reputation-button{min-width:60px;padding-inline:8px}.nominee-social-toggle{right:4px;bottom:4px}}
+@media(prefers-reduced-motion:reduce){.profile-avatar.frame-gold::before{animation:none}.profile-reputation-button,.nominee-social-toggle,.social-profile-row{transition:none}.social-profile-popover,.social-photo-overlay{animation:none}.social-profile-loading>span{animation:none}}
+.nominee-style-vote{display:block;width:100%;padding:0;border:0;border-radius:0;background:transparent;color:inherit;text-align:center;cursor:inherit}
+.nominee-style-vote:disabled{opacity:1}
+.nominee-style-vote:focus-visible{outline:2px solid #f0c66d;outline-offset:4px;border-radius:8px}
+
+/* Keep the final header account treatment above legacy profile overrides. */
+.topbar .account-status .text-button{min-height:40px;padding:0 11px;background:rgba(255,174,44,.055);color:#f5ad3c}
+.topbar .account-status .text-button:hover{background:rgba(255,174,44,.11);color:#ffc15a}
+.topbar .account-button{min-height:40px;padding:0 14px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.042);font-size:15px}
+.topbar .account-button:hover{border-color:rgba(255,255,255,.13);background:rgba(255,255,255,.075)}
+@media(max-width:700px){.topbar .account-status .text-button{min-height:38px;padding-inline:8px}.topbar .account-button{min-height:40px;padding-inline:10px;font-size:13px}}
+@media(max-width:380px){.topbar .account-button{padding-inline:8px;font-size:12px}}
+.nominee-card.self::after{pointer-events:none}
+.style-profile-card .nominee-social-toggle{z-index:6}
+@media(max-width:380px){.topbar .account-status .text-button{min-height:38px;padding-inline:4px}.topbar .account-button{right:-3px;min-height:38px;padding-inline:6px}}
