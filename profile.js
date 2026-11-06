@@ -196,21 +196,42 @@ function bindProfileControls(){
 function readFileAsDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Не удалось прочитать фотографию.'));reader.readAsDataURL(file)})}
 function loadImageElement(source){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Не удалось открыть фотографию.'));image.src=source})}
 function canvasToJpeg(canvas,quality){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Не удалось обработать фотографию.')),'image/jpeg',quality))}
-// Shared by profile banners and Discord/Telegram uploads: preserve aspect ratio,
-// flatten transparency and return a bounded JPEG accepted by the social RPC.
-async function prepareProfileImage(file){
+// Trim only fully transparent outer margins; keep every visible/antialiased pixel.
+function profileImageContentBounds(image){
+  const width=image.naturalWidth,height=image.naturalHeight;
+  if(width*height>32000000)throw new Error('Слишком большое разрешение фото. Уменьши его до 32 мегапикселей.');
+  const scan=document.createElement('canvas');scan.width=width;scan.height=height;
+  const context=scan.getContext('2d',{willReadFrequently:true});context.drawImage(image,0,0);
+  let left=width,top=height,right=-1,bottom=-1;
+  // Read strips instead of allocating a second full-resolution RGBA buffer.
+  for(let y=0;y<height;y+=128){
+    const rows=Math.min(128,height-y),pixels=context.getImageData(0,y,width,rows).data;
+    for(let row=0;row<rows;row++)for(let x=0;x<width;x++){
+      if(pixels[(row*width+x)*4+3]===0)continue;
+      left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y+row);bottom=Math.max(bottom,y+row);
+    }
+  }
+  scan.width=scan.height=0;
+  if(right<left)throw new Error('На фото нет видимого изображения: все пиксели прозрачные.');
+  return {x:left,y:top,width:right-left+1,height:bottom-top+1};
+}
+// Social uploads trim transparent margins before flattening to a bounded JPEG.
+// Banners retain their original framing.
+async function prepareProfileImage(file,trimTransparent=true){
   const allowed=['image/jpeg','image/png','image/webp'];
   if(!allowed.includes(file.type))throw new Error('Можно загрузить только фотографию JPG, PNG или WebP. GIF и видео не поддерживаются.');
   if(file.size>12*1024*1024)throw new Error('Фотография должна быть меньше 12 МБ.');
-  const source=await readFileAsDataUrl(file),image=await loadImageElement(source),scale=Math.min(1,1600/image.naturalWidth,1000/image.naturalHeight);
-  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
-  const context=canvas.getContext('2d',{alpha:false});context.fillStyle='#111110';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(image,0,0,canvas.width,canvas.height);
+  const source=await readFileAsDataUrl(file),image=await loadImageElement(source);
+  const bounds=trimTransparent?profileImageContentBounds(image):{x:0,y:0,width:image.naturalWidth,height:image.naturalHeight};
+  const scale=Math.min(1,1600/bounds.width,1000/bounds.height);
+  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bounds.width*scale));canvas.height=Math.max(1,Math.round(bounds.height*scale));
+  const context=canvas.getContext('2d',{alpha:false});context.fillStyle='#111110';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(image,bounds.x,bounds.y,bounds.width,bounds.height,0,0,canvas.width,canvas.height);
   let quality=.84,blob=await canvasToJpeg(canvas,quality);
   while(blob.size>490000&&quality>.5){quality-=.08;blob=await canvasToJpeg(canvas,quality)}
   if(blob.size>500000)throw new Error('Не удалось уменьшить фотографию до 500 КБ. Выбери другой кадр.');
   return await readFileAsDataUrl(blob);
 }
-function prepareProfileBanner(file){return prepareProfileImage(file)}
+function prepareProfileBanner(file){return prepareProfileImage(file,false)}
 async function handleProfileBanner(event){
   const input=event.currentTarget,file=input.files?.[0],token=profileToken();if(!file||!profileState.badgeEditing||profileState.busy)return;
   const label=input.closest('label');label?.classList.add('is-busy');input.disabled=true;
