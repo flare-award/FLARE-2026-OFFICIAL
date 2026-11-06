@@ -61,8 +61,8 @@ function profileBadgeMarkup(badge,compact=false,action=''){
   return `<div class="${classes}" data-badge-id="${esc(badge.id)}" tabindex="0" aria-describedby="${esc(tooltipId)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span><span>${esc(badge.name)}</span>${action?'':`<small>${badge.equipped?'Надет':'Снят'}</small>`}${actionMarkup}${tooltip}</div>`;
 }
 function profileBadgeEditToggleMarkup(){
-  const save=profileState.badgeEditing;
-  return `<button class="profile-badge-edit-toggle ${save?'is-save':''}" id="profile-badge-edit-toggle" type="button" aria-label="${save?'Сохранить оформление профиля':'Изменить оформление профиля'}" title="${save?'Сохранить оформление':'Изменить оформление'}"><svg viewBox="0 0 24 24" aria-hidden="true">${save?'<path d="m5 12 4 4L19 6"/>':'<path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/>'}</svg></button>`;
+  const editing=profileState.badgeEditing,pencil='<path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/>';
+  return `<button class="profile-badge-edit-toggle ${editing?'is-editing':''}" id="profile-badge-edit-toggle" type="button" aria-label="Изменить оформление профиля" title="${editing?'Редактирование открыто':'Изменить оформление'}" ${editing?'disabled aria-disabled="true"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${pencil}</svg></button>`;
 }
 const profileFrameNames={'frame-default':'Без рамки','frame-gold':'GOLD FRAME','frame-aurora':'AURORA FRAME','frame-inferno':'INFERNO FRAME'};
 function profileAppearanceFrameOptions(boing){
@@ -100,12 +100,12 @@ async function saveProfileAppearance(){
   const before=badges.filter(badge=>badge.equipped).map(badge=>badge.id).sort(),after=badges.filter(badge=>draft.has(badge.id)).map(badge=>badge.id).sort();
   const frames=profileAppearanceFrameOptions(boing),nextFrame=frames.some(frame=>frame.id===profileState.frameDraft)?profileState.frameDraft:(boing.selected_frame||'frame-default'),frameChanged=nextFrame!==(boing.selected_frame||'frame-default'),bannerChanged=Boolean(profileState.bannerDirty),nextBanner=profileState.bannerDraft||null;
   if(JSON.stringify(before)===JSON.stringify(after)&&!frameChanged&&!bannerChanged){resetProfileAppearanceDraft();renderProfile(true);return}
-  const token=profileToken(),button=$('#profile-badge-edit-toggle'),cancelButton=$('#profile-appearance-cancel');profileState.busy=true;if(button)button.disabled=true;if(cancelButton)cancelButton.disabled=true;
+  const token=profileToken(),saveButton=$('#profile-appearance-save'),cancelButton=$('#profile-appearance-cancel');profileState.busy=true;if(saveButton)saveButton.disabled=true;if(cancelButton)cancelButton.disabled=true;
   try{
     const result=await rpc('set_my_profile_appearance',{p_token:token,p_badge_ids:after,p_frame_id:nextFrame,p_update_banner:bannerChanged,p_banner_data:bannerChanged?nextBanner:null});if(token!==profileToken())return;
     mergeBoingState(result.boing);if(bannerChanged)profileState.data.banner=nextBanner;resetProfileAppearanceDraft();
     if(profileViewIsActive('profile'))renderProfile(true);toast('Оформление сохранено.');
-  }catch(error){toast(error.message);if(button?.isConnected)button.disabled=false;if(cancelButton?.isConnected)cancelButton.disabled=false}finally{profileState.busy=false}
+  }catch(error){toast(error.message);if(saveButton?.isConnected)saveButton.disabled=false;if(cancelButton?.isConnected)cancelButton.disabled=false}finally{profileState.busy=false}
 }
 function profileAvatarMarkup(profile,large=true){
   const nickname=profile.nickname||state.session?.nickname||'',boing=profile.boing||{},frame=boing.selected_frame||'frame-default';
@@ -124,7 +124,7 @@ function profileStatsMarkup(profile){
 function profileReputationMarkup(profile,own=false){
   const reputation=profile.reputation||{},up=Math.max(0,Number(reputation.up)||0),down=Math.max(0,Number(reputation.down)||0),viewerValue=Number(reputation.viewer_value)||0,canRate=!own&&reputation.can_rate!==false;
   const button=(value,label,path)=>`<button class="profile-reputation-button ${value===1?'is-like':'is-dislike'} ${viewerValue===value?'is-active':''}" type="button" data-reputation-value="${value}" aria-label="${label}" aria-pressed="${viewerValue===value}" ${canRate?'':'disabled'} ${own?'title="Нельзя оценить собственный профиль"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg><span>${formatProfileNumber(value===1?up:down)}</span></button>`;
-  return `<div class="profile-reputation" data-reputation-nickname="${esc(profile.nickname||'')}"><span class="profile-reputation-label">РЕПУТАЦИЯ</span><div class="profile-reputation-buttons">${button(1,'Большой палец вверх','<path d="M8 11H4v10h4V11Zm4 10h6.2a2 2 0 0 0 2-1.6l1.1-6a2 2 0 0 0-2-2.4h-4.5l.7-4.1A2.4 2.4 0 0 0 13.3 4L12 4.8 8 11v10h4Z"/>')}${button(-1,'Большой палец вниз','<path d="M16 13h4V3h-4v10Zm-4-10H5.8a2 2 0 0 0-2 1.6l-1.1 6a2 2 0 0 0 2 2.4h4.5l-.7 4.1a2.4 2.4 0 0 0 2.2 2.9L12 19.2 16 13V3h-4Z"/>')}</div></div>`;
+  return `<div class="profile-reputation" data-reputation-nickname="${esc(profile.nickname||'')}"><div class="profile-reputation-buttons">${button(1,'Большой палец вверх','<path d="M8 11H4v10h4V11Zm4 10h6.2a2 2 0 0 0 2-1.6l1.1-6a2 2 0 0 0-2-2.4h-4.5l.7-4.1A2.4 2.4 0 0 0 13.3 4L12 4.8 8 11v10h4Z"/>')}${button(-1,'Большой палец вниз','<path d="M16 13h4V3h-4v10Zm-4-10H5.8a2 2 0 0 0-2 1.6l-1.1 6a2 2 0 0 0 2 2.4h4.5l-.7 4.1a2.4 2.4 0 0 0 2.2 2.9L12 19.2 16 13V3h-4Z"/>')}</div></div>`;
 }
 function renderProfile(preserveScroll=false){
   const previousScroll=preserveScroll?($('.profile-scroll')?.scrollTop||0):0,profile=profileState.data;
@@ -133,7 +133,7 @@ function renderProfile(preserveScroll=false){
   const badgeList=visibleBadges.map(badge=>profileBadgeMarkup(badge,true,editing?(badge.equipped?'remove':'restore'):'')).join('');
   const frameEditor=frameOptions.length>1?`<div class="profile-frame-editor"><span class="profile-appearance-label">РАМКА АВАТАРА</span><div class="profile-frame-options" role="group" aria-label="Рамка аватара">${frameOptions.map(frame=>`<button class="profile-frame-choice ${previewFrame===frame.id?'is-selected':''}" type="button" data-profile-frame="${esc(frame.id)}" aria-pressed="${previewFrame===frame.id}"><span class="profile-frame-choice-swatch ${esc(frame.id)}" aria-hidden="true"></span><span>${esc(frame.name)}</span></button>`).join('')}</div></div>`:'';
   const bannerEditor=hasBannerUpgrade?`<div class="profile-banner-controls"><span>Фотобаннер · JPG, PNG или WebP до 12 МБ</span><div><label class="profile-small-button">Выбрать фото<input id="profile-banner-input" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><button class="profile-small-button" id="profile-banner-remove" type="button" ${previewBanner?'':'disabled'}>Убрать</button></div></div>`:'';
-  const appearanceEditor=editing?`<section class="profile-appearance-controls" aria-label="Настройки оформления"><div class="profile-appearance-title"><span>ОФОРМЛЕНИЕ</span><small>Нажми галочку сверху, чтобы сохранить изменения</small></div>${frameEditor}${bannerEditor}<div class="profile-appearance-actions"><button class="profile-small-button profile-appearance-cancel" id="profile-appearance-cancel" type="button">Отмена</button></div></section>`:'';
+  const appearanceEditor=editing?`<section class="profile-appearance-controls" aria-label="Настройки оформления"><div class="profile-appearance-title"><span>ОФОРМЛЕНИЕ</span><small>Изменения применятся после сохранения</small></div>${frameEditor}${bannerEditor}<div class="profile-appearance-actions"><button class="profile-small-button profile-appearance-cancel" id="profile-appearance-cancel" type="button">Отменить</button><button class="profile-small-button profile-appearance-save" id="profile-appearance-save" type="button">Сохранить</button></div></section>`:'';
   const created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   syncBoingUnlock();
   const previewProfile={...profile,boing:{...boing,selected_frame:previewFrame}};
@@ -184,7 +184,8 @@ function bindProfileControls(){
       profileState.email=email;$('#profile-email-value').textContent=email;button.textContent='Скрыть';
     }catch(error){toast(error.message)}finally{if(button.isConnected)button.disabled=false}
   });
-  $('#profile-badge-edit-toggle')?.addEventListener('click',()=>{if(profileState.badgeEditing)saveProfileAppearance();else beginProfileAppearanceEdit()});
+  $('#profile-badge-edit-toggle')?.addEventListener('click',beginProfileAppearanceEdit);
+  $('#profile-appearance-save')?.addEventListener('click',saveProfileAppearance);
   $('#profile-appearance-cancel')?.addEventListener('click',cancelProfileAppearanceEdit);
   $$('[data-badge-remove]').forEach(button=>button.addEventListener('click',()=>changeBoingBadgeDraft(button.dataset.badgeRemove,false)));
   $$('[data-badge-restore]').forEach(button=>button.addEventListener('click',()=>changeBoingBadgeDraft(button.dataset.badgeRestore,true)));

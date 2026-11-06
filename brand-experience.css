@@ -1645,3 +1645,13 @@ small{color:#bdb7ad;font-weight:500}
 @media(max-width:420px){.admin-social-intro{padding:18px}.admin-social-photo-field{grid-template-columns:minmax(0,1fr) 70px;padding:14px}.admin-social-photo-preview{width:70px;height:70px}.admin-social-photo-actions{grid-column:1/-1}.admin-social-photo-actions>*{flex:1}}
 @media(max-width:650px){.admin-modal>.admin-head .admin-tab{flex:0 0 auto}}
 @media(max-width:380px){.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{width:80px}.topbar .wordmark .wordmark-logo{width:160px}}
+
+/* Lock only the document under dialogs; each dialog keeps its own scrolling area. */
+html.modal-scroll-locked{overflow:hidden!important;overscroll-behavior:none}
+body.modal-scroll-locked{position:fixed;left:0;right:0;width:100%;overflow:hidden;overscroll-behavior:none;padding-right:var(--modal-scrollbar-compensation,0px)}
+.admin-test-account-actions{display:grid;gap:10px;min-width:196px}
+.admin-test-account-actions>.button,.admin-test-account-actions>.button-quiet{width:100%;min-height:42px}
+.admin-test-account-delete{border:1px solid rgba(242,84,103,.24);border-radius:10px;background:rgba(242,84,103,.045);color:#e58a96}
+.admin-test-account-delete:hover:not(:disabled){border-color:rgba(242,84,103,.48);background:rgba(242,84,103,.09);color:#ffacb6}
+.admin-test-account-delete:disabled{opacity:.42;cursor:not-allowed}
+@media(max-width:600px){.admin-test-account-actions{width:100%;min-width:0}}
