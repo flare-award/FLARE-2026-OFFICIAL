@@ -1,3 +1,5 @@
+.boing-quick-entry{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:48px;padding:0 19px;border:1px solid rgba(240,199,107,.38);border-radius:999px;background:#0d0c09;color:#f4df8a;font-family:"Sora",sans-serif;font-size:14px;font-weight:800;letter-spacing:-.035em;line-height:1;cursor:pointer;transition:border-color .18s ease,background-color .18s ease,color .18s ease}
+.boing-quick-entry[hidden]{display:none}.boing-quick-entry span{color:#fe7b25}.boing-quick-entry:hover{border-color:rgba(255,211,112,.7);background:#1c160d;color:#ffe8a6}.boing-quick-entry:active{background:#251b0e}.boing-quick-entry:focus-visible{outline-color:#f0c66d}
 .account-button{display:inline-flex;align-items:center;justify-content:center;min-width:172px;min-height:60px;max-width:280px;padding:0 28px;overflow:hidden;border:1px solid rgba(242,84,103,.78);border-radius:999px;background:#0a080b;box-shadow:none;color:#f25467;font-family:"Sora","Manrope",sans-serif;font-size:20px;font-weight:800;line-height:1;letter-spacing:-.045em;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background-color .18s ease,color .18s ease}
 .account-button-label{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .account-button:hover{border-color:#f25467;background:#191014;color:#ff6b7e}
@@ -103,7 +105,9 @@
 
 .boing-head{position:relative;z-index:5;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;flex:0 0 auto;min-height:78px;padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.07);background:#0d0e0d}
 .boing-head>.close-button{justify-self:end}
-.boing-logo{color:#f4df8a;font-family:"Sora",sans-serif;font-size:31px;font-weight:800;letter-spacing:-.065em;line-height:1;text-shadow:0 0 25px rgba(255,191,51,.12)}
+.boing-head>.close-button,.public-profile-head>.close-button{flex:0 0 44px;width:44px;height:44px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:#171614;color:#d7d1c8;font-size:27px;line-height:1}
+.boing-head>.close-button:hover,.public-profile-head>.close-button:hover{border-color:rgba(255,100,100,.58);background:rgba(220,55,55,.13);color:#ff8585}
+.boing-logo{color:#f4df8a;font-family:"Sora",sans-serif;font-size:35px;font-weight:800;letter-spacing:-.065em;line-height:1;text-shadow:0 0 25px rgba(255,191,51,.12)}
 .boing-logo span{color:#fe7b25}
 .boing-back{display:inline-flex;align-items:center;justify-self:start;gap:8px;min-height:40px;padding:0 11px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:#121311;color:#99958a;font-family:"Manrope","DM Sans",sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;cursor:pointer}
 .boing-back:hover{border-color:rgba(255,211,112,.25);color:#e2c987}
@@ -113,26 +117,21 @@
 .boing-tabs button:hover{color:#d8c392}
 .boing-tabs button.is-active{border-color:rgba(255,207,99,.17);background:rgba(255,193,7,.065);color:#f2cf80}
 .boing-game-layout{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;padding:15px 20px 18px}
-.boing-hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;flex:0 0 auto}
-.boing-hud>div{padding:12px 16px;border:1px solid rgba(255,255,255,.075);border-radius:13px;background:#10110f}
+.boing-hud{position:absolute;z-index:4;top:14px;left:18px;right:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;pointer-events:none}
+.boing-hud>div{min-width:0;padding:0;border:0;background:transparent;text-align:center}
 .boing-hud span{display:block;color:#77766d;font-family:"Sora",sans-serif;font-size:8px;font-weight:800;letter-spacing:.11em}
 .boing-hud strong{display:block;margin-top:3px;overflow:hidden;color:#f2e9d2;font-family:"Sora",sans-serif;font-size:25px;font-weight:800;letter-spacing:-.045em;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
 .boing-hud>div:first-child strong{color:#ffd568}
 .boing-hud>div:last-child strong{color:#e6bd62}
-.boing-arena{position:relative;isolation:isolate;flex:1 1 auto;min-height:300px;margin-top:13px;overflow:hidden;border:1px solid rgba(255,255,255,.09);border-radius:21px;background:radial-gradient(circle at 50% 34%,rgba(255,204,88,.045),transparent 33%),linear-gradient(180deg,#111310,#0b0d0b);touch-action:manipulation}
+.boing-arena{position:relative;isolation:isolate;flex:1 1 auto;min-height:300px;margin-top:0;overflow:hidden;border:1px solid rgba(255,255,255,.09);border-radius:21px;background:radial-gradient(circle at 50% 34%,rgba(255,204,88,.045),transparent 33%),linear-gradient(180deg,#111310,#0b0d0b);touch-action:manipulation}
 .boing-arena::before{position:absolute;inset:0;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.1) .7px,transparent .7px);background-size:25px 25px;opacity:.16;content:"";pointer-events:none}
-.boing-level{position:absolute;z-index:1;top:16px;left:18px;color:#777a6e;font-family:"Sora",sans-serif;font-size:9px;font-weight:800;letter-spacing:.09em;pointer-events:none}
+.boing-level{position:absolute;z-index:1;top:73px;left:18px;color:#777a6e;font-family:"Sora",sans-serif;font-size:9px;font-weight:800;letter-spacing:.09em;pointer-events:none}
 .boing-level span{margin-left:8px;color:#565a51;font-family:"Manrope","DM Sans",sans-serif;font-weight:600;letter-spacing:.03em}
 .boing-hint{position:absolute;z-index:1;left:50%;bottom:27px;width:max-content;max-width:85%;transform:translateX(-50%);color:#65695e;font-family:"Sora",sans-serif;font-size:9px;font-weight:800;letter-spacing:.08em;text-align:center;pointer-events:none}
 .bob{position:absolute;z-index:3;left:0;top:0;width:104px;height:104px;margin:0;padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;will-change:transform;touch-action:manipulation}
 .bob:focus-visible{outline:2px solid #ffd568;outline-offset:5px}
-.bob-body{position:absolute;inset:0;display:block;border:3px solid #ffd364;border-radius:50%;background:radial-gradient(circle at 34% 25%,#fff2a8 0,#f8da71 43%,#eeb648 100%);box-shadow:inset -9px -11px 20px rgba(156,89,16,.13),0 13px 25px rgba(0,0,0,.22),0 0 28px rgba(255,203,82,.07)}
+.bob-body{position:absolute;inset:0;display:block;border:3px solid rgba(255,255,255,.9);border-radius:50%;background:radial-gradient(circle at 34% 25%,#fff 0,#f4f4f0 48%,#cfd1cd 100%);box-shadow:inset -9px -11px 20px rgba(80,85,80,.12),0 13px 25px rgba(0,0,0,.22),0 0 28px rgba(255,255,255,.06)}
 .bob:active .bob-body{filter:brightness(1.08)}
-.bob-eye{position:absolute;top:36%;width:10px;height:14px;border-radius:50%;background:#211c13}
-.bob-eye-left{left:29%}.bob-eye-right{right:29%}
-.bob-mouth{position:absolute;left:50%;top:54%;width:34px;height:20px;transform:translateX(-50%);border-bottom:4px solid #211c13;border-radius:0 0 50% 50%}
-.bob-cheek{position:absolute;top:54%;width:13px;height:6px;border-radius:50%;background:rgba(231,121,69,.24)}
-.bob-cheek-left{left:16%}.bob-cheek-right{right:16%}
 .bob-name{position:absolute;left:50%;bottom:calc(100% + 10px);max-width:150px;padding:5px 10px;overflow:hidden;transform:translateX(-50%);border:1px solid rgba(255,255,255,.1);border-radius:8px;background:#151713;color:#e8dfca;font-family:"Sora",sans-serif;font-size:11px;font-weight:800;letter-spacing:.02em;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
 .bob-crown{position:absolute;z-index:2;left:13px;top:-23px;width:78px;height:37px;background:linear-gradient(180deg,#ffe485,#e7a93a);clip-path:polygon(0 22%,23% 47%,36% 0,53% 45%,73% 2%,100% 29%,88% 100%,10% 100%);filter:drop-shadow(0 4px 5px rgba(0,0,0,.25));pointer-events:none}
 .bob-cap{position:absolute;z-index:2;left:16px;top:-11px;width:74px;height:38px;border-radius:55px 55px 9px 9px;background:linear-gradient(145deg,#555b62,#22262c);transform:rotate(-5deg);pointer-events:none}
@@ -140,19 +139,15 @@
 .bob-shades{position:absolute;z-index:2;left:13px;top:32px;display:flex;gap:8px;width:78px;height:25px;pointer-events:none}
 .bob-shades::before{position:absolute;left:34px;top:7px;width:12px;height:4px;background:#191b1c;content:""}
 .bob-shades i{display:block;width:35px;height:23px;border:3px solid #272a2b;border-radius:7px 7px 12px 12px;background:linear-gradient(145deg,#3d4446,#111516)}
-.boing-floor{position:absolute;z-index:2;left:0;right:0;bottom:0;height:8px;background:linear-gradient(90deg,#714624,#e2a94f,#714624);box-shadow:0 -4px 20px rgba(255,165,51,.08);pointer-events:none}
-.boing-floor span{position:absolute;right:12px;bottom:13px;color:#51473a;font-family:"Sora",sans-serif;font-size:7px;font-weight:800;letter-spacing:.16em}
+.boing-floor{position:absolute;z-index:2;left:0;right:0;bottom:0;height:40px;background:linear-gradient(180deg,rgba(46,0,7,0) 0%,rgba(46,0,7,.36) 50%,rgba(35,0,5,.88) 100%);pointer-events:none}
+.boing-floor::after{position:absolute;right:0;bottom:0;left:0;height:8px;background:#260106;box-shadow:0 -3px 14px rgba(86,0,12,.18);content:""}
 .boing-impact{position:absolute;z-index:4;left:50%;top:45%;width:max-content;max-width:90%;transform:translate(-50%,-50%);color:#ffad82;font-family:"Sora",sans-serif;font-size:18px;font-weight:800;letter-spacing:-.02em;text-align:center;pointer-events:none}
 .boing-arena.is-failed .bob-body{animation:bobOuch .38s ease both}
 @keyframes bobOuch{40%{transform:scale(1.12,.82)}100%{transform:scale(1)}}
 .boing-game-footer{display:grid;grid-template-columns:auto minmax(180px,1fr);align-items:center;gap:22px;flex:0 0 auto;margin-top:13px}
 .boing-rename{min-height:40px;padding:0 13px;border:1px solid rgba(255,255,255,.085);border-radius:11px;background:#11120f;color:#a29e91;font-family:"Manrope","DM Sans",sans-serif;font-size:10px;font-weight:700;cursor:pointer}
 .boing-rename:hover{border-color:rgba(255,211,112,.25);color:#dbc489}
-.boing-rename span{margin-left:6px;color:#6d6a61;font-size:9px}
-.boing-milestone{display:grid;grid-template-columns:auto minmax(90px,1fr);align-items:center;gap:12px;color:#77756b;font-size:10px}
-.boing-milestone>div{height:5px;overflow:hidden;border-radius:999px;background:#1e201b}
-.boing-milestone i{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#e2ad43,#ffe083);transition:width .25s ease}
-.boing-milestone-wrap{min-width:0}.boing-milestone-wrap>small{display:block;margin-top:6px;color:#55584f;font-size:8px;line-height:1.4;text-align:right}
+.boing-rewards-note{min-width:0;margin:0;color:#65675e;font-size:9px;line-height:1.5;text-align:right}
 .boing-rename-panel{display:flex;flex:1 1 auto;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:30px;text-align:center}
 .boing-rename-panel h3{margin:8px 0 0;font-family:"Manrope","DM Sans",sans-serif;font-size:30px;letter-spacing:-.04em}
 .boing-rename-panel p{margin:10px 0 20px;color:#7f7d73;font-size:12px}
@@ -190,6 +185,9 @@
 .boing-leader-row.is-me{border-color:rgba(255,205,97,.22);background:rgba(255,193,7,.045)}
 .boing-leader-rank{color:#676a60;font-family:"Sora",sans-serif;font-size:13px;font-weight:800}
 .boing-leader-row:nth-child(1) .boing-leader-rank{color:#ffd465}.boing-leader-row:nth-child(2) .boing-leader-rank{color:#c5c9c2}.boing-leader-row:nth-child(3) .boing-leader-rank{color:#c58d61}
+.boing-leader-user{display:flex;align-items:center;gap:11px}.boing-leader-user>div{min-width:0}
+.boing-leader-avatar{position:relative;display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;overflow:hidden;border:1px solid rgba(255,255,255,.16);border-radius:50%;background:#1a1916;color:#b9a376;font-family:"Sora",sans-serif;font-size:14px;font-weight:800}
+.boing-leader-avatar img{position:absolute;inset:0;display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover}.boing-leader-avatar.no-image img{display:none}
 .boing-leader-row>div{min-width:0}
 .boing-leader-row>div strong{display:block;overflow:hidden;color:#e7dfce;font-family:"Manrope","DM Sans",sans-serif;font-size:14px;text-overflow:ellipsis;white-space:nowrap}
 .boing-leader-row small{display:block;margin-top:3px;color:#6e7067;font-size:9px;font-weight:500}
@@ -199,6 +197,7 @@
 .boing-leaders-empty strong{color:#d8ceb8;font-size:18px}.boing-leaders-empty p{font-size:12px}
 
 @media(max-width:700px){
+  .boing-quick-entry{min-height:44px;padding-inline:13px;font-size:12px}
   .account-button{min-width:0;min-height:50px;max-width:52vw;padding-inline:19px;font-size:16px;letter-spacing:-.035em}
   .modal.profile-modal,.modal.boing-modal{width:calc(100vw - 20px);height:calc(100vh - 20px);height:calc(100dvh - 20px);max-height:calc(100dvh - 20px);border-radius:22px}
   .profile-menu-head{padding:18px 18px 15px}.profile-menu-heading h2{font-size:25px}.profile-head-actions{gap:7px}.profile-mystery{width:44px}
@@ -207,33 +206,39 @@
   .profile-banner-controls{align-items:flex-start;flex-direction:column;margin:9px 14px 0}.profile-banner-controls>div{width:100%}.profile-banner-controls .profile-small-button{flex:1}
   .profile-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 14px 0}.profile-stat{padding:14px}.profile-stat strong{font-size:18px}
   .profile-badges-section{margin:16px 14px 0;padding:16px}.profile-badges-list{grid-template-columns:1fr}.profile-footer-actions{align-items:flex-start;flex-direction:column;padding:18px 14px 22px}.profile-footer-actions .profile-logout{width:100%}
-  .boing-head{min-height:66px;padding:10px 13px}.boing-logo{font-size:26px}.boing-back{width:42px;padding:0;justify-content:center}.boing-back>span:last-child{display:none}.boing-tabs{padding:7px 10px}.boing-tabs button{min-width:84px;min-height:31px}
-  .boing-game-layout{padding:11px 11px 13px}.boing-hud{gap:7px}.boing-hud>div{padding:10px 11px}.boing-hud strong{font-size:21px}.boing-hud span{font-size:7px}
-  .boing-arena{min-height:280px;margin-top:10px;border-radius:17px}.boing-level{top:13px;left:13px;font-size:8px}.boing-level span{display:block;margin:4px 0 0}.boing-hint{font-size:8px}
-  .boing-game-footer{grid-template-columns:1fr;gap:10px;margin-top:10px}.boing-rename{min-height:36px}.boing-milestone{grid-template-columns:auto 1fr}
+  .boing-head{min-height:66px;padding:10px 13px}.boing-logo{font-size:29px}.boing-head>.close-button,.public-profile-head>.close-button{flex-basis:40px;width:40px;height:40px}.boing-back{width:42px;padding:0;justify-content:center}.boing-back>span:last-child{display:none}.boing-tabs{padding:7px 10px}.boing-tabs button{min-width:84px;min-height:31px}
+  .boing-game-layout{padding:11px 11px 13px}.boing-hud{top:12px;left:12px;right:12px;gap:7px}.boing-hud strong{font-size:21px}.boing-hud span{font-size:7px}
+  .boing-arena{min-height:280px;margin-top:0;border-radius:17px}.boing-level{top:63px;left:13px;font-size:8px}.boing-level span{display:block;margin:4px 0 0}.boing-hint{font-size:8px}
+  .boing-game-footer{grid-template-columns:1fr;gap:8px;margin-top:10px}.boing-rename{min-height:36px}.boing-rewards-note{font-size:8px;text-align:center}
   .boing-panel-scroll{padding:13px}.boing-shop-grid{grid-template-columns:1fr}.boing-shop-item{min-height:165px}.boing-shop-balance{padding:16px}.boing-shop-balance strong{font-size:23px}
   .boing-leaders-panel{padding:15px 12px}.boing-leaders-head{align-items:flex-start;flex-direction:column}.boing-leader-sort{width:100%}.boing-leader-sort button{flex:1}
-  .boing-leader-row{grid-template-columns:28px minmax(0,1fr) auto auto;gap:8px;padding:12px 10px}.boing-leader-row>div strong{font-size:12px}.boing-leader-row b{font-size:11px}.boing-leader-row small{font-size:8px}.boing-leader-row>div small{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .boing-leader-row{grid-template-columns:28px minmax(0,1fr) auto auto;gap:8px;padding:12px 10px}.boing-leader-user{gap:8px}.boing-leader-avatar{flex-basis:32px;width:32px;height:32px;font-size:12px}.boing-leader-row>div strong{font-size:12px}.boing-leader-row b{font-size:11px}.boing-leader-row small{font-size:8px}.boing-leader-row>div small{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .boing-rename-panel{padding:22px}.boing-rename-panel h3{font-size:26px}.boing-rename-panel input{height:58px;font-size:22px}
 }
 @media(max-width:380px){.profile-identity-main{gap:14px;padding:18px}.profile-avatar{width:82px;height:82px}.profile-nickname-line h3{font-size:24px}.profile-nickname-line>span{display:none}.profile-stat{padding:12px}.profile-stat strong{font-size:16px}.boing-leader-row>div small{max-width:80px}.boing-hud strong{font-size:18px}}
-@media(prefers-reduced-motion:reduce){.account-button,.profile-mystery,.profile-badge,.profile-small-button,.profile-logout,.boing-tabs button,.boing-milestone i{transition:none}.profile-loading-orbit{animation:none}.boing-arena.is-failed .bob-body{animation:none}}
+@media(prefers-reduced-motion:reduce){.account-button,.boing-quick-entry,.profile-mystery,.profile-badge,.profile-small-button,.profile-logout,.boing-tabs button{transition:none}.profile-loading-orbit{animation:none}.boing-arena.is-failed .bob-body{animation:none}}
 
 /* BOB face studio */
 .bob{aspect-ratio:1}.bob-body{overflow:hidden}.bob-custom-face{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
 .bob-face-edit{position:absolute;z-index:5;left:0;top:0;display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid rgba(255,215,112,.42);border-radius:50%;background:#191a14;color:#f7d77e;box-shadow:0 6px 18px rgba(0,0,0,.32);cursor:pointer;transition:border-color .18s ease,background-color .18s ease,color .18s ease}
 .bob-face-edit[hidden]{display:none}.bob-face-edit:hover{border-color:#f5cf6b;background:#272315;color:#fff0b9}.bob-face-edit svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.modal.bob-face-modal{width:min(680px,calc(100vw - 32px));height:min(760px,calc(100vh - 32px));height:min(760px,calc(100dvh - 32px))}
+.modal.bob-face-modal{width:min(680px,calc(100vw - 32px));height:min(820px,calc(100vh - 32px));height:min(820px,calc(100dvh - 32px))}
 .bob-face-editor{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;overflow-y:auto;padding:28px 30px 26px;scrollbar-width:thin;scrollbar-color:#463b2a #0c0c0b}
 .bob-face-editor-head{text-align:center}.bob-face-editor-head .eyebrow{color:#a78c56;font-size:9px}.bob-face-editor-head h3{margin:8px 0 0;color:#f1eadc;font-family:"Manrope","DM Sans",sans-serif;font-size:28px;font-weight:800;letter-spacing:-.04em}.bob-face-editor-head p{max-width:430px;margin:10px auto 0;color:#858177;font-size:12px;line-height:1.6}
 .bob-face-stage{display:flex;flex:1 0 auto;flex-direction:column;align-items:center;justify-content:center;padding:25px 0 20px}
 .bob-face-canvas-shell{position:relative;flex:0 0 auto;width:min(320px,72vw);aspect-ratio:1;border-radius:50%;box-shadow:0 18px 45px rgba(0,0,0,.34),0 0 0 8px rgba(255,211,100,.025)}
-.bob-face-editor-body{position:absolute;inset:0;border:3px solid #ffd364;border-radius:50%;background:radial-gradient(circle at 34% 25%,#fff2a8 0,#f8da71 43%,#eeb648 100%);box-shadow:inset -9px -11px 20px rgba(156,89,16,.13)}
+.bob-face-editor-body{position:absolute;inset:0;border:3px solid rgba(255,255,255,.9);border-radius:50%;background:radial-gradient(circle at 34% 25%,#fff 0,#f4f4f0 48%,#cfd1cd 100%);box-shadow:inset -9px -11px 20px rgba(80,85,80,.12)}
 #bob-face-canvas{position:absolute;z-index:1;inset:0;display:block;width:100%;height:100%;border-radius:50%;cursor:crosshair;touch-action:none}
-.bob-face-toolbar{display:flex;align-items:center;gap:7px;width:min(100%,360px);margin-top:19px;padding:5px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:#11120f}
+.bob-face-palette{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px;width:min(100%,360px);margin-top:16px}
+.bob-face-palette button{position:relative;display:grid;place-items:center;min-width:0;aspect-ratio:1;padding:3px;border:1px solid transparent;border-radius:50%;background:transparent;cursor:pointer}
+.bob-face-palette button i{display:block;width:100%;height:100%;border:1px solid rgba(255,255,255,.22);border-radius:50%;background:var(--face-color);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.bob-face-palette button:hover{border-color:rgba(255,255,255,.35)}.bob-face-palette button.is-active{border-color:#f4df8a;box-shadow:0 0 0 2px rgba(240,198,109,.1)}.bob-face-palette button:focus-visible{outline-offset:2px}
+.bob-face-toolbar{display:flex;align-items:center;gap:5px;width:min(100%,360px);margin-top:10px;padding:5px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:#11120f}
 .bob-face-toolbar>span{flex:1}.bob-face-brushes{display:flex;gap:4px}.bob-face-toolbar button{display:grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:#8e8b80;cursor:pointer}.bob-face-toolbar button:hover:not(:disabled){border-color:rgba(255,211,112,.2);color:#eed28a}.bob-face-toolbar button.is-active{border-color:rgba(255,211,112,.28);background:#211e14;color:#f1ce72}.bob-face-toolbar button:disabled{opacity:.28;cursor:default}
-.bob-face-brushes i{display:block;width:5px;height:5px;border-radius:50%;background:currentColor}.bob-face-brushes [data-face-brush="6"] i{width:9px;height:9px}.bob-face-brushes [data-face-brush="11"] i{width:14px;height:14px}.bob-face-toolbar svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.bob-face-actions{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07)}.bob-face-actions>span{color:#65675f;font-size:9px;letter-spacing:.08em}.bob-face-actions>div{display:flex;align-items:center;gap:9px}.bob-face-actions .button{min-height:40px;padding:11px 17px;font-size:11px}.bob-face-actions .button:disabled{opacity:.5}
+.bob-face-brushes i{display:block;width:5px;height:5px;border-radius:50%;background:currentColor}.bob-face-brushes [data-face-brush="6"] i{width:9px;height:9px}.bob-face-brushes [data-face-brush="11"] i{width:14px;height:14px}.bob-face-brushes [data-face-brush="18"] i{width:18px;height:18px}.bob-face-toolbar svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.bob-face-transparency{display:grid;grid-template-columns:auto minmax(80px,1fr) 34px;align-items:center;gap:11px;width:min(100%,360px);margin-top:10px;color:#858177;font-size:10px}
+.bob-face-transparency input{width:100%;height:20px;margin:0;accent-color:#f0c66d;cursor:pointer}.bob-face-transparency output{color:#b9b3a7;font-family:"Sora",sans-serif;font-size:9px;font-variant-numeric:tabular-nums;text-align:right}
+.bob-face-actions{display:flex;align-items:center;justify-content:flex-end;gap:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07)}.bob-face-actions>div{display:flex;align-items:center;gap:9px}.bob-face-actions .button{min-height:40px;padding:11px 17px;font-size:11px}.bob-face-actions .button:disabled{opacity:.5}
 
 .bob-face-upload-row{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:12px}.bob-face-upload-label{gap:7px;cursor:pointer}.bob-face-upload-label svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.bob-face-upload-label.is-disabled{opacity:.4;pointer-events:none}.bob-face-upload-row>span{color:#6f7168;font-size:9px}
 .bob-face-editor.has-upload .bob-face-stage{padding:16px 0 12px}.bob-face-editor.has-upload .bob-face-canvas-shell{width:min(288px,72vw)}.bob-face-editor.has-upload .bob-face-toolbar{margin-top:14px}.bob-face-editor.has-upload .bob-face-upload-row{margin-top:10px}.bob-face-editor.has-upload .bob-face-actions{padding-top:14px}
@@ -253,9 +258,9 @@
 
 @media(max-width:700px){
   .modal.bob-face-modal,.modal.public-profile-modal{width:calc(100vw - 20px);height:calc(100vh - 20px);height:calc(100dvh - 20px);max-height:calc(100dvh - 20px)}
-  .bob-face-editor{padding:21px 18px 18px}.bob-face-editor-head h3{font-size:24px}.bob-face-editor-head p{font-size:11px}.bob-face-stage{padding:21px 0 18px}.bob-face-canvas-shell{width:min(290px,72vw)}.bob-face-actions>span{display:none}.bob-face-actions{justify-content:flex-end}.bob-face-actions .button{padding-inline:13px}
+  .bob-face-editor{padding:21px 18px 18px}.bob-face-editor-head h3{font-size:24px}.bob-face-editor-head p{font-size:11px}.bob-face-stage{padding:21px 0 18px}.bob-face-canvas-shell{width:min(290px,72vw)}.bob-face-toolbar button{width:32px;height:34px}.bob-face-actions{justify-content:flex-end}.bob-face-actions .button{padding-inline:13px}
   .boing-shop-categories button{padding-inline:5px;font-size:10px}
   .public-profile-head{min-height:68px;padding:11px 13px;gap:8px}.public-profile-head h2{font-size:19px}.public-profile-layout{padding:14px 124px 18px 14px}.public-profile-info .profile-identity-main{flex-direction:column;text-align:center}.public-profile-info .profile-details{width:100%}.public-profile-info .profile-nickname-line,.public-profile-info .profile-equipped-badges{justify-content:center}.public-profile-info .profile-stats{gap:8px}.public-profile-info .profile-stat{padding:12px}.public-profile-info .profile-badges-section{padding:14px}.public-bob-character{width:88px;height:88px;margin:19px 0 15px}.public-profile-bob-card{right:14px;bottom:14px;width:112px;padding:14px 6px 13px}.public-profile-bob-card>strong{font-size:12px}.public-profile-bob-card>small{font-size:7px}
 }
-@media(max-width:380px){.public-profile-layout{padding:14px 104px 18px 10px}.public-profile-bob-card{right:10px;bottom:10px;width:94px}.public-bob-character{width:78px;height:78px}.public-profile-info .profile-stats{grid-template-columns:1fr}.public-profile-bob-card>span{font-size:6px}.bob-face-actions>div{gap:6px}.bob-face-actions .profile-small-button{padding-inline:9px}}
+@media(max-width:380px){.bob-face-toolbar{gap:3px}.bob-face-toolbar button{width:28px;height:32px}.bob-face-brushes{gap:2px}.bob-face-transparency{gap:8px}.public-profile-layout{padding:14px 104px 18px 10px}.public-profile-bob-card{right:10px;bottom:10px;width:94px}.public-bob-character{width:78px;height:78px}.public-profile-info .profile-stats{grid-template-columns:1fr}.public-profile-bob-card>span{font-size:6px}.bob-face-actions>div{gap:6px}.bob-face-actions .profile-small-button{padding-inline:9px}}
 @media(prefers-reduced-motion:reduce){.bob-face-edit,.boing-shop-categories button,.boing-leader-name strong{transition:none}}

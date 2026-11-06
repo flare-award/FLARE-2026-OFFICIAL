@@ -1,6 +1,7 @@
 const profileState={data:null,request:0,view:'profile',email:null,leaderSort:'score',leaders:[],busy:false,shopCategory:'upgrades',publicData:null,badgeEditing:false,badgeDraft:null};
 state.profile=profileState;
 let boingScene=null,bobFaceEditor=null;
+const boingGravity=1540;
 const numberFormat=new Intl.NumberFormat('ru-RU');
 const dateFormat=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'});
 const formatProfileNumber=value=>numberFormat.format(Math.max(0,Number(value)||0));
@@ -10,6 +11,15 @@ const profileViewIsActive=view=>profileState.view===view&&Boolean($('.profile-mo
 const boingSeenKey=nickname=>`flare-boing-intro:${String(nickname||'').toLowerCase()}`;
 function readBoingSeen(nickname){try{return localStorage.getItem(boingSeenKey(nickname))==='1'}catch{return false}}
 function writeBoingSeen(nickname){try{localStorage.setItem(boingSeenKey(nickname),'1')}catch{}}
+function updateBoingQuickEntry(){
+  const button=$('#boing-quick-entry');if(!button)return;
+  const nickname=state.session?.nickname||'',ownsProfile=profileState.data?.nickname?.toLowerCase()===nickname.toLowerCase();
+  button.hidden=!Boolean(nickname&&(readBoingSeen(nickname)||(ownsProfile&&profileState.data?.boing?.game_intro_seen)));
+}
+function syncBoingUnlock(){
+  if(profileState.data?.boing?.game_intro_seen&&state.session?.nickname)writeBoingSeen(state.session.nickname);
+  updateBoingQuickEntry();
+}
 function clearProfileState(){
   profileState.request++;profileState.data=null;profileState.email=null;profileState.leaders=[];profileState.publicData=null;profileState.badgeEditing=false;profileState.badgeDraft=null;profileState.view='profile';profileState.busy=false;
   teardownBoing(false);
@@ -94,6 +104,7 @@ function renderProfile(preserveScroll=false){
   const badgeStorage=editing?`<div class="profile-badge-storage"><div class="profile-badge-storage-title"><span>СНЯТЫЕ БЕЙДЖИ</span><small>Нажми +, чтобы вернуть</small></div><div class="profile-badges-list is-editing">${removed.length?removed.map(b=>profileBadgeMarkup({...b,equipped:false},false,'restore')).join(''):'<p class="profile-empty-copy">Все бейджи надеты.</p>'}</div></div>`:'';
   const badgeCollection=badges.length?`<div class="profile-badges-collection"><div class="profile-badges-list ${editing?'is-editing':''}">${badgeList}</div></div>${badgeStorage}`:`<div class="profile-badges-list">${badgeList}</div>`;
   const created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
+  syncBoingUnlock();
   const content=`${profileHeader('Ваш аккаунт',true)}<div class="profile-scroll"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><span>УЧАСТНИК FLARE</span></div><div class="profile-equipped-badges">${equipped.length?equipped.map(b=>profileBadgeMarkup(b,true)).join(''):'<span class="profile-no-badge">Бейджи появятся здесь</span>'}${badges.length?profileBadgeEditToggleMarkup():''}</div><dl class="profile-meta"><div><dt>Регистрация</dt><dd>${esc(created)}</dd></div><div><dt>Email</dt><dd><span id="profile-email-value">${esc(profileState.email||profile.email_masked)}</span><button class="profile-email-toggle" id="profile-email-toggle" type="button">${profileState.email?'Скрыть':'Показать'}</button></dd></div></dl></div></div></section>${hasBannerUpgrade?`<div class="profile-banner-controls"><span>Фотобаннер · JPG, PNG или WebP до 12 МБ</span><div><label class="profile-small-button">Выбрать фото<input id="profile-banner-input" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><button class="profile-small-button" id="profile-banner-remove" type="button" ${profile.banner?'':'disabled'}>Убрать</button></div></div>`:''}${profileStatsMarkup(profile)}${editing?`<section class="profile-badges-section is-editing"><div class="profile-section-title"><div><span class="eyebrow">КОЛЛЕКЦИЯ</span><h3>Бейджи</h3></div><span>${badges.length} получено</span></div>${badgeCollection}</section>`:''}<div class="profile-footer-actions"><span>Аватар синхронизирован с номинантами</span><button class="profile-logout" id="profile-logout" type="button">Выйти из аккаунта</button></div></div>`;
   replaceModalView(content,'profile-modal account-profile-modal');
   bindProfileControls();if(preserveScroll&&$('.profile-scroll'))$('.profile-scroll').scrollTop=previousScroll;
@@ -123,7 +134,7 @@ async function logoutAccount(){
   rpc('flare_logout',{p_token:current.token}).catch(()=>{});toast('Ты вышел из аккаунта.');
 }
 function bindProfileAvatarFallback(){
-  $$('.profile-avatar img').forEach(image=>{const hide=()=>image.closest('.profile-avatar')?.classList.add('no-image');if(image.complete&&image.naturalWidth===0)hide();else image.addEventListener('error',hide,{once:true})});
+  $$('.profile-avatar img, .boing-leader-avatar img').forEach(image=>{const hide=()=>image.closest('.profile-avatar, .boing-leader-avatar')?.classList.add('no-image');if(image.complete&&image.naturalWidth===0)hide();else image.addEventListener('error',hide,{once:true})});
 }
 function bindProfileControls(){
   bindProfileAvatarFallback();
@@ -171,7 +182,7 @@ async function handleProfileBanner(event){
   }catch(error){toast(error.message);if(input.isConnected)input.disabled=false;label?.classList.remove('is-busy')}
 }
 function boingHeader(active='game'){
-  return `<header class="boing-head"><button class="boing-back" id="boing-back" type="button" aria-label="Вернуться к аккаунту"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"/></svg><span>АККАУНТ</span></button><div class="boing-logo" aria-label="BOING!">BOING<span>!</span></div><button class="close-button" type="button" aria-label="Закрыть">×</button></header><nav class="boing-tabs" aria-label="Разделы BOING!"><button type="button" data-boing-view="game" class="${active==='game'?'is-active':''}">PLAY</button><button type="button" data-boing-view="leaders" class="${active==='leaders'?'is-active':''}">LEADERS</button><button type="button" data-boing-view="shop" class="${active==='shop'?'is-active':''}">SHOP</button></nav>`;
+  return `<header class="boing-head"><button class="boing-back" id="boing-back" type="button" aria-label="Вернуться к аккаунту"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"/></svg><span>АККАУНТ</span></button><div class="boing-logo" aria-label="BOING!">BOING<span>!</span></div><button class="close-button" type="button" aria-label="Закрыть">×</button></header><nav class="boing-tabs" aria-label="Разделы BOING!"><button type="button" data-boing-view="game" class="${active==='game'?'is-active':''}">ИГРАТЬ</button><button type="button" data-boing-view="leaders" class="${active==='leaders'?'is-active':''}">ТОП</button><button type="button" data-boing-view="shop" class="${active==='shop'?'is-active':''}">МАГАЗИН</button></nav>`;
 }
 function bindBoingNavigation(active){
   $('#boing-back').onclick=finishBoingAndShowProfile;
@@ -183,9 +194,20 @@ function bobAccessoryMarkup(accessory){
   if(accessory==='bob-shades')return '<span class="bob-shades" aria-hidden="true"><i></i><i></i></span>';
   return '';
 }
+let defaultBobFaceSource='';
+function drawDefaultBobFace(context,width=320,height=320){
+  context.save();context.globalCompositeOperation='source-over';context.globalAlpha=1;context.scale(width/320,height/320);
+  context.strokeStyle='#242722';context.lineCap='round';context.lineJoin='round';
+  context.lineWidth=20;context.beginPath();context.moveTo(112,113);context.lineTo(112,137);context.moveTo(208,113);context.lineTo(208,137);context.stroke();
+  context.lineWidth=12;context.beginPath();context.moveTo(106,177);context.quadraticCurveTo(160,224,214,177);context.stroke();context.restore();
+}
+function defaultBobFace(){
+  if(defaultBobFaceSource)return defaultBobFaceSource;
+  const canvas=document.createElement('canvas');canvas.width=320;canvas.height=320;drawDefaultBobFace(canvas.getContext('2d'));
+  defaultBobFaceSource=canvas.toDataURL('image/png');return defaultBobFaceSource;
+}
 function bobFaceMarkup(boing){
-  if(boing?.face)return `<img class="bob-custom-face" src="${esc(boing.face)}" alt="" draggable="false">`;
-  return '<i class="bob-eye bob-eye-left"></i><i class="bob-eye bob-eye-right"></i><i class="bob-mouth"></i><i class="bob-cheek bob-cheek-left"></i><i class="bob-cheek bob-cheek-right"></i>';
+  return `<img class="bob-custom-face${boing?.face?'':' bob-default-face'}" src="${esc(boing?.face||defaultBobFace())}" alt="" draggable="false">`;
 }
 function bobCharacterMarkup(boing){return `${bobAccessoryMarkup(boing?.selected_accessory)}<span class="bob-body">${bobFaceMarkup(boing)}</span>`}
 function canEditBobFace(scene){return Boolean(scene&&!scene.runId&&!scene.clicks&&!scene.starting&&!scene.failed)}
@@ -207,7 +229,7 @@ function renderBoingGame(){
   const scene=ensureBoingScene(),boing=profileState.data.boing;
   scene.running=false;cancelAnimationFrame(scene.raf);scene.raf=0;
   const hint=scene.score>0?'НАЖМИ НА BOB, ЧТОБЫ ПРОДОЛЖИТЬ':'НАЖМИ НА BOB, ЧТОБЫ НАЧАТЬ';
-  const content=`${boingHeader('game')}<div class="boing-game-layout"><div class="boing-hud"><div><span>SCORE</span><strong id="boing-score">${formatProfileNumber(scene.score)}</strong></div><div><span>BEST</span><strong id="boing-best">${formatProfileNumber(Math.max(boing.best_score,scene.score))}</strong></div><div><span>COINS</span><strong id="boing-coins">${formatProfileNumber(boing.coins)}</strong></div></div><div class="boing-arena" id="boing-arena"><div class="boing-level">LEVEL 1 <span>НЕ УРОНИ BOB</span></div><div class="boing-hint" id="boing-hint">${hint}</div><button class="bob" id="bob" type="button" aria-label="Кликнуть по BOB и получить очки"><span class="bob-name" id="bob-name">${esc(boing.bob_name)}</span>${bobCharacterMarkup(boing)}</button><button class="bob-face-edit" id="bob-face-edit" type="button" aria-label="Нарисовать лицо BOB" title="Нарисовать лицо" ${canEditBobFace(scene)?'':'hidden'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/></svg></button><div class="boing-impact" id="boing-impact" aria-live="polite"></div><div class="boing-floor"><span>FLOOR</span></div></div><div class="boing-game-footer"><button class="boing-rename" id="boing-rename" type="button">Переименовать BOB <span id="boing-rename-price">${boing.free_renames_left?`бесплатно · ${boing.free_renames_left}`:'10 000 COINS'}</span></button><div class="boing-milestone-wrap"><div class="boing-milestone"><span id="boing-milestone-label">До следующей цели</span><div><i id="boing-milestone-fill"></i></div></div><small>COINS за каждые 100 общих очков · больше после 1 000, 10 000, 50 000 и 100 000</small></div></div></div>`;
+  const content=`${boingHeader('game')}<div class="boing-game-layout"><div class="boing-arena" id="boing-arena"><div class="boing-hud"><div><span>SCORE</span><strong id="boing-score">${formatProfileNumber(scene.score)}</strong></div><div><span>BEST</span><strong id="boing-best">${formatProfileNumber(Math.max(boing.best_score,scene.score))}</strong></div><div><span>COINS</span><strong id="boing-coins">${formatProfileNumber(boing.coins)}</strong></div></div><div class="boing-level">LEVEL 1 <span>НЕ УРОНИ BOB</span></div><div class="boing-hint" id="boing-hint">${hint}</div><button class="bob" id="bob" type="button" aria-label="Кликнуть по BOB и получить очки"><span class="bob-name" id="bob-name">${esc(boing.bob_name)}</span>${bobCharacterMarkup(boing)}</button><button class="bob-face-edit" id="bob-face-edit" type="button" aria-label="Нарисовать лицо BOB" title="Нарисовать лицо" ${canEditBobFace(scene)?'':'hidden'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/></svg></button><div class="boing-impact" id="boing-impact" aria-live="polite"></div><div class="boing-floor" aria-hidden="true"></div></div><div class="boing-game-footer"><button class="boing-rename" id="boing-rename" type="button">Переименовать BOB</button><p class="boing-rewards-note">COINS за каждые 100 общих очков · больше после 1 000, 10 000, 50 000 и 100 000</p></div></div>`;
   replaceModalView(content,'profile-modal boing-modal');
   bindBoingNavigation('game');
   scene.element=$('#bob');scene.arena=$('#boing-arena');
@@ -238,9 +260,6 @@ function updateBoingHud(){
   if($('#boing-score'))$('#boing-score').textContent=formatProfileNumber(score);
   if($('#boing-best'))$('#boing-best').textContent=formatProfileNumber(Math.max(Number(boing.best_score)||0,score));
   if($('#boing-coins'))$('#boing-coins').textContent=formatProfileNumber(boing.coins);
-  const progress=(Number(boing.total_score)||0)%100;
-  if($('#boing-milestone-fill'))$('#boing-milestone-fill').style.width=`${progress}%`;
-  if($('#boing-milestone-label'))$('#boing-milestone-label').textContent=progress?`${100-progress} очков до COINS`:'100 очков до COINS';
 }
 function enqueueBoingTask(scene,task){
   const run=scene.queue.catch(()=>{}).then(task);scene.queue=run;return run;
@@ -285,8 +304,9 @@ function clickBob(scene){
   if(!scene.runId)startBoingRun(scene);
   const boing=profileState.data.boing,points=Math.max(1,Number(boing.points_per_click)||1);
   scene.score+=points;scene.clicks++;scene.running=true;
-  scene.vy=-Math.min(790,620+Math.random()*90);scene.vx=clamp(scene.vx*.35+(Math.random()*360-180),-340,340);
-  const spinDirection=Math.sign(scene.vx)||(Math.random()<.5?-1:1);scene.spin=clamp(scene.spin*.25+spinDirection*(280+Math.abs(scene.vx)*1.15),-760,760);
+  const impulse=340+Math.random()*35,twoJumpCeilingGuard=Math.sqrt(boingGravity*Math.max(1,scene.y)*.82);
+  scene.vy=-Math.min(impulse,twoJumpCeilingGuard);scene.vx=clamp(scene.vx*.35+(Math.random()*360-180),-340,340);
+  const spinDirection=Math.sign(scene.vx)||(Math.random()<.5?-1:1);scene.spin=spinDirection*Math.min(820,480+Math.abs(scene.vx)*1.15);
   scene.arena.classList.add('is-playing');$('#boing-hint').textContent='';paintBob(scene);
   if(!scene.raf){scene.last=performance.now();scene.raf=requestAnimationFrame(now=>stepBoing(scene,now))}
   updateBoingHud();if(scene.runId)scheduleBoingSync(scene);
@@ -306,7 +326,7 @@ function stepBoing(scene,now){
   if(!scene.running||scene.destroyed||!scene.arena?.isConnected){scene.raf=0;return}
   const dt=Math.min(.032,Math.max(.001,(now-scene.last)/1000));scene.last=now;
   const width=scene.arena.clientWidth,height=scene.arena.clientHeight,floor=height-scene.size-8;
-  scene.vy+=1540*dt;scene.x+=scene.vx*dt;scene.y+=scene.vy*dt;scene.rotation+=scene.spin*dt;
+  scene.vy+=boingGravity*dt;scene.x+=scene.vx*dt;scene.y+=scene.vy*dt;scene.rotation+=scene.spin*dt;
   if(scene.x<=0){scene.x=0;scene.vx=Math.abs(scene.vx)*.82}else if(scene.x>=width-scene.size){scene.x=width-scene.size;scene.vx=-Math.abs(scene.vx)*.82}
   if(scene.y<=0){scene.y=0;scene.vy=Math.abs(scene.vy)*.72}
   if(scene.y>=floor){scene.y=floor;paintBob(scene);failBoingRound(scene);return}
@@ -338,7 +358,21 @@ function showBoing(){
     modal.animate([{width:`${oldRect.width}px`,height:`${oldRect.height}px`,opacity:.72,borderRadius:'24px'},{width:`${nextRect.width}px`,height:`${nextRect.height}px`,opacity:1,borderRadius:'28px'}],{duration:720,easing:'cubic-bezier(.2,.75,.2,1)'});
     $('.boing-game-layout')?.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:480,delay:220,easing:'cubic-bezier(.2,.7,.2,1)',fill:'backwards'});
   }
-  if(!boing.game_intro_seen){boing.game_intro_seen=true;writeBoingSeen(state.session?.nickname);rpc('mark_boing_intro_seen',{p_token:profileToken()}).catch(error=>console.info('Отметка о входе в BOING! не сохранена:',error.message))}
+  writeBoingSeen(state.session?.nickname);updateBoingQuickEntry();
+  if(!boing.game_intro_seen){boing.game_intro_seen=true;rpc('mark_boing_intro_seen',{p_token:profileToken()}).catch(error=>console.info('Отметка о входе в BOING! не сохранена:',error.message))}
+}
+async function openBoingQuickEntry(){
+  if(!state.session)return;
+  const nickname=state.session.nickname.toLowerCase();
+  if(profileState.data?.nickname?.toLowerCase()===nickname&&profileState.data.boing){showBoing();return}
+  profileState.view='profile';profileState.email=null;profileState.busy=false;profileState.badgeEditing=false;profileState.badgeDraft=null;
+  const request=++profileState.request,token=profileToken();
+  replaceModalView(profileLoadingMarkup(),'profile-modal account-profile-modal');
+  try{
+    const profile=await rpc('get_my_profile',{p_token:token});
+    if(request!==profileState.request||token!==profileToken())return;
+    profileState.data=profile;syncBoingUnlock();showBoing();
+  }catch(error){if(request===profileState.request&&token===profileToken())renderProfileError(error)}
 }
 function showBoingRename(){
   const boing=profileState.data?.boing;if(!boing)return;
@@ -368,6 +402,13 @@ function bobFacePoint(editor,event){
   const rect=editor.canvas.getBoundingClientRect();
   return{x:(event.clientX-rect.left)*editor.canvas.width/rect.width,y:(event.clientY-rect.top)*editor.canvas.height/rect.height};
 }
+function resetBobFaceBrush(editor){
+  const context=editor.context;context.globalCompositeOperation='source-over';context.globalAlpha=1;
+}
+function applyBobFaceBrush(editor){
+  const context=editor.context;context.globalCompositeOperation=editor.erasing?'destination-out':'source-over';context.globalAlpha=editor.erasing?1:1-editor.transparency/100;
+  context.lineWidth=editor.size;context.strokeStyle=editor.color;context.lineCap='round';context.lineJoin='round';
+}
 function canvasToPng(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Не удалось подготовить рисунок.')),'image/png'))}
 async function prepareBobFaceUpload(file){
   const isPng=file.type==='image/png'||(!file.type&&/\.png$/i.test(file.name||''));
@@ -396,7 +437,7 @@ async function handleBobFaceUpload(event,editor){
   try{
     const data=await prepareBobFaceUpload(file),image=await loadImageElement(data);
     if(bobFaceEditor!==editor)return;
-    editor.context.clearRect(0,0,editor.canvas.width,editor.canvas.height);editor.context.drawImage(image,0,0,editor.canvas.width,editor.canvas.height);
+    resetBobFaceBrush(editor);editor.context.clearRect(0,0,editor.canvas.width,editor.canvas.height);editor.context.drawImage(image,0,0,editor.canvas.width,editor.canvas.height);
     editor.imported=true;pushBobFaceHistory(editor);toast('PNG добавлена. Сохрани лицо BOB.');
   }catch(error){toast(error.message)}finally{
     editor.busy=false;if(input.isConnected){input.disabled=false;input.value='';label?.classList.remove('is-busy')}if(save?.isConnected)save.disabled=false;
@@ -406,14 +447,21 @@ async function saveBobFaceEditor(editor){
   if(!editor||!editor.ready||editor.busy)return;
   const token=profileToken(),button=$('#bob-face-save');editor.busy=true;if(button){button.disabled=true;button.textContent='Сохраняем…'}
   try{
-    const pixels=editor.context.getImageData(0,0,editor.canvas.width,editor.canvas.height).data;let hasDrawing=false;
-    for(let i=3;i<pixels.length;i+=4){if(pixels[i]){hasDrawing=true;break}}
-    let data=null;
-    if(hasDrawing){const blob=await canvasToPng(editor.canvas);if(blob.size>150000)throw new Error('Рисунок получился слишком сложным. Удали часть штрихов.');data=await readFileAsDataUrl(blob)}
+    const blob=await canvasToPng(editor.canvas);if(blob.size>150000)throw new Error('Рисунок получился слишком сложным. Удали часть штрихов.');
+    const data=await readFileAsDataUrl(blob);
     const result=await rpc(editor.imported?'upload_my_boing_face':'set_my_boing_face',{p_token:token,p_data:data});if(token!==profileToken())return;
-    mergeBoingState(result.boing);toast(data?'Лицо BOB сохранено.':'Стандартное лицо BOB возвращено.');
+    mergeBoingState(result.boing);toast('Лицо BOB сохранено.');
     if(profileViewIsActive('face'))renderBoingGame();
   }catch(error){toast(error.message);editor.busy=false;if(button?.isConnected){button.disabled=false;button.textContent='Сохранить лицо'}}
+}
+const bobFaceColors=[
+  {value:'#242722',name:'Чёрный'},{value:'#ffffff',name:'Белый'},{value:'#f25467',name:'Красный'},{value:'#ff9e7a',name:'Оранжевый'},{value:'#f0c66d',name:'Жёлтый'},
+  {value:'#79dfc3',name:'Зелёный'},{value:'#78c8ff',name:'Голубой'},{value:'#8d9dff',name:'Синий'},{value:'#ca9aff',name:'Фиолетовый'},{value:'#f4798b',name:'Розовый'}
+];
+function updateBobFaceTools(editor){
+  $$('[data-face-color]').forEach(button=>{const active=!editor.erasing&&button.dataset.faceColor===editor.color;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active))});
+  $$('[data-face-brush]').forEach(button=>{const active=Number(button.dataset.faceBrush)===editor.size;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active))});
+  const eraser=$('#bob-face-eraser');if(eraser){eraser.classList.toggle('is-active',editor.erasing);eraser.setAttribute('aria-pressed',String(editor.erasing))}
 }
 function showBoingFaceEditor(){
   const scene=boingScene,boing=profileState.data?.boing;
@@ -421,19 +469,23 @@ function showBoingFaceEditor(){
   pauseBoingScene();profileState.view='face';
   const canUpload=(boing.inventory||[]).includes('bob-face-upload');
   const uploadControls=canUpload?`<div class="bob-face-upload-row"><label class="profile-small-button bob-face-upload-label is-disabled" id="bob-face-upload-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M5 14v5h14v-5"/></svg>Загрузить PNG<input id="bob-face-upload-input" type="file" accept="image/png,.png" hidden disabled></label><span>до 12 МБ · кадрируется в круг</span></div>`:'';
-  const content=`${boingHeader('game')}<section class="bob-face-editor ${canUpload?'has-upload':''}"><div class="bob-face-editor-head"><span class="eyebrow">BOB FACE STUDIO</span><h3>Твой BOB. Твои правила.</h3><p>${canUpload?'Нарисуй лицо или загрузи свою PNG. Пустой холст вернёт стандартную улыбку.':'Нарисуй лицо прямо на круге. Пустой холст вернёт стандартную улыбку.'}</p></div><div class="bob-face-stage"><div class="bob-face-canvas-shell"><span class="bob-face-editor-body" aria-hidden="true"></span><canvas id="bob-face-canvas" width="320" height="320" aria-label="Холст для рисования лица BOB"></canvas></div><div class="bob-face-toolbar"><div class="bob-face-brushes" role="group" aria-label="Размер кисти"><button type="button" data-face-brush="3" aria-label="Тонкая кисть" title="Тонкая кисть"><i></i></button><button type="button" data-face-brush="6" class="is-active" aria-label="Средняя кисть" title="Средняя кисть"><i></i></button><button type="button" data-face-brush="11" aria-label="Толстая кисть" title="Толстая кисть"><i></i></button></div><span></span><button type="button" id="bob-face-undo" aria-label="Отменить штрих" title="Отменить штрих" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></svg></button><button type="button" id="bob-face-clear" aria-label="Очистить холст" title="Очистить холст"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg></button></div>${uploadControls}</div><div class="bob-face-actions"><span>PNG · прозрачный фон</span><div><button class="profile-small-button" id="bob-face-cancel" type="button">Не менять</button><button class="button" id="bob-face-save" type="button" disabled>Сохранить лицо</button></div></div></section>`;
+  const palette=bobFaceColors.map(color=>`<button type="button" data-face-color="${color.value}" style="--face-color:${color.value}" aria-label="${color.name}" title="${color.name}" aria-pressed="false"><i></i></button>`).join('');
+  const content=`${boingHeader('game')}<section class="bob-face-editor ${canUpload?'has-upload':''}"><div class="bob-face-editor-head"><span class="eyebrow">BOB FACE STUDIO</span><h3>Твой BOB:</h3><p>Нарисуй ему лицо.</p></div><div class="bob-face-stage"><div class="bob-face-canvas-shell"><span class="bob-face-editor-body" aria-hidden="true"></span><canvas id="bob-face-canvas" width="320" height="320" aria-label="Холст для рисования лица BOB"></canvas></div><div class="bob-face-palette" role="group" aria-label="Цвет кисти">${palette}</div><div class="bob-face-toolbar"><div class="bob-face-brushes" role="group" aria-label="Размер кисти"><button type="button" data-face-brush="3" aria-label="Тонкая кисть" title="Тонкая кисть"><i></i></button><button type="button" data-face-brush="6" class="is-active" aria-label="Средняя кисть" title="Средняя кисть"><i></i></button><button type="button" data-face-brush="11" aria-label="Толстая кисть" title="Толстая кисть"><i></i></button><button type="button" data-face-brush="18" aria-label="Очень толстая кисть" title="Очень толстая кисть"><i></i></button></div><span></span><button type="button" id="bob-face-eraser" aria-label="Ластик" title="Ластик" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 15 8-9 8 7-6 7H8l-4-4a2 2 0 0 1 0-1Z"/><path d="m9 20 7-8M13 20h7"/></svg></button><button type="button" id="bob-face-undo" aria-label="Отменить штрих" title="Отменить штрих" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></svg></button><button type="button" id="bob-face-clear" aria-label="Очистить холст" title="Очистить холст"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg></button></div><label class="bob-face-transparency"><span>Прозрачность</span><input id="bob-face-transparency" type="range" min="0" max="90" step="10" value="0" aria-label="Прозрачность кисти"><output id="bob-face-transparency-value" for="bob-face-transparency">0%</output></label>${uploadControls}</div><div class="bob-face-actions"><div><button class="profile-small-button" id="bob-face-cancel" type="button">Отменить</button><button class="button" id="bob-face-save" type="button" disabled>Сохранить лицо</button></div></div></section>`;
   replaceModalView(content,'profile-modal boing-modal bob-face-modal');bindBoingNavigation('game');
-  const canvas=$('#bob-face-canvas'),context=canvas.getContext('2d');context.lineCap='round';context.lineJoin='round';context.strokeStyle='#211c13';
-  const editor={canvas,context,history:[],index:-1,size:6,drawing:false,ready:false,busy:false,imported:false};bobFaceEditor=editor;
-  const ready=()=>{if(bobFaceEditor!==editor)return;editor.ready=true;pushBobFaceHistory(editor);const save=$('#bob-face-save'),upload=$('#bob-face-upload-input');if(save)save.disabled=false;if(upload){upload.disabled=false;$('#bob-face-upload-label')?.classList.remove('is-disabled')}};
-  if(boing.face)loadImageElement(boing.face).then(image=>{if(bobFaceEditor!==editor)return;context.drawImage(image,0,0,canvas.width,canvas.height);ready()}).catch(()=>ready());else ready();
-  const finish=event=>{if(!editor.drawing)return;editor.drawing=false;try{if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}catch{}pushBobFaceHistory(editor)};
-  canvas.addEventListener('pointerdown',event=>{if(!editor.ready||editor.busy)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);const point=bobFacePoint(editor,event);editor.drawing=true;context.lineWidth=editor.size;context.beginPath();context.moveTo(point.x,point.y);context.lineTo(point.x+.01,point.y);context.stroke()});
+  const canvas=$('#bob-face-canvas'),context=canvas.getContext('2d');
+  const editor={canvas,context,history:[],index:-1,size:6,color:bobFaceColors[0].value,transparency:0,erasing:false,drawing:false,ready:false,busy:false,imported:false};bobFaceEditor=editor;updateBobFaceTools(editor);
+  const ready=()=>{if(bobFaceEditor!==editor)return;resetBobFaceBrush(editor);editor.ready=true;pushBobFaceHistory(editor);const save=$('#bob-face-save'),upload=$('#bob-face-upload-input');if(save)save.disabled=false;if(upload){upload.disabled=false;$('#bob-face-upload-label')?.classList.remove('is-disabled')}};
+  if(boing.face)loadImageElement(boing.face).then(image=>{if(bobFaceEditor!==editor)return;resetBobFaceBrush(editor);context.drawImage(image,0,0,canvas.width,canvas.height);ready()}).catch(()=>{if(bobFaceEditor!==editor)return;drawDefaultBobFace(context,canvas.width,canvas.height);ready()});else{drawDefaultBobFace(context,canvas.width,canvas.height);ready()}
+  const finish=event=>{if(!editor.drawing)return;editor.drawing=false;try{if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId)}catch{}pushBobFaceHistory(editor);resetBobFaceBrush(editor)};
+  canvas.addEventListener('pointerdown',event=>{if(!editor.ready||editor.busy)return;event.preventDefault();canvas.setPointerCapture(event.pointerId);const point=bobFacePoint(editor,event);editor.drawing=true;applyBobFaceBrush(editor);context.beginPath();context.moveTo(point.x,point.y);context.lineTo(point.x+.01,point.y);context.stroke()});
   canvas.addEventListener('pointermove',event=>{if(!editor.drawing||editor.busy)return;event.preventDefault();const point=bobFacePoint(editor,event);context.lineTo(point.x,point.y);context.stroke()});
   canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);
-  $$('[data-face-brush]').forEach(button=>button.onclick=()=>{if(editor.busy)return;editor.size=Number(button.dataset.faceBrush);$$('[data-face-brush]').forEach(item=>item.classList.toggle('is-active',item===button))});
+  $$('[data-face-color]').forEach(button=>button.onclick=()=>{if(editor.busy)return;editor.color=button.dataset.faceColor;editor.erasing=false;updateBobFaceTools(editor)});
+  $$('[data-face-brush]').forEach(button=>button.onclick=()=>{if(editor.busy)return;editor.size=Number(button.dataset.faceBrush);updateBobFaceTools(editor)});
+  $('#bob-face-eraser').onclick=()=>{if(editor.busy)return;editor.erasing=!editor.erasing;updateBobFaceTools(editor)};
+  $('#bob-face-transparency').oninput=event=>{editor.transparency=Number(event.currentTarget.value);$('#bob-face-transparency-value').textContent=`${editor.transparency}%`};
   $('#bob-face-undo').onclick=()=>restoreBobFaceHistory(editor);
-  $('#bob-face-clear').onclick=()=>{if(!editor.ready||editor.busy)return;context.clearRect(0,0,canvas.width,canvas.height);pushBobFaceHistory(editor)};
+  $('#bob-face-clear').onclick=()=>{if(!editor.ready||editor.busy)return;resetBobFaceBrush(editor);context.clearRect(0,0,canvas.width,canvas.height);pushBobFaceHistory(editor)};
   $('#bob-face-upload-input')?.addEventListener('change',event=>handleBobFaceUpload(event,editor));
   $('#bob-face-cancel').onclick=renderBoingGame;$('#bob-face-save').onclick=()=>saveBobFaceEditor(editor);
 }
@@ -448,7 +500,7 @@ function shopItemButton(item,boing){
   return `<button type="button" data-buy-item="${esc(item.id)}">${formatProfileNumber(item.price)} COINS</button>`;
 }
 const boingShopGroups={upgrades:{label:'Апгрейды',kinds:['click','coin']},cosmetics:{label:'Косметика',kinds:['accessory','leader','face']},profile:{label:'Профиль',kinds:['frame','banner','badge']}};
-const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'LEADERS',face:'BOB PNG',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
+const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'ТОП',face:'BOB PNG',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
 function showBoingShop(category=profileState.shopCategory||'upgrades'){
   const boing=profileState.data?.boing;if(!boing)return;
   if(!boingShopGroups[category])category='upgrades';
@@ -469,7 +521,7 @@ function showBoingShop(category=profileState.shopCategory||'upgrades'){
 }
 async function showBoingLeaders(sort=profileState.leaderSort||'score'){
   pauseBoingScene();const request=++profileState.request;profileState.view='leaders';profileState.leaderSort=sort;
-  replaceModalView(`${boingHeader('leaders')}<div class="boing-leaders-panel"><div class="boing-leaders-head"><div><span class="eyebrow">ТОЛЬКО ИГРОКИ</span><h3>LEADERS</h3></div><div class="boing-leader-sort"><button type="button" data-leader-sort="score" class="${sort==='score'?'is-active':''}">По очкам</button><button type="button" data-leader-sort="coins" class="${sort==='coins'?'is-active':''}">По COINS</button></div></div><div class="boing-leaders-loading"><span class="profile-loading-orbit"></span><p>Считаем рекорды…</p></div></div>`,'profile-modal boing-modal');
+  replaceModalView(`${boingHeader('leaders')}<div class="boing-leaders-panel"><div class="boing-leaders-head"><div><span class="eyebrow">ТОЛЬКО ИГРОКИ</span><h3>ТОП</h3></div><div class="boing-leader-sort"><button type="button" data-leader-sort="score" class="${sort==='score'?'is-active':''}">По очкам</button><button type="button" data-leader-sort="coins" class="${sort==='coins'?'is-active':''}">По COINS</button></div></div><div class="boing-leaders-loading"><span class="profile-loading-orbit"></span><p>Считаем рекорды…</p></div></div>`,'profile-modal boing-modal');
   bindBoingNavigation('leaders');$$('[data-leader-sort]').forEach(button=>button.onclick=()=>showBoingLeaders(button.dataset.leaderSort));
   try{
     const token=profileToken(),result=await rpc('get_boing_leaders',{p_token:token,p_sort:sort});
@@ -477,14 +529,18 @@ async function showBoingLeaders(sort=profileState.leaderSort||'score'){
     profileState.leaders=result.leaders||[];renderBoingLeaderRows();
   }catch(error){const loading=$('.boing-leaders-loading');if(request===profileState.request&&profileViewIsActive('leaders')&&loading)loading.innerHTML=`<p>${esc(error.message)}</p>`}
 }
+function boingLeaderAvatarMarkup(nickname){
+  const photoKey=`avatar:${slugPhotoName(nickname)}`;
+  return `<span class="boing-leader-avatar" aria-hidden="true"><span>${esc(nickname.slice(0,1).toUpperCase()||'F')}</span><img src="${esc(photoSource(photoKey))}" data-photo-key="${esc(photoKey)}" alt="" loading="lazy"></span>`;
+}
 function renderBoingLeaderRows(){
   const panel=$('.boing-leaders-panel');if(!panel)return;
-  const rows=profileState.leaders.length?profileState.leaders.map(player=>`<div class="boing-leader-row ${player.nickname===state.session?.nickname?'is-me':''}"><span class="boing-leader-rank">${String(player.rank).padStart(2,'0')}</span><div><button class="boing-leader-name" type="button" data-public-profile="${esc(player.nickname)}" aria-label="Открыть профиль ${esc(player.nickname)}"><strong>${esc(player.nickname)}</strong></button><small>${player.bob_name?`BOB: ${esc(player.bob_name)}`:'Имя BOB скрыто'}</small></div><span><b>${formatProfileNumber(player.best_score)}</b><small>очков</small></span><span><b>${formatProfileNumber(player.coins)}</b><small>COINS</small></span></div>`).join(''):'<div class="boing-leaders-empty"><strong>Пока никто не играл</strong><p>Первый рекорд может быть твоим.</p></div>';
+  const rows=profileState.leaders.length?profileState.leaders.map(player=>`<div class="boing-leader-row ${player.nickname===state.session?.nickname?'is-me':''}"><span class="boing-leader-rank">${String(player.rank).padStart(2,'0')}</span><div class="boing-leader-user">${boingLeaderAvatarMarkup(player.nickname)}<div><button class="boing-leader-name" type="button" data-public-profile="${esc(player.nickname)}" aria-label="Открыть профиль ${esc(player.nickname)}"><strong>${esc(player.nickname)}</strong></button><small>${player.bob_name?`BOB: ${esc(player.bob_name)}`:'Имя BOB скрыто'}</small></div></div><span><b>${formatProfileNumber(player.best_score)}</b><small>очков</small></span><span><b>${formatProfileNumber(player.coins)}</b><small>COINS</small></span></div>`).join(''):'<div class="boing-leaders-empty"><strong>Пока никто не играл</strong><p>Первый рекорд может быть твоим.</p></div>';
   $('.boing-leaders-loading',panel)?.remove();panel.insertAdjacentHTML('beforeend',`<div class="boing-leader-list">${rows}</div>`);
-  $$('[data-public-profile]',panel).forEach(button=>button.onclick=()=>showPublicFlareProfile(button.dataset.publicProfile));
+  bindProfileAvatarFallback();$$('[data-public-profile]',panel).forEach(button=>button.onclick=()=>showPublicFlareProfile(button.dataset.publicProfile));
 }
 function publicProfileHeader(nickname='Профиль участника'){
-  return `<header class="public-profile-head"><button class="boing-back" id="public-profile-back" type="button" aria-label="Вернуться к лидерам"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"/></svg><span>LEADERS</span></button><div><span class="eyebrow">FLARE ID</span><h2>${esc(nickname)}</h2></div><button class="close-button" type="button" aria-label="Закрыть">×</button></header>`;
+  return `<header class="public-profile-head"><button class="boing-back" id="public-profile-back" type="button" aria-label="Вернуться к лидерам"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"/></svg><span>ТОП</span></button><div><span class="eyebrow">FLARE ID</span><h2>${esc(nickname)}</h2></div><button class="close-button" type="button" aria-label="Закрыть">×</button></header>`;
 }
 function publicProfileBadgeMarkup(badge,compact=false){return profileBadgeMarkup(badge,compact)}
 function renderPublicFlareProfile(){
@@ -509,3 +565,5 @@ async function showPublicFlareProfile(nickname){
     $('#public-profile-back').onclick=()=>showBoingLeaders();$('#public-profile-retry').onclick=()=>showPublicFlareProfile(nickname);
   }
 }
+$('#boing-quick-entry')?.addEventListener('click',openBoingQuickEntry);
+updateBoingQuickEntry();

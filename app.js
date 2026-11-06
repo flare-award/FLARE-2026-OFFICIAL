@@ -42,6 +42,7 @@ function updateAccount(){
   $('#account-status').innerHTML=s?.nickname.toLowerCase()==='maronnix'?'<button type="button" class="text-button" id="admin-entry">Панель</button>':'';
   $('#admin-entry')?.addEventListener('click',showAdmin);
   updateProgress();
+  if(typeof updateBoingQuickEntry==='function')updateBoingQuickEntry();
   if(!s&&typeof clearProfileState==='function')clearProfileState();
   if(s){
     const accountToken=s.token,choiceRevision=state.eventChoiceRevision;
