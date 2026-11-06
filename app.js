@@ -36,7 +36,7 @@ async function restoreNomineeViewFromAccount(token){
 }
 function updateAccount(){
   const s=state.session,button=$('#auth-button');
-  button.textContent=s?s.nickname:'Профиль';
+  button.innerHTML=`<span class="account-button-label">${esc(s?s.nickname:'Профиль')}</span>`;
   button.classList.toggle('is-signed-in',Boolean(s));
   button.setAttribute('aria-label',s?`Открыть профиль ${s.nickname}`:'Войти или зарегистрироваться');
   $('#account-status').innerHTML=s?.nickname.toLowerCase()==='maronnix'?'<button type="button" class="text-button" id="admin-entry">Панель</button>':'';
@@ -654,8 +654,12 @@ async function showAdmin(){
   }
 }
 async function initializeSite(){
+  $('#auth-button').onclick=()=>{
+    if(!state.session){renderAuth();return}
+    if(typeof showProfile!=='function'){toast('Профиль ещё загружается. Нажми ещё раз через секунду.');return}
+    showProfile().catch(error=>{console.error('Не удалось открыть профиль:',error);toast('Не удалось открыть профиль. Попробуй ещё раз.')});
+  };
   await loadPhotoOverrides();
-  $('#auth-button').onclick=()=>{if(state.session)showProfile();else renderAuth()};
   $$('.intro-link[data-category]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();history.replaceState(null,'',link.getAttribute('href'));scrollToCategoryButtons()}));
   $$('.category-card').forEach(b=>b.onclick=()=>{b.blur();if(!state.session){state.pendingCategory=b.dataset.category;renderAuth();return}state.category=b.dataset.category;state.nominationListScrollTop=0;renderNominations()});$('#winner-prev').onclick=()=>moveCarousel(-1);$('#winner-next').onclick=()=>moveCarousel(1);renderFaq();renderWinners();initWinnerSwipe();renderEventOptions();updateAccount();initCountdown();initFloatingHeader();window.addEventListener('resize',updateCarousel);if(state.session)loadVideoCatalog();
   document.addEventListener('keydown',e=>{if(e.altKey&&e.shiftKey&&e.key.toLowerCase()==='a'&&state.session?.nickname.toLowerCase()==='maronnix')showAdmin()});
