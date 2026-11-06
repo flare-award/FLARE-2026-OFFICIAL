@@ -32,11 +32,11 @@ function mergeBoingState(boing){
   updateBoingHud();
 }
 function profileHeader(title='Ваш аккаунт',mystery=false,appearance=false){
-  return `<header class="profile-menu-head"><div class="profile-menu-heading"><span class="eyebrow">FLARE ID</span><div class="profile-title-line"><h2>${esc(title)}</h2>${mystery?'<button class="profile-mystery" id="open-boing" type="button" aria-label="Открыть BOING!" title="Что-то интересное">???</button>':''}</div></div><div class="profile-head-actions">${appearance?profileBadgeEditToggleMarkup():''}<button class="close-button" type="button" aria-label="Закрыть">×</button></div></header>`;
+  return `<header class="profile-menu-head"><div class="profile-menu-heading"><span class="eyebrow">FLARE ID</span><div class="profile-title-line"><h2>${esc(title)}</h2>${mystery?'<span class="profile-title-divider" aria-hidden="true"></span><button class="profile-mystery" id="open-boing" type="button" aria-label="Открыть BOING!">???</button>':''}</div></div><div class="profile-head-actions">${appearance?profileBadgeEditToggleMarkup():''}<button class="close-button" type="button" aria-label="Закрыть">×</button></div></header>`;
 }
 function profileLoadingMarkup(){
   const nickname=state.session?.nickname||'Профиль';
-  return `${profileHeader()}<div class="profile-loading" aria-live="polite"><span class="profile-loading-orbit"></span><strong>${esc(nickname)}</strong><span>Загружаем твой FLARE ID…</span></div>`;
+  return `${profileHeader('Ваш аккаунт',true)}<div class="profile-loading" aria-live="polite"><span class="profile-loading-orbit"></span><strong>${esc(nickname)}</strong><span>Загружаем твой FLARE ID…</span></div>`;
 }
 function profileBadgeIcon(id){
   const paths={
@@ -82,6 +82,10 @@ function beginProfileAppearanceEdit(){
   const boing=profile.boing,badges=Array.isArray(boing.badges)?boing.badges:[];
   profileState.badgeEditing=true;profileState.badgeDraft=badges.filter(badge=>badge.equipped).map(badge=>badge.id);profileState.frameDraft=boing.selected_frame||'frame-default';profileState.bannerDraft=profile.banner||null;profileState.bannerDirty=false;renderProfile(true);
 }
+function cancelProfileAppearanceEdit(){
+  if(!profileState.badgeEditing||profileState.busy)return;
+  resetProfileAppearanceDraft();renderProfile(true);
+}
 function changeBoingBadgeDraft(badgeId,equip){
   if(!profileState.badgeEditing||profileState.busy)return;
   const badges=profileState.data?.boing?.badges||[];if(!badges.some(badge=>badge.id===badgeId))return;
@@ -94,12 +98,12 @@ async function saveProfileAppearance(){
   const before=badges.filter(badge=>badge.equipped).map(badge=>badge.id).sort(),after=badges.filter(badge=>draft.has(badge.id)).map(badge=>badge.id).sort();
   const frames=profileAppearanceFrameOptions(boing),nextFrame=frames.some(frame=>frame.id===profileState.frameDraft)?profileState.frameDraft:(boing.selected_frame||'frame-default'),frameChanged=nextFrame!==(boing.selected_frame||'frame-default'),bannerChanged=Boolean(profileState.bannerDirty),nextBanner=profileState.bannerDraft||null;
   if(JSON.stringify(before)===JSON.stringify(after)&&!frameChanged&&!bannerChanged){resetProfileAppearanceDraft();renderProfile(true);return}
-  const token=profileToken(),button=$('#profile-badge-edit-toggle');profileState.busy=true;if(button)button.disabled=true;
+  const token=profileToken(),button=$('#profile-badge-edit-toggle'),cancelButton=$('#profile-appearance-cancel');profileState.busy=true;if(button)button.disabled=true;if(cancelButton)cancelButton.disabled=true;
   try{
     const result=await rpc('set_my_profile_appearance',{p_token:token,p_badge_ids:after,p_frame_id:nextFrame,p_update_banner:bannerChanged,p_banner_data:bannerChanged?nextBanner:null});if(token!==profileToken())return;
     mergeBoingState(result.boing);if(bannerChanged)profileState.data.banner=nextBanner;resetProfileAppearanceDraft();
     if(profileViewIsActive('profile'))renderProfile(true);toast('Оформление сохранено.');
-  }catch(error){toast(error.message);if(button?.isConnected)button.disabled=false}finally{profileState.busy=false}
+  }catch(error){toast(error.message);if(button?.isConnected)button.disabled=false;if(cancelButton?.isConnected)cancelButton.disabled=false}finally{profileState.busy=false}
 }
 function profileAvatarMarkup(profile,large=true){
   const nickname=profile.nickname||state.session?.nickname||'',boing=profile.boing||{},frame=boing.selected_frame||'frame-default';
@@ -122,11 +126,11 @@ function renderProfile(preserveScroll=false){
   const badgeList=visibleBadges.map(badge=>profileBadgeMarkup(badge,true,editing?(badge.equipped?'remove':'restore'):'')).join('');
   const frameEditor=frameOptions.length>1?`<div class="profile-frame-editor"><span class="profile-appearance-label">РАМКА АВАТАРА</span><div class="profile-frame-options" role="group" aria-label="Рамка аватара">${frameOptions.map(frame=>`<button class="profile-frame-choice ${previewFrame===frame.id?'is-selected':''}" type="button" data-profile-frame="${esc(frame.id)}" aria-pressed="${previewFrame===frame.id}"><span class="profile-frame-choice-swatch ${esc(frame.id)}" aria-hidden="true"></span><span>${esc(frame.name)}</span></button>`).join('')}</div></div>`:'';
   const bannerEditor=hasBannerUpgrade?`<div class="profile-banner-controls"><span>Фотобаннер · JPG, PNG или WebP до 12 МБ</span><div><label class="profile-small-button">Выбрать фото<input id="profile-banner-input" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><button class="profile-small-button" id="profile-banner-remove" type="button" ${previewBanner?'':'disabled'}>Убрать</button></div></div>`:'';
-  const appearanceEditor=editing&&(frameEditor||bannerEditor)?`<section class="profile-appearance-controls" aria-label="Настройки оформления"><div class="profile-appearance-title"><span>ОФОРМЛЕНИЕ</span><small>Нажми галочку сверху, чтобы сохранить изменения</small></div>${frameEditor}${bannerEditor}</section>`:'';
+  const appearanceEditor=editing?`<section class="profile-appearance-controls" aria-label="Настройки оформления"><div class="profile-appearance-title"><span>ОФОРМЛЕНИЕ</span><small>Нажми галочку сверху, чтобы сохранить изменения</small></div>${frameEditor}${bannerEditor}<div class="profile-appearance-actions"><button class="profile-small-button profile-appearance-cancel" id="profile-appearance-cancel" type="button">Отмена</button></div></section>`:'';
   const created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   syncBoingUnlock();
   const previewProfile={...profile,boing:{...boing,selected_frame:previewFrame}};
-  const content=`${profileHeader('Ваш аккаунт',true,canEdit)}<div class="profile-scroll"><section class="profile-identity ${previewBanner?'has-custom-banner':''} ${editing?'is-appearance-editing':''}">${previewBanner?`<img class="profile-banner" src="${esc(previewBanner)}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(previewProfile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badgeList}</div></div><dl class="profile-meta"><div><dt>Регистрация</dt><dd>${esc(created)}</dd></div><div><dt>Email</dt><dd><span id="profile-email-value">${esc(profileState.email||profile.email_masked)}</span><button class="profile-email-toggle" id="profile-email-toggle" type="button">${profileState.email?'Скрыть':'Показать'}</button></dd></div></dl></div></div></section>${appearanceEditor}${profileStatsMarkup(profile)}<div class="profile-footer-actions"><button class="profile-logout" id="profile-logout" type="button">Выйти из аккаунта</button></div></div>`;
+  const content=`${profileHeader('Ваш аккаунт',true,canEdit)}<div class="profile-scroll"><section class="profile-identity ${previewBanner?'has-custom-banner':''} ${editing?'is-appearance-editing':''}">${previewBanner?`<img class="profile-banner" src="${esc(previewBanner)}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(previewProfile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badgeList}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div><div><dt>Email</dt><dd><span id="profile-email-value">${esc(profileState.email||profile.email_masked)}</span><button class="profile-email-toggle" id="profile-email-toggle" type="button">${profileState.email?'Скрыть':'Показать'}</button></dd></div></dl></div></div></section>${appearanceEditor}${profileStatsMarkup(profile)}<div class="profile-footer-actions"><button class="profile-logout" id="profile-logout" type="button">Выйти из аккаунта</button></div></div>`;
   replaceModalView(content,'profile-modal account-profile-modal');
   bindProfileControls();if(preserveScroll&&$('.profile-scroll'))$('.profile-scroll').scrollTop=previousScroll;
 }
@@ -142,6 +146,7 @@ async function showProfile(){
   profileState.view='profile';profileState.email=null;profileState.busy=false;resetProfileAppearanceDraft();
   const request=++profileState.request,token=profileToken();
   replaceModalView(profileLoadingMarkup(),'profile-modal account-profile-modal');
+  $('#open-boing').onclick=()=>{const button=$('#open-boing');if(button)button.disabled=true;openBoingQuickEntry()};
   try{
     const profile=await rpc('get_my_profile',{p_token:token});
     if(request!==profileState.request||token!==profileToken())return;
@@ -172,6 +177,7 @@ function bindProfileControls(){
     }catch(error){toast(error.message)}finally{if(button.isConnected)button.disabled=false}
   });
   $('#profile-badge-edit-toggle')?.addEventListener('click',()=>{if(profileState.badgeEditing)saveProfileAppearance();else beginProfileAppearanceEdit()});
+  $('#profile-appearance-cancel')?.addEventListener('click',cancelProfileAppearanceEdit);
   $$('[data-badge-remove]').forEach(button=>button.addEventListener('click',()=>changeBoingBadgeDraft(button.dataset.badgeRemove,false)));
   $$('[data-badge-restore]').forEach(button=>button.addEventListener('click',()=>changeBoingBadgeDraft(button.dataset.badgeRestore,true)));
   $$('[data-profile-frame]').forEach(button=>button.addEventListener('click',()=>{if(!profileState.badgeEditing||profileState.busy)return;profileState.frameDraft=button.dataset.profileFrame;renderProfile(true)}));
@@ -388,6 +394,7 @@ async function openBoingQuickEntry(){
   profileState.view='profile';profileState.email=null;profileState.busy=false;profileState.badgeEditing=false;profileState.badgeDraft=null;
   const request=++profileState.request,token=profileToken();
   replaceModalView(profileLoadingMarkup(),'profile-modal account-profile-modal');
+  const mystery=$('#open-boing');if(mystery)mystery.disabled=true;
   try{
     const profile=await rpc('get_my_profile',{p_token:token});
     if(request!==profileState.request||token!==profileToken())return;
@@ -567,7 +574,7 @@ function renderPublicFlareProfile(){
   const profile=profileState.publicData;if(!profile?.boing)return;
   const boing=profile.boing,badges=sortProfileBadges(Array.isArray(boing.badges)?boing.badges:[]).filter(badge=>badge.equipped),created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   const stats=[['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],['COINS',formatProfileNumber(boing.coins),'баланс участника'],['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации']];
-  const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badges.length?badges.map(badge=>publicProfileBadgeMarkup(badge,true)).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div></div><dl class="profile-meta"><div><dt>Регистрация</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
+  const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badges.length?badges.map(badge=>publicProfileBadgeMarkup(badge,true)).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
   replaceModalView(content,'profile-modal public-profile-modal');$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();
 }
 async function showPublicFlareProfile(nickname){

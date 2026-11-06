@@ -363,3 +363,48 @@
   .account-profile-modal .profile-equipped-badges{gap:6px}
   .account-profile-modal .profile-equipped-badges .profile-badge{flex-basis:30px;width:30px;height:30px;min-height:30px}
 }
+
+/* Clear account hierarchy, readable metadata and reversible appearance drafts. */
+.profile-menu-heading h2,.profile-title-line .profile-mystery{color:#f3f0e9}
+.profile-title-line{gap:14px}
+.profile-title-divider{display:block;flex:0 0 1px;width:1px;height:26px;background:rgba(255,255,255,.2)}
+.profile-title-line .profile-mystery:hover,.profile-title-line .profile-mystery:active{color:#f3f0e9}
+.profile-title-line .profile-mystery:disabled{opacity:.55;cursor:wait}
+.profile-meta>div{min-width:0;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(7,7,6,.68);box-shadow:0 3px 14px rgba(0,0,0,.22)}
+.profile-meta dt{color:#c8bda7;text-shadow:0 1px 4px #000}
+.profile-meta dd{color:#f5f0e6;text-shadow:0 1px 4px #000}
+.profile-email-toggle{color:#e6c576;text-shadow:0 1px 4px #000}
+.profile-badge-tooltip{background:linear-gradient(145deg,rgba(var(--badge-rgb),.045),rgba(var(--badge-secondary-rgb),.015)),rgba(10,10,9,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.profile-badge-tooltip>.profile-badge-description{color:#c5beb2}
+.profile-appearance-actions{display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.075)}
+.profile-small-button.profile-appearance-cancel{min-width:96px;border-color:rgba(255,255,255,.16);background:#191817;color:#d8d2c6}
+.profile-small-button.profile-appearance-cancel:hover{border-color:rgba(255,255,255,.3);background:#22201d;color:#fff}
+
+/* Borderless account actions with a compact, bold admin companion. */
+.topbar .account-status{display:flex;align-items:center}
+.topbar .account-status .text-button{padding:10px 8px;border-radius:9px;color:#d8d2c6;font-family:"Manrope","DM Sans",sans-serif;font-size:14px;font-weight:800;line-height:1;transition:background-color .18s ease,color .18s ease}
+.topbar .account-status .text-button:hover{background:rgba(255,255,255,.06);color:#fff}
+.topbar .account-button{position:relative;right:-6px;min-height:46px;max-width:230px;padding:0 10px;border:0;border-radius:10px;background:transparent;box-shadow:none;color:#f3f0e9;font-size:14px;font-weight:700}
+.topbar .account-button:hover{border-color:transparent;background:rgba(255,255,255,.065);color:#fff}
+.topbar .account-button:active{background:rgba(255,255,255,.1)}
+@media(max-width:700px){
+  .account-profile-modal .profile-menu-head{gap:12px}
+  .account-profile-modal .profile-menu-heading h2{font-size:23px;white-space:nowrap}
+  .account-profile-modal .profile-title-line{gap:9px}
+  .account-profile-modal .profile-title-line .profile-mystery{min-width:30px;font-size:23px}
+  .profile-title-divider{height:23px}
+  .profile-meta>div{padding:9px 10px}
+  .topbar .account-status .text-button{padding-inline:6px;font-size:12px}
+  .topbar .account-button{right:-3px;min-height:44px;max-width:42vw;padding-inline:8px;font-size:13px}
+}
+@media(max-width:380px){
+  .account-profile-modal .profile-menu-head{gap:10px;padding-inline:14px}
+  .account-profile-modal .profile-menu-heading h2{font-size:20px}
+  .account-profile-modal .profile-title-line{gap:7px}
+  .account-profile-modal .profile-title-line .profile-mystery{min-width:26px;font-size:20px}
+  .account-profile-modal .profile-head-actions{gap:7px}
+  .account-profile-modal .profile-head-actions>.close-button,.account-profile-modal .profile-head-actions>.profile-badge-edit-toggle{flex-basis:36px;width:36px;height:36px}
+  .topbar .boing-quick-entry{min-height:40px;padding-inline:8px;font-size:12px}
+  .topbar .account-status .text-button{padding-inline:4px;font-size:11px}
+  .topbar .account-button{padding-inline:6px;font-size:12px}
+}

@@ -1523,7 +1523,7 @@ small{color:#bdb7ad;font-weight:500}
 @media(max-width:600px){.footer-bottom{margin-top:68px}}
 
 /* Dark outlined shortcuts use each category's accent, with no inherited yellow fill. */
-.brand-intro .intro-links>.intro-link,.brand-intro .intro-links>.intro-link:nth-child(2){min-height:60px;border:1px solid rgba(242,84,103,.65);border-radius:999px;background:#0A080B;box-shadow:none;color:#F25467;filter:none;transform:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+.brand-intro .intro-links>.intro-link,.brand-intro .intro-links>.intro-link:nth-child(2){min-height:54px;padding:0 24px;border:1px solid rgba(242,84,103,.65);border-radius:999px;background:#0A080B;box-shadow:none;color:#F25467;font-size:14px;filter:none;transform:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
 .brand-intro .intro-links>.intro-link[data-category="доп."]{border-color:rgba(214,80,221,.65);color:#D650DD}
 .brand-intro .intro-links>.intro-link:hover,.brand-intro .intro-links>.intro-link:nth-child(2):hover{border-color:#F25467;background:#151012;box-shadow:none;color:#F25467;filter:none;transform:none}
 .brand-intro .intro-links>.intro-link[data-category="доп."]:hover{border-color:#D650DD;background:#170E18;color:#D650DD}
@@ -1567,19 +1567,30 @@ small{color:#bdb7ad;font-weight:500}
 
 /* Centered campaign entry and a clean fallback for photos not supplied yet. */
 .brand-intro .intro-logo{align-self:center;margin-inline:auto;transform:none;text-align:center}
-.brand-intro .intro-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;width:min(calc(100% - 40px),640px);margin-inline:auto;padding:0}
+.brand-intro .intro-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;width:min(calc(100% - 40px),600px);margin-inline:auto;padding:0;transform:translateY(-24px)}
 .brand-intro .intro-links>.intro-link{width:100%;text-align:center}
 .visual-photo.is-missing{display:none}
-@media(min-width:701px){
-  .topbar>.top-actions{margin-left:auto}
-  .topbar .wordmark{position:absolute;left:50%;right:auto;transform:translate3d(-50%,0,0)}
-  .topbar.is-at-top .wordmark{transform:translate3d(-50%,-6.25px,0)}
-  .topbar.is-scrolled .wordmark{transform:translate3d(-50%,0,0)}
-  .topbar.is-faq-hidden.is-scrolled .wordmark{transform:translate3d(-50%,-6.25px,0)}
+@media(max-width:600px){
+  .brand-intro .intro-links{grid-template-columns:1fr;width:min(calc(100% - 40px),300px);transform:translateY(-12px)}
+  .brand-intro .intro-links>.intro-link,.brand-intro .intro-links>.intro-link:nth-child(2){min-height:52px;padding-inline:20px;font-size:13px}
 }
-@media(max-width:600px){.brand-intro .intro-links{grid-template-columns:1fr;width:min(calc(100% - 40px),320px)}}
 
 /* Original FLARE artwork: black pixels blend away without editing the supplied PNG. */
 .brand-intro .intro-logo-media{position:relative;flex:0 0 auto;width:100%;height:clamp(110px,14vw,190px);margin:0;background:none;filter:none;overflow:visible;mix-blend-mode:screen}
-.intro-logo-media .intro-logo-source{position:absolute;top:50%;left:50%;display:block;width:clamp(600px,120vw,1672px);max-width:none;height:auto;transform:translate(-50%,-50%);mix-blend-mode:screen;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.intro-logo-media .intro-logo-source{position:absolute;top:50%;left:50%;display:block;width:clamp(600px,120vw,1672px);max-width:none;height:auto;transform:translate(-50%,-50%);mix-blend-mode:screen;-webkit-mask-image:radial-gradient(ellipse 54% 38% at 50% 50%,#000 52%,rgba(0,0,0,.82) 72%,transparent 100%);mask-image:radial-gradient(ellipse 54% 38% at 50% 50%,#000 52%,rgba(0,0,0,.82) 72%,transparent 100%);pointer-events:none;user-select:none;-webkit-user-drag:none}
 @media(max-width:360px){.intro-logo-media .intro-logo-source{width:540px}}
+
+/* Fade the supplied artwork's dark edges and deepen the transition below intro. */
+.brand-intro::after{content:"";position:absolute;z-index:1;inset:auto 0 0;height:32%;background:linear-gradient(180deg,transparent 0%,rgba(1,1,1,.38) 45%,rgba(1,1,1,.88) 78%,#010101 100%);pointer-events:none}
+
+/* The header uses the same supplied FLARE artwork and stays anchored to the left. */
+.topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{width:178px;height:46px;mix-blend-mode:screen}
+.topbar .wordmark .wordmark-logo{position:absolute;top:50%;left:50%;display:block;width:340px;max-width:none;height:auto;transform:translate(-50%,-50%);clip-path:inset(25% 10% 25% 10%);mix-blend-mode:screen;pointer-events:none;user-select:none;-webkit-user-drag:none}
+@media(max-width:700px){
+  .topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{width:128px;height:38px}
+  .topbar .wordmark .wordmark-logo{width:250px}
+}
+@media(max-width:380px){
+  .topbar .wordmark,.topbar.is-at-top .wordmark,.topbar.is-scrolled .wordmark{width:92px;height:34px}
+  .topbar .wordmark .wordmark-logo{width:184px}
+}
