@@ -1,4 +1,4 @@
-const profileState={data:null,request:0,view:'profile',email:null,leaderSort:'score',leaders:[],busy:false,shopCategory:'upgrades',publicData:null};
+const profileState={data:null,request:0,view:'profile',email:null,leaderSort:'score',leaders:[],busy:false,shopCategory:'upgrades',publicData:null,badgeEditing:false,badgeDraft:null};
 state.profile=profileState;
 let boingScene=null,bobFaceEditor=null;
 const numberFormat=new Intl.NumberFormat('ru-RU');
@@ -11,7 +11,7 @@ const boingSeenKey=nickname=>`flare-boing-intro:${String(nickname||'').toLowerCa
 function readBoingSeen(nickname){try{return localStorage.getItem(boingSeenKey(nickname))==='1'}catch{return false}}
 function writeBoingSeen(nickname){try{localStorage.setItem(boingSeenKey(nickname),'1')}catch{}}
 function clearProfileState(){
-  profileState.request++;profileState.data=null;profileState.email=null;profileState.leaders=[];profileState.publicData=null;profileState.view='profile';profileState.busy=false;
+  profileState.request++;profileState.data=null;profileState.email=null;profileState.leaders=[];profileState.publicData=null;profileState.badgeEditing=false;profileState.badgeDraft=null;profileState.view='profile';profileState.busy=false;
   teardownBoing(false);
 }
 function mergeBoingState(boing){
@@ -38,8 +38,37 @@ function profileBadgeIcon(id){
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[id]||paths.legend}</svg>`;
 }
-function profileBadgeMarkup(badge,compact=false){
-  return `<button type="button" class="profile-badge ${badge.equipped?'is-equipped':''} rarity-${esc(badge.rarity)}" data-badge="${esc(badge.id)}" aria-pressed="${Boolean(badge.equipped)}" title="${esc(badge.description)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span><span>${esc(badge.name)}</span>${compact?'':`<small>${badge.equipped?'Надет':'Надеть'}</small>`}</button>`;
+function profileBadgeMarkup(badge,compact=false,action=''){
+  const classes=`profile-badge ${badge.equipped?'is-equipped':''} rarity-${esc(badge.rarity)}${action?' is-editing':''}`;
+  if(compact)return `<span class="${classes}" title="${esc(badge.name)} — ${esc(badge.description)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span><span>${esc(badge.name)}</span></span>`;
+  const actionMarkup=action?`<button class="profile-badge-action is-${action}" type="button" data-badge-${action}="${esc(badge.id)}" aria-label="${action==='remove'?'Снять':'Вернуть'} бейдж ${esc(badge.name)}" title="${action==='remove'?'Снять':'Вернуть'}"><svg viewBox="0 0 24 24" aria-hidden="true">${action==='remove'?'<path d="M6 12h12"/>':'<path d="M12 6v12M6 12h12"/>'}</svg></button>`:'';
+  return `<div class="${classes}" tabindex="0" aria-describedby="badge-tip-${esc(badge.id)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span><span>${esc(badge.name)}</span>${action?'':`<small>${badge.equipped?'Надет':'Снят'}</small>`}${actionMarkup}<span class="profile-badge-tooltip" id="badge-tip-${esc(badge.id)}" role="tooltip"><strong>${esc(badge.name)}</strong><span>${esc(badge.description)}</span></span></div>`;
+}
+function profileBadgeEditToggleMarkup(){
+  const save=profileState.badgeEditing;
+  return `<button class="profile-badge-edit-toggle ${save?'is-save':''}" id="profile-badge-edit-toggle" type="button" aria-label="${save?'Сохранить расположение бейджей':'Изменить надетые бейджи'}" title="${save?'Сохранить':'Изменить бейджи'}"><svg viewBox="0 0 24 24" aria-hidden="true">${save?'<path d="m5 12 4 4L19 6"/>':'<path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/>'}</svg></button>`;
+}
+function beginBoingBadgeEdit(){
+  const badges=profileState.data?.boing?.badges||[];if(!badges.length||profileState.busy)return;
+  profileState.badgeEditing=true;profileState.badgeDraft=badges.filter(badge=>badge.equipped).map(badge=>badge.id);renderProfile(true);
+}
+function changeBoingBadgeDraft(badgeId,equip){
+  if(!profileState.badgeEditing||profileState.busy)return;
+  const badges=profileState.data?.boing?.badges||[];if(!badges.some(badge=>badge.id===badgeId))return;
+  const draft=new Set(Array.isArray(profileState.badgeDraft)?profileState.badgeDraft:[]);if(equip)draft.add(badgeId);else draft.delete(badgeId);
+  profileState.badgeDraft=[...draft];renderProfile(true);if(!equip)$('.profile-badge-storage')?.scrollIntoView({block:'nearest'});
+}
+async function saveBoingBadgeLayout(){
+  if(!profileState.badgeEditing||profileState.busy)return;
+  const badges=profileState.data?.boing?.badges||[],draft=Array.isArray(profileState.badgeDraft)?profileState.badgeDraft:[];
+  const before=badges.filter(badge=>badge.equipped).map(badge=>badge.id).sort(),after=[...draft].sort();
+  if(JSON.stringify(before)===JSON.stringify(after)){profileState.badgeEditing=false;profileState.badgeDraft=null;renderProfile(true);return}
+  const token=profileToken(),button=$('#profile-badge-edit-toggle');profileState.busy=true;if(button)button.disabled=true;
+  try{
+    const result=await rpc('set_my_boing_badges',{p_token:token,p_badge_ids:draft});if(token!==profileToken())return;
+    mergeBoingState(result.boing);profileState.badgeEditing=false;profileState.badgeDraft=null;
+    if(profileViewIsActive('profile'))renderProfile(true);toast('Бейджи сохранены.');
+  }catch(error){toast(error.message);if(button?.isConnected)button.disabled=false}finally{profileState.busy=false}
 }
 function profileAvatarMarkup(profile,large=true){
   const nickname=profile.nickname||state.session?.nickname||'',boing=profile.boing||{},frame=boing.selected_frame||'frame-default';
@@ -57,14 +86,17 @@ function profileStatsMarkup(profile){
   ];
   return `<div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div>`;
 }
-function renderProfile(){
-  const profile=profileState.data;
+function renderProfile(preserveScroll=false){
+  const previousScroll=preserveScroll?($('.profile-scroll')?.scrollTop||0):0,profile=profileState.data;
   if(!profile?.boing)return;
-  const boing=profile.boing,badges=Array.isArray(boing.badges)?boing.badges:[],equipped=badges.filter(b=>b.equipped),hasBannerUpgrade=(boing.inventory||[]).includes('banner-custom');
+  const boing=profile.boing,badges=Array.isArray(boing.badges)?boing.badges:[],editing=profileState.badgeEditing,draft=editing&&Array.isArray(profileState.badgeDraft)?profileState.badgeDraft:badges.filter(b=>b.equipped).map(b=>b.id),equipped=badges.filter(b=>draft.includes(b.id)),removed=badges.filter(b=>!draft.includes(b.id)),hasBannerUpgrade=(boing.inventory||[]).includes('banner-custom');
+  const visibleBadges=editing?equipped:badges,badgeList=visibleBadges.length?visibleBadges.map(b=>profileBadgeMarkup(b,false,editing?'remove':'')).join(''):`<p class="profile-empty-copy">${editing?'Все бейджи сняты. Их можно вернуть из окошка ниже.':'Пока пусто. Особенные бейджи выдаются за большие достижения и очень редко появляются в магазине.'}</p>`;
+  const badgeStorage=editing?`<div class="profile-badge-storage"><div class="profile-badge-storage-title"><span>СНЯТЫЕ БЕЙДЖИ</span><small>Нажми +, чтобы вернуть</small></div><div class="profile-badges-list is-editing">${removed.length?removed.map(b=>profileBadgeMarkup({...b,equipped:false},false,'restore')).join(''):'<p class="profile-empty-copy">Все бейджи надеты.</p>'}</div></div>`:'';
+  const badgeCollection=badges.length?`<div class="profile-badges-collection"><div class="profile-badges-list ${editing?'is-editing':''}">${badgeList}</div>${profileBadgeEditToggleMarkup()}</div>${badgeStorage}`:`<div class="profile-badges-list">${badgeList}</div>`;
   const created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
-  const content=`${profileHeader('Ваш аккаунт',true)}<div class="profile-scroll"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><span>УЧАСТНИК FLARE</span></div><div class="profile-equipped-badges">${equipped.length?equipped.map(b=>profileBadgeMarkup(b,true)).join(''):'<span class="profile-no-badge">Бейджи появятся здесь</span>'}</div><dl class="profile-meta"><div><dt>Регистрация</dt><dd>${esc(created)}</dd></div><div><dt>Email</dt><dd><span id="profile-email-value">${esc(profileState.email||profile.email_masked)}</span><button class="profile-email-toggle" id="profile-email-toggle" type="button">${profileState.email?'Скрыть':'Показать'}</button></dd></div></dl></div></div></section>${hasBannerUpgrade?`<div class="profile-banner-controls"><span>Фотобаннер · JPG, PNG или WebP до 12 МБ</span><div><label class="profile-small-button">Выбрать фото<input id="profile-banner-input" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><button class="profile-small-button" id="profile-banner-remove" type="button" ${profile.banner?'':'disabled'}>Убрать</button></div></div>`:''}${profileStatsMarkup(profile)}<section class="profile-badges-section"><div class="profile-section-title"><div><span class="eyebrow">КОЛЛЕКЦИЯ</span><h3>Бейджи</h3></div><span>${badges.length} получено</span></div><div class="profile-badges-list">${badges.length?badges.map(b=>profileBadgeMarkup(b)).join(''):'<p class="profile-empty-copy">Пока пусто. Особенные бейджи выдаются за большие достижения и очень редко появляются в магазине.</p>'}</div></section><div class="profile-footer-actions"><span>Аватар синхронизирован с номинантами</span><button class="profile-logout" id="profile-logout" type="button">Выйти из аккаунта</button></div></div>`;
+  const content=`${profileHeader('Ваш аккаунт',true)}<div class="profile-scroll"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><span>УЧАСТНИК FLARE</span></div><div class="profile-equipped-badges">${equipped.length?equipped.map(b=>profileBadgeMarkup(b,true)).join(''):'<span class="profile-no-badge">Бейджи появятся здесь</span>'}</div><dl class="profile-meta"><div><dt>Регистрация</dt><dd>${esc(created)}</dd></div><div><dt>Email</dt><dd><span id="profile-email-value">${esc(profileState.email||profile.email_masked)}</span><button class="profile-email-toggle" id="profile-email-toggle" type="button">${profileState.email?'Скрыть':'Показать'}</button></dd></div></dl></div></div></section>${hasBannerUpgrade?`<div class="profile-banner-controls"><span>Фотобаннер · JPG, PNG или WebP до 12 МБ</span><div><label class="profile-small-button">Выбрать фото<input id="profile-banner-input" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><button class="profile-small-button" id="profile-banner-remove" type="button" ${profile.banner?'':'disabled'}>Убрать</button></div></div>`:''}${profileStatsMarkup(profile)}<section class="profile-badges-section ${editing?'is-editing':''}"><div class="profile-section-title"><div><span class="eyebrow">КОЛЛЕКЦИЯ</span><h3>Бейджи</h3></div><span>${badges.length} получено</span></div>${badgeCollection}</section><div class="profile-footer-actions"><span>Аватар синхронизирован с номинантами</span><button class="profile-logout" id="profile-logout" type="button">Выйти из аккаунта</button></div></div>`;
   replaceModalView(content,'profile-modal account-profile-modal');
-  bindProfileControls();
+  bindProfileControls();if(preserveScroll&&$('.profile-scroll'))$('.profile-scroll').scrollTop=previousScroll;
 }
 function renderProfileError(error){
   console.info('Профиль не загружен:',error?.message||error);
@@ -75,7 +107,7 @@ function renderProfileError(error){
 }
 async function showProfile(){
   if(!state.session){renderAuth();return}
-  profileState.view='profile';profileState.email=null;profileState.busy=false;
+  profileState.view='profile';profileState.email=null;profileState.busy=false;profileState.badgeEditing=false;profileState.badgeDraft=null;
   const request=++profileState.request,token=profileToken();
   replaceModalView(profileLoadingMarkup(),'profile-modal account-profile-modal');
   try{
@@ -107,12 +139,9 @@ function bindProfileControls(){
       profileState.email=email;$('#profile-email-value').textContent=email;button.textContent='Скрыть';
     }catch(error){toast(error.message)}finally{if(button.isConnected)button.disabled=false}
   });
-  $$('[data-badge]').forEach(button=>button.addEventListener('click',async()=>{
-    if(profileState.busy)return;
-    const badge=(profileState.data?.boing?.badges||[]).find(item=>item.id===button.dataset.badge);if(!badge)return;
-    profileState.busy=true;button.disabled=true;const token=profileToken();
-    try{const result=await rpc('set_boing_badge',{p_token:token,p_badge_id:badge.id,p_equipped:!badge.equipped});if(token!==profileToken())return;mergeBoingState(result.boing);if(profileViewIsActive('profile'))renderProfile()}catch(error){toast(error.message);if(button.isConnected)button.disabled=false}finally{profileState.busy=false}
-  }));
+  $('#profile-badge-edit-toggle')?.addEventListener('click',()=>{if(profileState.badgeEditing)saveBoingBadgeLayout();else beginBoingBadgeEdit()});
+  $$('[data-badge-remove]').forEach(button=>button.addEventListener('click',()=>changeBoingBadgeDraft(button.dataset.badgeRemove,false)));
+  $$('[data-badge-restore]').forEach(button=>button.addEventListener('click',()=>changeBoingBadgeDraft(button.dataset.badgeRestore,true)));
   $('#profile-banner-input')?.addEventListener('change',handleProfileBanner);
   $('#profile-banner-remove')?.addEventListener('click',async event=>{
     const button=event.currentTarget,token=profileToken();button.disabled=true;
