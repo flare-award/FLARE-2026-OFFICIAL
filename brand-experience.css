@@ -1578,3 +1578,8 @@ small{color:#bdb7ad;font-weight:500}
   .topbar.is-faq-hidden.is-scrolled .wordmark{transform:translate3d(-50%,-6.25px,0)}
 }
 @media(max-width:600px){.brand-intro .intro-links{grid-template-columns:1fr;width:min(calc(100% - 40px),320px)}}
+
+/* Original FLARE artwork: black pixels blend away without editing the supplied PNG. */
+.brand-intro .intro-logo-media{position:relative;flex:0 0 auto;width:100%;height:clamp(110px,14vw,190px);margin:0;background:none;filter:none;overflow:visible;mix-blend-mode:screen}
+.intro-logo-media .intro-logo-source{position:absolute;top:50%;left:50%;display:block;width:clamp(600px,120vw,1672px);max-width:none;height:auto;transform:translate(-50%,-50%);mix-blend-mode:screen;pointer-events:none;user-select:none;-webkit-user-drag:none}
+@media(max-width:360px){.intro-logo-media .intro-logo-source{width:540px}}

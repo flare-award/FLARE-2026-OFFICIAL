@@ -577,7 +577,7 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('conflict-1','conflict-of-year','Akirakume, Dony_zq, Nodben vs Maronnix','conflict',NULL) ,
 ('conflict-2','conflict-of-year','Eozik, Flourin, Maronnix vs Denis_185, Fines Stark','video',NULL) ,
 ('conflict-3','conflict-of-year','Flourin vs Qusti','conflict',NULL) ,
-('conflict-4','conflict-of-year','Izumrudik vs Cloury','image',NULL) ,
+('conflict-4','conflict-of-year','Izumrudik vs Cloury','video',NULL) ,
 ('event-1','event-of-year','Akirakume получил права','image',NULL) ,
 ('event-2','event-of-year','Выживание в Minecraft','video',NULL) ,
 ('event-3','event-of-year','Ливнули с сервера','image',NULL) ,
@@ -1530,5 +1530,15 @@ end $$;
 
 revoke all on function public.set_my_profile_appearance(text,jsonb,text,text,boolean) from public,authenticated;
 grant execute on function public.set_my_profile_appearance(text,jsonb,text,text,boolean) to anon;
+
+commit;
+
+-- Treat Izumrudik vs Cloury as a video nominee in the shared catalog.
+-- Run after 20261106_profile_unified_appearance.sql. Safe to re-run.
+begin;
+
+insert into public.flare_options(id,nomination_id,name,kind,person_nickname) values
+('conflict-4','conflict-of-year','Izumrudik vs Cloury','video',null)
+on conflict(id) do update set nomination_id=excluded.nomination_id,name=excluded.name,kind=excluded.kind,person_nickname=excluded.person_nickname;
 
 commit;
