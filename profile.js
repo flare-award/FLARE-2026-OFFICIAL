@@ -196,7 +196,9 @@ function bindProfileControls(){
 function readFileAsDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Не удалось прочитать фотографию.'));reader.readAsDataURL(file)})}
 function loadImageElement(source){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Не удалось открыть фотографию.'));image.src=source})}
 function canvasToJpeg(canvas,quality){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Не удалось обработать фотографию.')),'image/jpeg',quality))}
-async function prepareProfileBanner(file){
+// Shared by profile banners and Discord/Telegram uploads: preserve aspect ratio,
+// flatten transparency and return a bounded JPEG accepted by the social RPC.
+async function prepareProfileImage(file){
   const allowed=['image/jpeg','image/png','image/webp'];
   if(!allowed.includes(file.type))throw new Error('Можно загрузить только фотографию JPG, PNG или WebP. GIF и видео не поддерживаются.');
   if(file.size>12*1024*1024)throw new Error('Фотография должна быть меньше 12 МБ.');
@@ -208,6 +210,7 @@ async function prepareProfileBanner(file){
   if(blob.size>500000)throw new Error('Не удалось уменьшить фотографию до 500 КБ. Выбери другой кадр.');
   return await readFileAsDataUrl(blob);
 }
+function prepareProfileBanner(file){return prepareProfileImage(file)}
 async function handleProfileBanner(event){
   const input=event.currentTarget,file=input.files?.[0],token=profileToken();if(!file||!profileState.badgeEditing||profileState.busy)return;
   const label=input.closest('label');label?.classList.add('is-busy');input.disabled=true;
