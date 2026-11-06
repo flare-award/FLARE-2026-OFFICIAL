@@ -82,6 +82,8 @@ async function loadVideoCatalog(){
       if(item){item.name=row.name||item.name;item.url=row.video_url||''}
     }
     sortClipNominees();
+    syncPhotoSlotLabels();
+    if($('#admin-panel-design'))updatePhotoSyncStatus();
     return true;
   }catch(error){console.info('Названия и ссылки видео не загружены:',error.message);return false}
 }
@@ -105,6 +107,22 @@ function buildPhotoSlots(){
 }
 const photoSlots=buildPhotoSlots();
 const photoSlotByKey=new Map(photoSlots.map(slot=>[slot.key,slot]));
+function syncPhotoSlotLabels(){
+  // Names/order are mutable; photo keys, paths and local overrides belong to IDs.
+  nominations.forEach(nomination=>nomination.nominees.forEach(item=>{
+    if(item.type==='person')return;
+    const slot=photoSlotByKey.get(`nominee:${nomination.id}:${item.id}`);
+    if(slot)slot.label=`${nomination.title} · ${item.name}`;
+  }));
+  $$('.admin-design-card').forEach(card=>{
+    const slot=photoSlotByKey.get(card.dataset.designKey);if(!slot)return;
+    card.dataset.designSearch=`${slot.label} ${slot.path}`.toLowerCase();
+    const title=$('.admin-design-info h4',card);if(title)title.textContent=slot.label;
+    const image=$('.admin-design-preview>img',card);if(image)image.alt=slot.label;
+    $('[data-design-upload]',card)?.setAttribute('aria-label',`Заменить фото: ${slot.label}`);
+  });
+}
+
 function photoSource(key){return photoOverrides[key]||photoSlotByKey.get(key)?.path||''}
 function openPhotoDatabase(){
   if(photoDatabasePromise)return photoDatabasePromise;
@@ -223,6 +241,7 @@ function renderVideoOptionsEditor(){
   return `<section class="admin-video-editor"><details><summary class="admin-video-summary"><span><strong>Ссылки и названия видео</strong><small>Клипы, события и остальные видео-номинанты</small></span><b>${videos.length} вариантов</b></summary><div class="admin-video-editor-body"><p>Изменения сохраняются в Supabase и сразу отображаются всем. Выполни актуальный <code>supabase/schema.sql</code> в Supabase SQL Editor, чтобы включить управление ссылками для всех видео.</p><div class="admin-video-list">${videos.map(({nomination,item})=>`<div class="admin-video-row" data-video-row="${esc(item.id)}"><div class="admin-video-identity"><span>${esc(nomination.title)}</span><strong>${esc(item.name)}</strong></div><label class="admin-video-field"><span>Название</span><input type="text" maxlength="120" required data-video-name="${esc(item.id)}" value="${esc(item.name)}"></label><label class="admin-video-field"><span>Ссылка на видео</span><input type="url" data-video-url="${esc(item.id)}" value="${esc(item.url||'')}" placeholder="https://youtu.be/..."></label><button type="button" class="button admin-video-save" data-video-save="${esc(item.id)}">Сохранить</button></div>`).join('')}</div></div></details></section>`;
 }
 function renderDesignPanel(){
+  syncPhotoSlotLabels();
   const cards=photoSlots.map(slot=>{
     const avatar=slot.groupKey==='avatars';
     const image=`<img src="${esc(photoSource(slot.key))}" data-photo-key="${esc(slot.key)}" alt="${esc(slot.label)}" loading="lazy">`;
@@ -276,6 +295,8 @@ function bindDesignPanel(){
       const saved=await rpc('admin_update_video_option',{p_token:state.session.token,p_option_id:id,p_name:name,p_video_url:url||null});
       if(nominee){nominee.name=saved.name;nominee.url=saved.video_url||''}
       sortClipNominees();
+      syncPhotoSlotLabels();updatePhotoSyncStatus();
+      const identity=$('.admin-video-identity strong',button.closest('[data-video-row]'));if(identity)identity.textContent=saved.name;
       nameInput.value=saved.name;urlInput.value=saved.video_url||'';toast('Название и ссылка видео сохранены для всех.');
     }catch(error){toast(error.message)}finally{button.disabled=false}
   });
