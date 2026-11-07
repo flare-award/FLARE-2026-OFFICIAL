@@ -661,13 +661,14 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('person-5-akirakume','meme-of-year','Akirakume','person','Akirakume') ,
 ('person-5-awal','meme-of-year','Awal','person','Awal') ,
 ('person-5-balabol','meme-of-year','Balabol','person','Balabol') ,
-('person-5-cloury','meme-of-year','Cloury','person','Cloury') ,
 ('person-5-dony-zq','meme-of-year','Dony_zq','person','Dony_zq') ,
 ('person-5-eozik','meme-of-year','Eozik','person','Eozik') ,
 ('person-5-flourin','meme-of-year','Flourin','person','Flourin') ,
 ('person-5-izumrudik','meme-of-year','Izumrudik','person','Izumrudik') ,
 ('person-5-maronnix','meme-of-year','Maronnix','person','Maronnix') ,
+('person-5-nodben','meme-of-year','Nodben','person','Nodben') ,
 ('person-5-qusti','meme-of-year','Qusti','person','Qusti') ,
+('person-5-rezo1n','meme-of-year','Rezo1n','person','Rezo1n') ,
 ('person-6-awal','breakthrough','Awal','person','Awal') ,
 ('person-6-balabol','breakthrough','Balabol','person','Balabol') ,
 ('person-6-izumrudik','breakthrough','Izumrudik','person','Izumrudik') ,
@@ -2838,3 +2839,19 @@ update public.flare_badges b set description=v.description from (values
 update public.flare_options
 set name='Nodben', person_nickname='Nodben'
 where id='person-2-dony-zq' and nomination_id='multigaming' and kind='person';
+
+-- Refuse removal if a vote arrived since the preflight check; never cascade-delete ballots.
+do $$
+begin
+  perform 1 from public.flare_options
+    where id='person-5-cloury' and nomination_id='meme-of-year' for update;
+  if exists(select 1 from public.flare_votes where option_id='person-5-cloury')
+     or exists(select 1 from public.flare_test_votes where option_id='person-5-cloury') then
+    raise exception 'Cloury has saved votes in meme-of-year; preserve ballots and review before removal.';
+  end if;
+  delete from public.flare_options where id='person-5-cloury' and nomination_id='meme-of-year';
+end $$;
+insert into public.flare_options(id,nomination_id,name,kind,person_nickname) values
+  ('person-5-nodben','meme-of-year','Nodben','person','Nodben'),
+  ('person-5-rezo1n','meme-of-year','Rezo1n','person','Rezo1n')
+on conflict(id) do nothing;
