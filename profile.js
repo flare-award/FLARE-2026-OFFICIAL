@@ -362,8 +362,9 @@ function resetBobPosition(scene,force=false){
   scene.accessoryCorners=[];
   if(hat){
     const x=hat.offsetLeft,y=hat.offsetTop,w=hat.offsetWidth,h=hat.offsetHeight,isCap=hat.classList.contains('bob-cap');
-    const angle=isCap?-5*Math.PI/180:0,cx=x+w/2,cy=y+h/2,right=x+w+(isCap?14:0),bottom=y+h+(isCap?2:0);
-    scene.accessoryCorners=[[x,y],[right,y],[x,bottom],[right,bottom]].map(([px,py])=>[(px-cx)*Math.cos(angle)-(py-cy)*Math.sin(angle)+cx-radius,(px-cx)*Math.sin(angle)+(py-cy)*Math.cos(angle)+cy-radius]);
+    const brim=isCap?getComputedStyle(hat,'::after'):null;
+    const right=x+w+(brim?Math.max(0,-parseFloat(brim.right)||0):0),bottom=y+h+(brim?Math.max(0,-parseFloat(brim.bottom)||0):0);
+    scene.accessoryCorners=[[x,y],[right,y],[x,bottom],[right,bottom]].map(([px,py])=>[px-radius,py-radius]);
   }
   paintBob(scene);
 }
@@ -680,14 +681,19 @@ function boingShopGroupIcon(category){
 }
 const boingShopGroups={upgrades:{label:'Апгрейды',kinds:['click','coin']},cosmetics:{label:'Косметика',kinds:['accessory','leader','face']},profile:{label:'Профиль',kinds:['frame','banner','badge']}};
 const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'ТОП',face:'BOB PNG',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
+function boingShopItemPreview(item,boing){
+  if(item.kind==='accessory')return `<div class="boing-shop-preview" aria-hidden="true"><div class="boing-preview-bob">${bobCharacterMarkup({...boing,selected_accessory:item.id})}</div></div>`;
+  if(item.kind==='frame')return `<div class="boing-frame-preview" aria-hidden="true">${profileAvatarMarkup({...profileState.data,boing:{...boing,selected_frame:item.id}},false)}</div>`;
+  return '';
+}
 function showBoingShop(category=profileState.shopCategory||'upgrades'){
   const boing=profileState.data?.boing;if(!boing)return;
   if(!boingShopGroups[category])category='upgrades';
   pauseBoingScene();profileState.view='shop';profileState.shopCategory=category;
   const allItems=Array.isArray(boing.shop)?boing.shop:[],items=allItems.filter(item=>boingShopGroups[category].kinds.includes(item.kind));
   const tabs=Object.entries(boingShopGroups).map(([id,group])=>`<button type="button" data-shop-category="${id}" class="${id===category?'is-active':''}">${boingShopGroupIcon(id)}<span>${group.label}</span></button>`).join('');
-  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3>${item.kind==='accessory'?`<div class="boing-shop-preview" aria-hidden="true"><div class="boing-preview-bob">${bobCharacterMarkup({...boing,selected_accessory:item.id})}</div></div>`:''}<p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?(boing.economy_version===2?'POWER CLICK увеличивает очки, но не ускоряет выдачу COINS. Награда — за каждые 100 кликов: 100 COINS, с 10 000 кликов — 200. COINS BOOST добавляет 10% за уровень. Следующий уровень всегда дороже.':'Улучшения действуют на следующие клики и начисления COINS. Актуальные цены и эффекты указаны в карточках.'):category==='cosmetics'?'Аксессуары можно надевать и снимать. BOB NAME IN LEADERS открывает имя в таблице, а BOB PNG FACE — загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
-  bindBoingNavigation('shop');
+  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3>${boingShopItemPreview(item,boing)}<p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?(boing.economy_version===2?'POWER CLICK увеличивает очки, но не ускоряет выдачу COINS. Награда — за каждые 100 кликов: 100 COINS, с 10 000 кликов — 200. COINS BOOST добавляет 10% за уровень. Следующий уровень всегда дороже.':'Улучшения действуют на следующие клики и начисления COINS. Актуальные цены и эффекты указаны в карточках.'):category==='cosmetics'?'Аксессуары можно надевать и снимать. BOB NAME IN LEADERS открывает имя в таблице, а BOB PNG FACE — загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
+  bindBoingNavigation('shop');bindProfileAvatarFallback();
   $$('[data-shop-category]').forEach(button=>button.onclick=()=>showBoingShop(button.dataset.shopCategory));
   $$('[data-buy-item]').forEach(button=>button.onclick=async()=>{
     const token=profileToken(),itemId=button.dataset.buyItem;button.disabled=true;
