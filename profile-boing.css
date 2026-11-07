@@ -701,3 +701,49 @@
  .profile-avatar.frame-aurora::before,.profile-avatar.frame-aurora::after,
  .profile-avatar.frame-inferno::before,.profile-avatar.frame-inferno::after{animation:none;transform:none;opacity:1}
 }
+
+/* Ogonyok: layered vector flame, restrained motion, increasing ceremonial detail. */
+.ogonyok-mark{--ember:#ffb452;position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:60px;height:66px;color:var(--ember);vertical-align:middle}
+.ogonyok-mark svg{width:100%;height:100%;overflow:visible}
+.ogonyok-mark b{position:absolute;bottom:7px;left:0;width:100%;color:#4b2109;font:800 12px "Sora",sans-serif;text-align:center;font-variant-numeric:tabular-nums}
+.ogonyok-tier-1{--ember:#ff934d}.ogonyok-tier-2{--ember:#ff637f}.ogonyok-tier-3{--ember:#c39aff}.ogonyok-tier-4{--ember:#79caff}.ogonyok-tier-5{--ember:#75edcc}.ogonyok-tier-6{--ember:#e4dcff}.ogonyok-tier-7{--ember:#ffe196}.ogonyok-tier-8{--ember:#fff2d2}
+.ogonyok-mark.is-dormant{--ember:#686b61;opacity:.65}.ogonyok-mark.is-dormant .ogonyok-core{fill:#949588}
+.ogonyok-flame,.ogonyok-core{transform-origin:32px 58px}.is-lit .ogonyok-flame{animation:ogonyokBreathe 4.5s ease-in-out infinite}.is-lit .ogonyok-core{animation:ogonyokBreathe 3.3s ease-in-out infinite reverse}.ogonyok-orbit{transform:rotate(-24deg);transform-origin:32px 39px;opacity:.6}.ogonyok-wings{opacity:.75}.ogonyok-sparks{animation:ogonyokSpark 5s ease-in-out infinite}
+.ogonyok-mark.is-compact{width:34px;height:39px}.ogonyok-mark.is-compact b{bottom:4px;font-size:9px}
+@keyframes ogonyokBreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(.97,1.035)}}
+@keyframes ogonyokSpark{0%,100%{opacity:.35}50%{opacity:1}}
+.ogonyok-game{position:relative;display:flex;align-items:center;gap:12px;flex:0 0 auto;margin-bottom:12px;padding:7px 14px 7px 8px;border:1px solid #413022;border-radius:17px;background:linear-gradient(115deg,#211a14,#121411 70%)}
+.ogonyok-game>.ogonyok-mark{width:46px;height:52px}.ogonyok-copy{flex:1;min-width:0}.ogonyok-copy>div{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.ogonyok-copy strong{color:#ffe1a3;font-size:13px}.ogonyok-copy>div>span{color:#e1bc87;font-size:10px;white-space:nowrap}.ogonyok-copy p{margin:5px 0 7px;color:#b4ad9d;font-size:10px;line-height:1.5}.ogonyok-copy p span{color:#8c8e80}.ogonyok-copy progress{display:block;appearance:none;width:100%;height:3px;border:0;border-radius:3px;overflow:hidden;background:#303028}.ogonyok-copy progress::-webkit-progress-bar{background:#303028}.ogonyok-copy progress::-webkit-progress-value{background:linear-gradient(90deg,#ef714d,#ffda8b)}.ogonyok-copy progress::-moz-progress-bar{background:#f4b967}
+.ogonyok-help{position:static;flex:0 0 auto}.ogonyok-help summary{display:grid;place-items:center;list-style:none;width:24px;height:24px;border:1px solid #56503a;border-radius:50%;color:#dbc397;font-size:12px;cursor:pointer}.ogonyok-help summary::-webkit-details-marker{display:none}.ogonyok-help>div{position:absolute;z-index:12;top:calc(100% + 6px);left:0;right:0;padding:16px;border:1px solid #5a4830;border-radius:12px;background:#202019;color:#e1d7bc;font-size:12px;line-height:1.65;box-shadow:0 12px 30px #0008}.ogonyok-help[open] summary{background:#4b3824}
+.boing-leaders-tip{margin:0 0 16px;color:#babba9;font-size:12px;line-height:1.5}.boing-leader-identity{flex-wrap:wrap;gap:4px 8px}.boing-leader-identity>.ogonyok-mark{margin-left:0}.boing-leader-bob-name{max-width:100%;overflow-wrap:anywhere}
+/* Both profile variants share one top-aligned sidebar; no absolute bottom anchoring. */
+.modal.public-profile-modal,.modal.account-profile-modal{height:auto;min-height:0;max-height:calc(100dvh - 32px)}
+.public-profile-body{flex:0 1 auto}.public-profile-scroll{flex:0 1 auto}.public-profile-layout,.own-profile-layout{display:grid;grid-template-columns:minmax(0,1fr) 164px;gap:16px;align-items:start;padding:22px 24px 24px}
+.public-profile-info,.own-profile-info{min-width:0}.own-profile-info .profile-identity{margin:0}.own-profile-info .profile-stats{margin:14px 0 0;grid-template-columns:repeat(2,minmax(0,1fr))}.own-profile-info .profile-footer-actions{margin:16px 0 0}.own-profile-info .profile-appearance-controls{margin:14px 0 0}
+.profile-bob-aside{display:flex;flex-direction:column;gap:12px;min-width:0}.profile-bob-aside .public-profile-bob-card{position:relative;inset:auto;width:100%;margin:0;padding:17px 10px;box-sizing:border-box;justify-content:center;gap:4px}.profile-bob-aside .public-bob-character{width:96px;height:96px;margin:21px 0 16px}.profile-streak-record{display:flex;align-items:center;flex-direction:column;gap:8px;padding:16px 10px;border:1px solid #423623;border-radius:16px;background:linear-gradient(145deg,#211c14,#121410);text-align:center}.profile-streak-record>span{font:700 8px "Sora",sans-serif;letter-spacing:.08em;color:#b5a17c}.profile-streak-record>strong{color:#f2d59b;font:700 21px "Sora",sans-serif}.profile-streak-record>strong small{display:block;margin-top:4px;color:#8e8e7c;font:400 10px "Sora",sans-serif}
+@media(max-width:700px){.public-profile-layout,.own-profile-layout{grid-template-columns:minmax(0,1fr) 120px;gap:10px;padding:14px}.profile-bob-aside .public-bob-character{width:82px;height:82px}.profile-bob-aside .public-profile-bob-card{padding:14px 6px}.own-profile-info .profile-identity-main{padding:18px}.ogonyok-game{gap:7px;padding-right:9px}.ogonyok-copy p span{display:block}.ogonyok-copy strong{font-size:12px}.ogonyok-copy>div>span{font-size:9px}.ogonyok-game>.ogonyok-mark{width:38px;height:46px}.ogonyok-copy>div{flex-wrap:wrap;gap:2px 7px}}
+@media(max-width:420px){.public-profile-layout,.own-profile-layout{grid-template-columns:minmax(0,1fr) 96px;gap:8px;padding:10px}.profile-bob-aside .public-bob-character{width:72px;height:72px}.profile-bob-aside .public-profile-bob-card>strong{font-size:11px}.profile-bob-aside .public-profile-bob-card>span,.profile-streak-record>span{font-size:6px}.profile-streak-record{padding:13px 5px}.own-profile-info .profile-stats,.public-profile-info .profile-stats{grid-template-columns:1fr}.own-profile-info .profile-identity-main{padding:14px}.own-profile-info .profile-avatar{width:76px;height:76px}.own-profile-info .profile-nickname-line h3{font-size:21px}.own-profile-info .profile-footer-actions{flex-wrap:wrap}.boing-leader-identity .ogonyok-mark{width:28px;height:32px}}
+@media(prefers-reduced-motion:reduce){.ogonyok-flame,.ogonyok-core,.ogonyok-sparks{animation:none!important}}
+.profile-bob-aside .ogonyok-mark{color:var(--ember);width:46px;height:52px;letter-spacing:normal}
+.profile-streak-record .ogonyok-mark{width:54px;height:60px}
+.profile-streak-record .ogonyok-mark b{display:none}
+.profile-bob-aside .ogonyok-mark b{font-size:11px;bottom:6px}
+.boing-leader-identity{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;gap:3px}
+.boing-leader-labels{display:flex;align-items:center;gap:9px;min-width:0;max-width:100%}
+.boing-leader-labels .boing-leader-name{min-width:0;flex:0 1 auto}
+.boing-leader-labels .boing-leader-bob-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:700px){.boing-leader-labels{gap:6px}}
+/* On phones, statistics use both columns instead of leaving a tall empty sidebar. */
+@media(max-width:700px){
+ .public-profile-info,.own-profile-info{display:contents}
+ .public-profile-info>.profile-identity,.own-profile-info>.profile-identity{grid-column:1;grid-row:1;align-self:stretch}
+ .profile-bob-aside{grid-column:2;grid-row:1}
+ .public-profile-info>.profile-stats,.own-profile-info>.profile-stats{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));margin:0}
+ .public-profile-info>.profile-footer-actions,.own-profile-info>.profile-footer-actions{grid-column:1/-1;grid-row:3;margin:0}
+ .own-profile-info>.profile-appearance-controls{grid-column:1/-1;grid-row:2;margin:0}
+ .own-profile-layout:has(.is-appearance-editing) .profile-stats{grid-row:3}
+ .own-profile-layout:has(.is-appearance-editing) .profile-footer-actions{grid-row:4}
+ .public-profile-info .profile-stat,.own-profile-info .profile-stat{padding:14px}
+}
+/* Keep BOB reachable without scrolling on short landscape screens. */
+@media(max-height:580px){.ogonyok-game{order:2;margin:12px 0 0}}
