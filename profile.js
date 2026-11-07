@@ -1,10 +1,11 @@
 const profileState={data:null,request:0,view:'profile',email:null,leaderSort:'score',leaders:[],busy:false,shopCategory:'upgrades',publicData:null,badgeEditing:false,badgeDraft:null,frameDraft:null,bannerDraft:null,bannerDirty:false};
 state.profile=profileState;
 let boingScene=null,bobFaceEditor=null;
-const boingGravity=1540;
+// Slightly gentler downward acceleration: 1% below the previous gravity.
+const boingGravity=1540*.99;
 // Mass is 1; BOB is a uniform circular rigid body (I = mass * radius² / 2).
-// The old kick ranged from 340 to 375 px/s. Use its midpoint, with exactly +5%.
-const boingLegacyKick=(340+375)/2,boingClickStrength=1.05;
+// The old kick ranged from 340 to 375 px/s. Keep the previous +5%, then add another 5%.
+const boingLegacyKick=(340+375)/2,boingClickStrength=1.05*1.05;
 const boingPhysicsStep=1/120;
 const numberFormat=new Intl.NumberFormat('ru-RU');
 const dateFormat=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'});
@@ -557,7 +558,7 @@ function clickBob(scene,event){
   const boing=profileState.data.boing,points=Math.max(1,Number(boing.points_per_click)||1);
   scene.score+=points;scene.clicks++;scene.running=true;
   // Tap assist cancels falling speed before the kick, so gravity cannot swallow a late tap.
-  // The actual click impulse is unchanged (+5%); rising momentum and torque are preserved.
+  // Rising momentum and torque are preserved alongside the stronger click impulse.
   scene.vy=Math.min(scene.vy,0);
   applyBobClickImpulse(scene,bobClickPoint(scene,event));
   scene.arena.classList.add('is-playing');$('#boing-hint').textContent='';paintBob(scene);
