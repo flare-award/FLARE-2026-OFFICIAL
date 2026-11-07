@@ -9,12 +9,13 @@ for(const width of [1360,390,320]){
  await page.setViewport({width,height:900});
  await page.evaluate(ids=>{
  state.session={nickname:'Maronnix',token:'test'};teardownBoing(false);
- profileState.data={nickname:'Maronnix',boing:{bob_name:'BOB',coins:100000,best_score:0,inventory:[],badges:[],economy_version:2,shop:[{id:'click-power',kind:'click',name:'POWER CLICK',description:'Очки за клик.',price:5000,level:0,max_level:5},{id:'coin-boost',kind:'coin',name:'COINS BOOST',description:'+10% за уровень.',price:10000,level:0,max_level:5},...ids.map((id,i)=>({id,kind:'accessory',name:id.toUpperCase(),description:'Аксессуар для BOB.',price:({'bob-shades':5000,'bob-cap':10000,'bob-crown':30000,'bob-beanie':8000,'bob-fedora':15000,'bob-sneakers':20000,'bob-bowtie':12000})[id],owned:false,level:0,max_level:1})),...['frame-gold','frame-aurora','frame-inferno'].map(id=>({id,kind:'frame',name:id.toUpperCase(),description:'Рамка аватара.',price:({'frame-gold':10000,'frame-aurora':35000,'frame-inferno':75000})[id],owned:false,level:0,max_level:1}))]}};
+ profileState.data={nickname:'Maronnix',boing:{bob_name:'BOB',coins:100000,best_score:0,inventory:[],badges:[],economy_version:3,shop:[{id:'click-power',kind:'click',name:'POWER CLICK',description:'Очки за клик.',price:5000,level:0,max_level:5},{id:'coin-boost',kind:'coin',name:'COINS BOOST',description:'+10% за уровень.',price:10000,level:0,max_level:5},...ids.map((id,i)=>({id,kind:'accessory',name:id.toUpperCase(),description:'Аксессуар для BOB.',price:({'bob-shades':5000,'bob-cap':10000,'bob-crown':30000,'bob-beanie':8000,'bob-fedora':15000,'bob-sneakers':20000,'bob-bowtie':12000})[id],owned:false,level:0,max_level:1})),...['frame-gold','frame-aurora','frame-inferno'].map(id=>({id,kind:'frame',name:id.toUpperCase(),description:'Рамка аватара.',price:({'frame-gold':10000,'frame-aurora':35000,'frame-inferno':75000})[id],owned:false,level:0,max_level:1}))]}};
  rpc=async()=>({leaders:[{rank:1,nickname:'VeryLongNickname',bob_name:'ОченьДлинноеИмя16',best_score:999999,coins:999999},{rank:2,nickname:'Maronnix',bob_name:'BOB',best_score:50,coins:300},{rank:3,nickname:'Hidden',bob_name:null,best_score:30,coins:100}]});
  showBoingShop('upgrades');
  },cosmetics);
  assert.equal(await page.$$eval('.boing-shop-categories button svg',es=>es.length),3);
- assert((await page.$eval('.boing-shop-note',el=>el.textContent)).includes('10%'));
+ const rewardNote=await page.$eval('.boing-shop-note',el=>el.textContent);
+ assert(rewardNote.includes('10%'));assert(rewardNote.includes('100 COINS за каждые полные 200 очков одного раунда'));assert(rewardNote.includes('Остаток не переносится'));assert(!rewardNote.includes('100 кликов'));
  await page.click('[data-shop-category="cosmetics"]');assert.equal(await page.$$eval('.boing-shop-preview',es=>es.length),7);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await page.screenshot({path:`/tmp/flare-boing-cosmetics-${width}.png`});
