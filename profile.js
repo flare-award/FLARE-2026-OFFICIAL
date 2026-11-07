@@ -347,9 +347,73 @@ function renderBoingGame(){
   scene.observer?.disconnect();
   if('ResizeObserver'in window){scene.observer=new ResizeObserver(()=>resetBobPosition(scene,false));scene.observer.observe(scene.arena)}
   resetBobPosition(scene,true);updateBoingHud();
-  scene.element.addEventListener('click',event=>clickBob(scene,event));
+  bindBobInput(scene);
   $('#bob-face-edit').onclick=showBoingFaceEditor;
   $('#boing-rename').onclick=showBoingRename;
+}
+function boingAutomationPattern(samples){
+  // Conservative evidence only: do not punish ordinary bursts, a steady human rhythm,
+  // coarse privacy timers, touch jitter, or held accessibility keys.
+  if(samples.length<64)return false;
+  const recent=samples.slice(-64),gaps=recent.slice(1).map((sample,i)=>sample.t-recent[i].t);
+  if(gaps.some(gap=>gap<=0))return false;
+  const span=recent.at(-1).t-recent[0].t;
+  if(span<800)return true; // sustained >78 inputs/sec, never just a double click
+  const mean=span/63;if(mean<12||mean>220)return false;
+  const spread=Math.max(...gaps)-Math.min(...gaps),variance=gaps.reduce((sum,gap)=>sum+(gap-mean)**2,0)/63;
+  const fractions=new Set(recent.map(sample=>Math.round(sample.t*10)%10));
+  return fractions.size>=4&&spread<1.3&&variance<.1225;
+}
+function acceptBobInput(scene,event){
+  if(scene.destroyed||scene.locked||scene.failed)return;
+  // Only activate round rejection once the server supports discarding uncredited runs.
+  const protectedRun=profileState.data?.boing?.integrity_version===1;
+  if(event.isTrusted===false){if(protectedRun)rejectBoingRound(scene);return}
+  scene.inputSamples||=[];
+  const sample={n:scene.clicks+1,t:performance.timeOrigin+performance.now()};
+  const samples=[...scene.inputSamples,sample].slice(-80);
+  if(protectedRun&&boingAutomationPattern(samples)){rejectBoingRound(scene);return}
+  scene.inputSamples=samples;clickBob(scene,event);
+}
+function bindBobInput(scene){
+  // A moving button may leave the pointer before pointerup, so do not wait for click.
+  // Do not capture the pointer: each subsequent hit must still land on BOB.
+  scene.element.addEventListener('pointerdown',event=>{
+    if(event.button!==0)return;
+    event.preventDefault();scene.element.focus({preventScroll:true});acceptBobInput(scene,event);
+  });
+  scene.element.addEventListener('keydown',event=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    event.preventDefault();if(!event.repeat)acceptBobInput(scene,event);
+  });
+  // Assistive activation is a detail=0 click. Pointer compatibility clicks must not double-count.
+  scene.element.addEventListener('click',event=>{if(event.detail===0&&!event.pointerType&&!event.sourceCapabilities?.firesTouchEvents)acceptBobInput(scene,event)});
+}
+function resetBoingRound(scene,hint='ЕЩЁ РАЗ! НАЖМИ НА BOB'){
+  clearTimeout(scene.rejectRetryTimer);clearTimeout(scene.settleRetryTimer);scene.rejectRetries=0;scene.settleRetries=0;
+  scene.runId=null;scene.score=0;scene.clicks=0;scene.syncedClicks=0;scene.failed=false;scene.locked=false;scene.rejected=false;scene.vx=0;scene.vy=0;scene.inputSamples=[];
+  scene.arena?.classList.remove('is-failed','is-playing');if($('#boing-impact'))$('#boing-impact').textContent='';if($('#boing-hint'))$('#boing-hint').textContent=hint;
+  resetBobPosition(scene,true);updateBoingHud();
+}
+function finishRejectedBoingRound(scene,data){
+  if(scene.destroyed)return;
+  scene.running=false;cancelAnimationFrame(scene.raf);scene.raf=0;clearTimeout(scene.syncTimer);scene.syncScheduled=false;
+  mergeBoingState(data.boing);resetBoingRound(scene,'РАУНД НЕ ЗАСЧИТАН · НАЖМИ НА BOB');
+  toast('Автоматическая серия нажатий: раунд завершён без зачёта. Можно начать заново.');
+}
+function rejectBoingRound(scene){
+  if(scene.rejected||scene.destroyed)return;
+  scene.rejected=true;scene.failed=true;scene.locked=true;scene.running=false;cancelAnimationFrame(scene.raf);scene.raf=0;clearTimeout(scene.syncTimer);scene.syncScheduled=false;
+  scene.arena?.classList.add('is-failed');if($('#boing-impact'))$('#boing-impact').textContent='РАУНД НЕ ЗАСЧИТАН';
+  // Wait behind an in-flight start/sync; the server has not credited this run yet.
+  discardRejectedBoingRound(scene);
+}
+function discardRejectedBoingRound(scene){
+  enqueueBoingTask(scene,async()=>{
+    if(!scene.runId){if(!scene.destroyed)resetBoingRound(scene);return}
+    const data=await rpc('discard_boing_run',{p_token:profileToken(),p_run_id:scene.runId});
+    finishRejectedBoingRound(scene,data);
+  }).catch(error=>{if(!scene.destroyed){scene.rejectRetries=(scene.rejectRetries||0)+1;if(scene.rejectRetries===1)toast('Раунд остановлен. Повторяем отмену результата.');scene.rejectRetryTimer=setTimeout(()=>discardRejectedBoingRound(scene),Math.min(15000,2000*2**Math.min(3,scene.rejectRetries-1)))}});
 }
 function resetBobPosition(scene,force=false){
   if(!scene?.arena?.isConnected||!scene.element)return;
@@ -400,7 +464,7 @@ function startBoingRun(scene){
     if(scene.destroyed)return;
     const data=await rpc('start_boing_run',{p_token:token});
     scene.starting=false;scene.runId=data.run_id;scene.syncedClicks=0;
-    if(scene.destroyed){await rpc('sync_boing_run',{p_token:token,p_run_id:data.run_id,p_clicks:scene.clicks,p_failed:true});scene.runId=null;return}
+    if(scene.destroyed){await rpc(scene.rejected?'discard_boing_run':'sync_boing_run',scene.rejected?{p_token:token,p_run_id:data.run_id}:{p_token:token,p_run_id:data.run_id,p_clicks:scene.clicks,p_failed:true});scene.runId=null;return}
     mergeBoingState(data.boing);queueBoingSync(scene,false);
   }).catch(error=>{
     scene.starting=false;if(scene.destroyed)return;
@@ -414,13 +478,15 @@ function queueBoingSync(scene,failed){
   return enqueueBoingTask(scene,async()=>{
     if(!scene.runId)return;
     const runId=scene.runId,clicks=scene.clicks;
-    const data=await rpc('sync_boing_run',{p_token:token,p_run_id:runId,p_clicks:clicks,p_failed:Boolean(failed)});
+    const guarded=profileState.data?.boing?.integrity_version===1;
+    const data=scene.rejected?await rpc('discard_boing_run',{p_token:token,p_run_id:runId}):await rpc(guarded?'sync_boing_checked_run':'sync_boing_run',{p_token:token,p_run_id:runId,p_clicks:clicks,p_failed:Boolean(failed),...(guarded?{p_times:scene.inputSamples||[]}: {})});
     if(scene.destroyed)return;
+    if(data.rejected){finishRejectedBoingRound(scene,data);return}
     mergeBoingState(data.boing);scene.syncedClicks=Math.max(scene.syncedClicks,clicks);
     if(failed){if(scene.runId===runId)scene.runId=null;return}
     if(scene.clicks===clicks&&data.boing?.active_run){scene.score=Number(data.boing.active_run.score)||scene.score;updateBoingHud()}
     if(scene.clicks>scene.syncedClicks)scheduleBoingSync(scene);
-  }).catch(error=>{if(!scene.destroyed){toast(error.message);if(!failed)scheduleBoingSync(scene)}});
+  }).catch(error=>{if(failed)throw error;if(!scene.destroyed){toast(error.message);scheduleBoingSync(scene)}});
 }
 function scheduleBoingSync(scene){
   if(!scene||scene.destroyed||scene.failed||scene.syncScheduled)return;
@@ -430,7 +496,7 @@ function scheduleBoingSync(scene){
 function bobClickPoint(scene,event){
   // Keyboard/assistive activation is a centre hit. Screen-space coordinates remain
   // correct at any body angle, unlike offsets inside the rotated face/image.
-  if(!event||event.detail===0)return {x:0,y:0};
+  if(!event||!Number.isFinite(event.clientX)||(event.detail===0&&!event.pointerType))return {x:0,y:0};
   const rect=scene.arena.getBoundingClientRect(),radius=scene.size/2;
   let x=event.clientX-rect.left-scene.arena.clientLeft-scene.x-radius,y=event.clientY-rect.top-scene.arena.clientTop-scene.y-radius;
   const distance=Math.hypot(x,y),limit=radius*.98;
@@ -464,11 +530,14 @@ function failBoingRound(scene){
   if(scene.failed||scene.destroyed)return;
   scene.failed=true;scene.running=false;scene.locked=true;cancelAnimationFrame(scene.raf);scene.raf=0;
   scene.arena?.classList.add('is-failed');if($('#boing-impact'))$('#boing-impact').textContent='OUCH! СОХРАНЯЕМ РЕЗУЛЬТАТ…';
-  queueBoingSync(scene,true).finally(()=>{
+  settleBoingRound(scene);
+}
+function settleBoingRound(scene){
+  queueBoingSync(scene,true).then(()=>{if(!scene.destroyed)resetBoingRound(scene)}).catch(()=>{
     if(scene.destroyed)return;
-    scene.runId=null;scene.score=0;scene.clicks=0;scene.syncedClicks=0;scene.failed=false;scene.locked=false;scene.vx=0;scene.vy=0;
-    scene.arena?.classList.remove('is-failed','is-playing');if($('#boing-impact'))$('#boing-impact').textContent='';if($('#boing-hint'))$('#boing-hint').textContent='ЕЩЁ РАЗ! НАЖМИ НА BOB';
-    resetBobPosition(scene,true);updateBoingHud();
+    scene.settleRetries=(scene.settleRetries||0)+1;
+    if(scene.settleRetries===1)toast('Нет подтверждения сохранения. Результат удерживается, повторяем запрос.');
+    scene.settleRetryTimer=setTimeout(()=>settleBoingRound(scene),Math.min(15000,2000*2**Math.min(3,scene.settleRetries-1)));
   });
 }
 function resolveBobContact(scene,rx,ry,nx,ny,restitution){
@@ -508,15 +577,15 @@ function stepBoing(scene,now){
 function teardownBoing(sync=true){
   bobFaceEditor=null;
   const scene=boingScene;if(!scene)return;
-  boingScene=null;scene.destroyed=true;scene.running=false;clearTimeout(scene.syncTimer);cancelAnimationFrame(scene.raf);scene.observer?.disconnect();
-  if(sync&&scene.runId&&profileToken())queueBoingSync(scene,true);
+  boingScene=null;scene.destroyed=true;scene.running=false;clearTimeout(scene.syncTimer);clearTimeout(scene.rejectRetryTimer);clearTimeout(scene.settleRetryTimer);cancelAnimationFrame(scene.raf);scene.observer?.disconnect();
+  if(sync&&scene.runId&&profileToken())queueBoingSync(scene,true).catch(()=>{});
 }
 async function finishBoingAndShowProfile(){
   const scene=boingScene;if(scene?.finishing)return;
   if(scene){
     scene.finishing=true;scene.locked=true;pauseBoingScene();
     if(scene.starting)await scene.queue.catch(()=>{});
-    if(scene.runId)await queueBoingSync(scene,true);
+    try{if(scene.runId)await queueBoingSync(scene,true)}catch{scene.finishing=false;scene.locked=scene.failed||scene.rejected;toast('Не удалось подтвердить сохранение. Попробуй ещё раз — раунд не сброшен.');return}
     if(scene.destroyed)return;
     teardownBoing(false);
   }

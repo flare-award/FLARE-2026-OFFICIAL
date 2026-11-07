@@ -31,13 +31,18 @@ for(const [width,height] of [[1360,1000],[768,900],[700,850],[390,844],[320,700]
  await page.click('#bob-face-edit');assert.equal(await page.evaluate(()=>profileState.view),'face');await page.waitForFunction(()=>bobFaceEditor?.ready);await page.click('#bob-face-cancel');assert.equal(await page.evaluate(()=>profileState.view),'game');
  await page.click('#boing-rename');assert.equal(await page.$eval('#boing-name-input',el=>el.value),'BOB');await page.click('#boing-rename-cancel');
  // Keyboard centre hit: no arbitrary rotation. A real off-centre pointer hit produces torque.
- await page.evaluate(()=>{document.querySelector('#bob').click();cancelAnimationFrame(boingScene.raf);boingScene.raf=0;boingScene.running=false});
+ await page.focus('#bob');await page.keyboard.press('Enter');await page.evaluate(()=>{cancelAnimationFrame(boingScene.raf);boingScene.raf=0;boingScene.running=false});
  assert.equal(await page.evaluate(()=>boingScene.spin),0);assert.equal(await page.$eval('#bob-face-edit',el=>el.disabled),true);assert.equal(await page.$eval('#boing-rename',el=>el.disabled),true);
  assert.equal(await page.$eval('#boing-score',el=>el.textContent),'1');
  await resetGame();const r=await page.$eval('#bob',el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y}});await page.mouse.click(r.x+77,r.y+70);
  const run=await page.evaluate(()=>{cancelAnimationFrame(boingScene.raf);boingScene.raf=0;boingScene.running=false;return {spin:boingScene.spin,vy:boingScene.vy,clicks:boingScene.clicks}});assert(run.spin<0);assert(run.vy<0);assert.equal(run.clicks,1);
  await page.evaluate(()=>failBoingRound(boingScene));await page.waitForFunction(()=>!boingScene.failed);assert.equal(await page.$eval('#boing-score',el=>el.textContent),'0');assert.equal(await page.$eval('#bob-face-edit',el=>el.disabled),false);assert.equal(await page.$eval('#boing-rename',el=>el.disabled),false);
  assert.equal(await page.evaluate(()=>calls.filter(x=>x.name==='sync_boing_run'&&x.args.p_failed).length),1);
+ await resetGame();const down=await page.$eval('#bob',el=>{const r=el.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}});await page.mouse.move(down.x,down.y);await page.mouse.down();
+ assert.equal(await page.evaluate(()=>boingScene.clicks),1); // credited on down, before any release
+ await page.evaluate(()=>{cancelAnimationFrame(boingScene.raf);boingScene.raf=0;boingScene.running=false;boingScene.x=Math.min(boingScene.arena.clientWidth-boingScene.size,boingScene.x+100);boingScene.y+=40;paintBob(boingScene)});await page.mouse.up();assert.equal(await page.evaluate(()=>boingScene.clicks),1);
+ await resetGame();const touch=await page.$eval('#bob',el=>{const r=el.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}});await page.touchscreen.tap(touch.x,touch.y);assert.equal(await page.evaluate(()=>boingScene.clicks),1);
+ await resetGame();const pair=await page.$eval('#bob',el=>{const r=el.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}}),cdp=await page.createCDPSession();await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x:pair.x-16,y:pair.y},{id:2,x:pair.x+16,y:pair.y}]});assert.equal(await page.evaluate(()=>boingScene.clicks),2);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});assert.equal(await page.evaluate(()=>boingScene.clicks),2);await cdp.detach();
  await resetGame();const fallingKick=await page.evaluate(()=>{boingScene.vy=600;clickBob(boingScene);cancelAnimationFrame(boingScene.raf);boingScene.raf=0;boingScene.running=false;return boingScene.vy});assert.equal(fallingKick,-357.5*1.05);
  console.log('PASS',width,height,'name/rotating hats, footer/actions, unclipped borders, face/name navigation, keyboard/pointer impulses and failed-run sync');
 }
