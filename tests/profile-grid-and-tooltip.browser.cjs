@@ -30,6 +30,6 @@ for(const width of [1360,768,700,390,320]){
   await page.screenshot({path:`/tmp/profile-fixed-${own?'own':'public'}-${width}.png`});console.log('PASS matched banner/BOB, 2x2/record heights, footer alignment, short copy, tooltip stacking',width,own);
  }
 }
-await page.evaluate(()=>{profileState.data.boing.badges=[];renderBoingGame()});assert.equal(await page.$('#boing-back'),null);assert.equal(await page.$('.boing-level'),null);assert.equal(await page.$('.ogonyok-help'),null);assert.equal(await page.$$eval('.boing-arena>.ogonyok-game',es=>es.length),1);
-assert.deepEqual(errors,[]);console.log('PASS removed account/level/question controls and compact live streak inside arena, no JS errors');
+await page.evaluate(()=>{profileState.data.boing.badges=[];renderBoingGame()});assert.equal(await page.$('#boing-back'),null);assert.equal(await page.$('.boing-level'),null);assert.equal(await page.$('.ogonyok-help'),null);assert.equal(await page.$$eval('.boing-game-footer>.ogonyok-game',es=>es.length),1);
+assert.deepEqual(errors,[]);console.log('PASS removed account/level/question controls and compact live streak aligned in footer, no JS errors');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
