@@ -25,7 +25,7 @@ assert.equal(await page.$eval('.admin-date-poll>summary>span',e=>e.textContent),
 await page.click('#admin-tab-design');
 assert.equal(await page.$eval('#admin-design-photos',e=>e.hidden),false);assert.equal(await page.$eval('#admin-design-videos',e=>e.hidden),true);
 assert.equal(await page.$$eval('.admin-design-card:not([hidden])',es=>es.length),12);
-assert.equal(await page.$('.admin-design-card[data-design-key="avatar:liwersi"]'),null);
+assert(await page.$('.admin-design-card[data-design-key="avatar:liwersi"]'));
 const first=await page.$eval('.admin-design-card:not([hidden])',e=>e.dataset.designKey);
 await page.click('button[data-photo-page="1"]');assert.notEqual(await page.$eval('.admin-design-card:not([hidden])',e=>e.dataset.designKey),first);
 await input('#admin-design-search','unfindable987');assert.equal(await page.$$eval('.admin-design-card:not([hidden])',es=>es.length),0);assert.equal(await page.$eval('#admin-design-empty',e=>e.hidden),false);

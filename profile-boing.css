@@ -869,3 +869,32 @@
 .social-photo-overlay[data-service="discord"] .social-photo-title .social-photo-service{color:#9991b5}
 .social-photo-overlay .social-photo-title>span>span{font:inherit;color:inherit}
 .social-photo-overlay .social-photo-title .social-photo-separator{color:#c6c6c6}
+
+/* A neutral, centered more menu, including keyboard and touch-open states. */
+.style-profile-card .nominee-social-toggle{width:34px;height:34px;padding:5px;border-radius:50%;color:#fff;background:transparent;filter:none;box-shadow:none;transform:none;transition:background-color .18s ease}
+.style-profile-card .nominee-social-toggle svg{display:block;width:24px;height:24px;stroke-width:2}
+.style-profile-card .nominee-social-toggle:hover,.style-profile-card .nominee-social-toggle[aria-expanded="true"]{color:#fff;background:#ffffff14;filter:none;transform:none}
+.style-profile-card .nominee-social-toggle:focus-visible{color:#fff;background:#ffffff14;border-radius:50%;outline:2px solid #fff;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.style-profile-card .nominee-social-toggle{transition:none}}
+
+/* Public profile width must follow the modal, never the nickname/badge content. */
+.public-profile-body,.public-profile-scroll{width:100%;min-width:0}
+.public-profile-scroll{flex:1 1 auto}
+.public-profile-layout,.own-profile-layout{width:100%;box-sizing:border-box}
+/* Match the standard banner footprint across accounts; large badge collections may still grow. */
+.public-profile-layout,.own-profile-layout{--profile-banner-min-height:216px}
+.public-profile-layout .profile-identity,.own-profile-layout .profile-identity{display:flex;flex-direction:column;justify-content:center;min-height:var(--profile-banner-min-height)}
+.public-profile-layout .profile-identity-main,.own-profile-layout .profile-identity-main{width:100%;box-sizing:border-box}
+@media(max-width:960px){.public-profile-layout,.own-profile-layout{--profile-banner-min-height:304px}}
+@media(max-width:600px){.public-profile-layout,.own-profile-layout{--profile-banner-min-height:336px}}
+@media(min-width:701px){.modal.public-profile-modal{width:min(960px,calc(100vw - 40px))}}
+@media(max-width:600px){
+ .public-profile-layout .profile-identity-main,.own-profile-layout .profile-identity-main{flex-direction:column;align-items:flex-start}
+ .public-profile-layout .profile-details,.own-profile-layout .profile-details{width:100%}
+
+ .public-profile-layout .profile-avatar,.own-profile-layout .profile-avatar{width:76px;height:76px}
+ .public-profile-layout .profile-nickname-line h3,.own-profile-layout .profile-nickname-line h3{font-size:21px}
+ .public-profile-layout .profile-equipped-badges,.own-profile-layout .profile-equipped-badges{gap:6px}
+ .public-profile-layout .profile-equipped-badges .profile-badge,.own-profile-layout .profile-equipped-badges .profile-badge{flex-basis:30px;width:30px;height:30px;min-height:30px}
+ .own-profile-info .profile-stats,.public-profile-info .profile-stats{grid-template-columns:1fr}
+}

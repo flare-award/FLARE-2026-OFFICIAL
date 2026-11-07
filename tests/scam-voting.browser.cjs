@@ -5,11 +5,11 @@ await new Promise(r=>setTimeout(r,200));
 const items=await page.evaluate(()=>nominations.find(n=>n.id==='scam-of-year').nominees.map(i=>({id:i.id,name:i.name})));
 for(const width of [1360,390,320]){
  await page.setViewport({width,height:900});
- for(const nickname of ['Maronnix','Akirakume','Dony_zq','Nodben','Eozik','Qusti']){
+ for(const nickname of ['Maronnix','Akirakume','Dony_zq','Nodben','Eozik','Qusti','Flourin']){
   for(const item of items){
    const self=item.name===nickname||(item.id==='scam-group'&&['Akirakume','Dony_zq','Nodben'].includes(nickname));
    await page.evaluate(nickname=>{state.session={nickname,token:'test'};state.votes={};state.selected=null;state.busy=false;state.category='основная';window.voteCalls=[];rpc=async(name,args)=>{if(name==='cast_vote')voteCalls.push(args);return name==='get_video_options'?[]:{ok:true}};showNomination('scam-of-year',{fromHistory:true})},nickname);
-   assert(await page.$('[data-nominee="person-8-akirakume"] .portrait-placeholder'));
+   await page.waitForSelector('[data-nominee="person-8-akirakume"] .portrait-placeholder');
    await page.click(`[data-nominee="${item.id}"]`);
    if(self){assert.equal(await page.$eval('#cast-vote',e=>e.disabled),true);assert.equal(await page.evaluate(()=>state.selected),null)}
    else{
@@ -19,7 +19,7 @@ for(const width of [1360,390,320]){
    }
   }
  }
- console.log('PASS scam: all 5 candidates / 6 voters, missing-photo fallback, select/save and self/group restrictions',width);
+ console.log('PASS scam: all 6 candidates / 7 voters, missing-photo fallback, select/save and self/group restrictions',width);
 }
 // A later image error in another nomination must not throw or break its controls either.
 await page.evaluate(()=>{state.votes={};showNomination('game-of-year',{fromHistory:true});const image=document.querySelector('.visual-photo');image.dispatchEvent(new Event('error'))});
