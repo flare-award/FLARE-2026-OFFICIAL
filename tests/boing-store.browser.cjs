@@ -13,6 +13,7 @@ for(const width of [1360,390,320]){
  rpc=async()=>({leaders:[{rank:1,nickname:'VeryLongNickname',bob_name:'ОченьДлинноеИмя16',best_score:999999,coins:999999},{rank:2,nickname:'Maronnix',bob_name:'BOB',best_score:50,coins:300},{rank:3,nickname:'Hidden',bob_name:null,best_score:30,coins:100}]});
  showBoingShop('upgrades');
  },cosmetics);
+ assert.equal(await page.$('.boing-shop-balance'),null);assert.equal(await page.$eval('.boing-head #boing-coins',e=>e.textContent.replace(/\s/g,'')),'100000');
  assert.equal(await page.$$eval('.boing-shop-categories button svg',es=>es.length),3);
  const rewardNote=await page.$eval('.boing-shop-note',el=>el.textContent);
  assert(rewardNote.includes('10%'));assert(rewardNote.includes('100 COINS за каждые полные 200 очков одного раунда'));assert(rewardNote.includes('Остаток не переносится'));assert(!rewardNote.includes('100 кликов'));

@@ -93,6 +93,7 @@ function buildPhotoSlots(){
   nominations.forEach(nom=>{
     nom.nominees.forEach(item=>{
       if(item.type==='person'){
+        if(!MEMBERS.includes(item.name))return;
         if(people.has(item.name))return;
         people.add(item.name);
         const slug=slugPhotoName(item.name);
@@ -180,26 +181,41 @@ function drawAvatarCrop(session){
   panX.value=String(Math.round(session.panX*100));panY.value=String(Math.round(session.panY*100));
   panX.disabled=maxX<1;panY.disabled=maxY<1;
 }
+let avatarCropRequest=0;
 function finishAvatarCrop(key){
   const session=avatarCropSessions.get(key);if(!session)return;
   avatarCropSessions.delete(key);if(session.ownedUrl)URL.revokeObjectURL(session.ownedUrl);
   const editor=session.editor;editor.hidden=true;editor.classList.remove('is-open');session.card.appendChild(editor);
   session.canvas.classList.remove('is-dragging');
+  if(!avatarCropSessions.size)$('.admin-crop-backdrop')?.remove();
+  if(session.returnFocus?.isConnected)session.returnFocus.focus({preventScroll:true});
 }
-function closeAllAvatarCrops(){for(const key of avatarCropSessions.keys())finishAvatarCrop(key)}
+function closeAllAvatarCrops(){avatarCropRequest++;for(const key of avatarCropSessions.keys())finishAvatarCrop(key)}
 function revealDesignCard(card){const modal=card?.closest('.admin-modal');if(!modal)return;const item=card.getBoundingClientRect(),viewport=modal.getBoundingClientRect(),head=$('.admin-head',modal)?.getBoundingClientRect(),headHeight=head?.height||0;modal.scrollTop+=item.top-(viewport.top+headHeight)-(modal.clientHeight-headHeight-item.height)/2}
 async function openAvatarCrop(card,source,ownedUrl=''){
-  const key=card.dataset.designKey;finishAvatarCrop(key);
+  closeAllAvatarCrops();const request=++avatarCropRequest;
+  const key=card.dataset.designKey;
   const editor=card.querySelector('[data-avatar-editor]'),canvas=card.querySelector('[data-avatar-canvas]');
   const image=new Image();
   try{
     await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Не удалось открыть это фото для кадрирования.'));image.src=source});
   }catch(error){if(ownedUrl)URL.revokeObjectURL(ownedUrl);throw error}
-  if(!card.isConnected){if(ownedUrl)URL.revokeObjectURL(ownedUrl);return}
-  const session={key,card,canvas,editor,image,zoom:1,panX:0,panY:.32,ownedUrl};
+  if(!card.isConnected||request!==avatarCropRequest){if(ownedUrl)URL.revokeObjectURL(ownedUrl);return}
+  const session={key,card,canvas,editor,image,zoom:1,panX:0,panY:.32,ownedUrl,returnFocus:document.activeElement};
+  const backdrop=document.createElement('div');backdrop.className='admin-crop-backdrop';backdrop.onclick=()=>finishAvatarCrop(key);document.body.appendChild(backdrop);
   document.body.appendChild(editor);
-  avatarCropSessions.set(key,session);editor.hidden=false;editor.classList.add('is-open');editor.scrollTop=0;drawAvatarCrop(session);
+  avatarCropSessions.set(key,session);editor.hidden=false;editor.classList.add('is-open');editor.scrollTop=0;drawAvatarCrop(session);editor.focus();
 }
+document.addEventListener('keydown',event=>{
+ const session=[...avatarCropSessions.values()].at(-1);if(!session)return;
+ if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();finishAvatarCrop(session.key);return}
+ if(event.key==='Tab'){
+  const items=$$('button:not(:disabled),input:not(:disabled)',session.editor),first=items[0],last=items.at(-1);
+  if(!first)return;
+  if(event.shiftKey&&(document.activeElement===first||document.activeElement===session.editor)){event.preventDefault();last.focus()}
+  else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===session.editor)){event.preventDefault();first.focus()}
+ }
+},true);
 function bindAvatarCropControls(grid){
   $$('.admin-design-card[data-design-category="avatars"]',grid).forEach(card=>{
     const key=card.dataset.designKey,canvas=card.querySelector('[data-avatar-canvas]');
@@ -236,31 +252,89 @@ async function resetAllPhotoOverrides(){
   await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Не удалось сбросить фотографии.'))});
   for(const [key,url] of Object.entries(photoOverrides)){delete photoOverrides[key];updatePhotoNodes(key);URL.revokeObjectURL(url)}updatePhotoSyncStatus();
 }
-function renderVideoOptionsEditor(){
-  const videos=nominations.flatMap(nomination=>nomination.nominees.filter(item=>item.type==='video').map(item=>({nomination,item})));
-  return `<section class="admin-video-editor"><details><summary class="admin-video-summary"><span><strong>Ссылки и названия видео</strong><small>Клипы, события и остальные видео-номинанты</small></span><b>${videos.length} вариантов</b></summary><div class="admin-video-editor-body"><p>Изменения сохраняются в Supabase и сразу отображаются всем. Выполни актуальный <code>supabase/schema.sql</code> в Supabase SQL Editor, чтобы включить управление ссылками для всех видео.</p><div class="admin-video-list">${videos.map(({nomination,item})=>`<div class="admin-video-row" data-video-row="${esc(item.id)}"><div class="admin-video-identity"><span>${esc(nomination.title)}</span><strong>${esc(item.name)}</strong></div><label class="admin-video-field"><span>Название</span><input type="text" maxlength="120" required data-video-name="${esc(item.id)}" value="${esc(item.name)}"></label><label class="admin-video-field"><span>Ссылка на видео</span><input type="url" data-video-url="${esc(item.id)}" value="${esc(item.url||'')}" placeholder="https://youtu.be/..."></label><button type="button" class="button admin-video-save" data-video-save="${esc(item.id)}">Сохранить</button></div>`).join('')}</div></div></details></section>`;
+function bindTabKeyboard(nav,selector){
+ if(!nav)return;
+ nav.addEventListener('keydown',event=>{
+  if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+  const tabs=$$(selector,nav),index=tabs.indexOf(event.target);if(index<0)return;
+  event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+  tabs[next].click();tabs[next].focus();
+ });
 }
-function renderDesignPanel(){
+function setAdminDesignMode(mode){
+ const panel=$('#admin-panel-design');if(!panel||!['photos','videos','publish'].includes(mode))return;
+ closeAllAvatarCrops();
+ $$('[data-design-mode]',panel).forEach(tab=>{const active=tab.dataset.designMode===mode;tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1});
+ $$('[data-design-workspace]',panel).forEach(view=>view.hidden=view.dataset.designWorkspace!==mode);
+}
+function bindAdminVideoEditor(panel){
+ const editor=$('.admin-video-editor',panel);if(!editor)return;
+ const ready=editor.dataset.videoReady==='true';
+ const filter=()=>{const query=$('#admin-video-search',editor).value.trim().toLowerCase(),category=$('#admin-video-category',editor).value;let count=0;
+  $$('[data-video-row]',editor).forEach(row=>{row.hidden=!(row.dataset.videoSearch.includes(query)&&(category==='all'||row.dataset.videoCategory===category));if(!row.hidden)count++});$('#admin-video-empty',editor).hidden=count>0;
+ };
+ $('#admin-video-search',editor).oninput=filter;$('#admin-video-category',editor).onchange=filter;
+ $('[data-video-reload]',editor)?.addEventListener('click',async event=>{
+  const button=event.currentTarget,token=state.session?.token;button.disabled=true;
+  const loaded=await loadVideoCatalog();if(!panel.isConnected||token!==state.session?.token)return;
+  $('#admin-design-videos',panel).innerHTML=renderVideoOptionsEditor(loaded);bindAdminVideoEditor(panel);
+ });
+ $$('[data-video-row]',editor).forEach(row=>{
+  const id=row.dataset.videoRow,name=$('[data-video-name]',row),url=$('[data-video-url]',row),button=$('[data-video-save]',row),status=$('.admin-video-status',row),feedback=$('[data-video-feedback]',row);
+  const dirty=()=>name.value.trim()!==row.dataset.savedName||url.value.trim()!==row.dataset.savedUrl;
+  const refresh=()=>{const changed=dirty();row.classList.toggle('is-dirty',changed);button.disabled=!ready||!changed;status.textContent=changed?'Не сохранено':row.dataset.savedUrl?'Ссылка добавлена':'Без ссылки'};
+  name.oninput=url.oninput=()=>{feedback.textContent='';refresh()};
+  button.onclick=async()=>{
+   if(!ready||button.disabled)return;
+   if(!name.value.trim()||name.value.trim().length>120){feedback.textContent='Название: от 1 до 120 символов.';name.focus();return}
+   if(url.value.trim()&&!/^https?:\/\/\S+$/i.test(url.value.trim())){feedback.textContent='Нужна ссылка с http:// или https://.';url.focus();return}
+   const token=state.session?.token,submittedName=name.value.trim(),submittedUrl=url.value.trim();button.disabled=true;name.disabled=true;url.disabled=true;feedback.textContent='Сохраняем…';
+   try{
+    const saved=await rpc('admin_update_video_option',{p_token:token,p_option_id:id,p_name:submittedName,p_video_url:submittedUrl||null});
+    if(!panel.isConnected||token!==state.session?.token)return;
+    const nominee=nominations.flatMap(n=>n.nominees).find(item=>item.id===id&&item.type==='video');if(nominee){nominee.name=saved.name;nominee.url=saved.video_url||''}
+    name.value=saved.name;url.value=saved.video_url||'';row.dataset.savedName=saved.name;row.dataset.savedUrl=saved.video_url||'';
+    $('.admin-video-identity strong',row).textContent=saved.name;row.dataset.videoSearch=`${saved.name} ${$('.admin-video-identity>span',row).textContent}`.toLowerCase();
+    sortClipNominees();syncPhotoSlotLabels();updatePhotoSyncStatus();feedback.textContent='Сохранено для всех участников.';
+   }catch(error){if(panel.isConnected)feedback.textContent=error.message}
+   finally{name.disabled=false;url.disabled=false;refresh()}
+  };
+ });
+ filter();
+}
+function renderVideoOptionsEditor(ready=true){
+  const groups=nominations.filter(n=>n.nominees.some(item=>item.type==='video'));
+  const videos=groups.flatMap(nomination=>nomination.nominees.filter(item=>item.type==='video').map(item=>({nomination,item})));
+  return `<section class="admin-video-editor" data-video-ready="${ready}"><div class="admin-workspace-heading"><div><h3>Видео</h3><p>Название и ссылка сохраняются на сайте для всех участников.</p></div><span class="admin-workspace-count">${videos.length} видео</span></div>${ready?'':'<div class="admin-media-error" role="alert">Не удалось загрузить актуальные ссылки. Редактирование приостановлено, чтобы не затереть данные.<button type="button" data-video-reload>Повторить загрузку</button></div>'}<div class="admin-media-tools"><input type="search" id="admin-video-search" placeholder="Найти видео…" aria-label="Поиск видео"><select id="admin-video-category" aria-label="Номинация видео"><option value="all">Все номинации</option>${groups.map(n=>`<option value="${esc(n.id)}">${esc(n.title)}</option>`).join('')}</select></div><p id="admin-video-empty" class="admin-design-empty" hidden>Видео не найдены.</p><div class="admin-video-list">${videos.map(({nomination,item})=>`<details class="admin-video-row" data-video-row="${esc(item.id)}" data-video-category="${esc(nomination.id)}" data-video-search="${esc(`${item.name} ${nomination.title}`.toLowerCase())}" data-saved-name="${esc(item.name)}" data-saved-url="${esc(item.url||'')}"><summary><span class="admin-video-identity"><span>${esc(nomination.title)}</span><strong>${esc(item.name)}</strong></span><span class="admin-video-status">${item.url?'Ссылка добавлена':'Без ссылки'}</span></summary><div class="admin-video-fields"><label class="admin-video-field"><span>Название</span><input type="text" maxlength="120" required data-video-name="${esc(item.id)}" value="${esc(item.name)}" ${ready?'':'disabled'}></label><label class="admin-video-field"><span>Ссылка на видео</span><input type="url" data-video-url="${esc(item.id)}" value="${esc(item.url||'')}" placeholder="https://youtu.be/…" ${ready?'':'disabled'}></label><div class="admin-video-submit"><span data-video-feedback role="status"></span><button type="button" class="button admin-video-save" data-video-save="${esc(item.id)}" disabled>Сохранить</button></div></div></details>`).join('')}</div></section>`;
+}
+function renderDesignPanel(videoReady=true){
   syncPhotoSlotLabels();
   const cards=photoSlots.map(slot=>{
     const avatar=slot.groupKey==='avatars';
     const image=`<img src="${esc(photoSource(slot.key))}" data-photo-key="${esc(slot.key)}" alt="${esc(slot.label)}" loading="lazy">`;
-    const preview=avatar?`<div class="admin-design-preview is-avatar">${image}<div class="admin-avatar-reference" aria-label="Круглый кадр аватарки"><div class="admin-avatar-reference-circle"><img src="${esc(photoSource(slot.key))}" data-photo-key="${esc(slot.key)}" alt="" loading="lazy"></div><small>В круге</small></div></div>`:`<div class="admin-design-preview">${image}</div>`;
-    const cropEditor=avatar?`<section class="admin-avatar-editor" data-avatar-editor hidden><h4>${esc(slot.label)} · кадр аватарки</h4><p>Перетащи фото в круге. Точная круглая обрезка сохранится и в карточке номинанта.</p><canvas class="admin-avatar-crop-canvas" data-avatar-canvas width="512" height="512" aria-label="Круглый предпросмотр кадра аватарки"></canvas><div class="admin-avatar-crop-controls"><label>Размер <output data-avatar-zoom-value>100%</output><input type="range" min="100" max="300" step="1" value="100" data-avatar-zoom aria-label="Размер кадра"></label><label>По горизонтали<input type="range" min="-100" max="100" step="1" value="0" data-avatar-pan-x aria-label="Положение по горизонтали"></label><label>По вертикали<input type="range" min="-100" max="100" step="1" value="0" data-avatar-pan-y aria-label="Положение по вертикали"></label></div><div class="admin-avatar-crop-actions"><button type="button" class="button admin-avatar-crop-save" data-avatar-crop-save>Применить кадр</button><button type="button" class="button-quiet admin-avatar-crop-cancel" data-avatar-crop-cancel>Отмена</button></div></section>`:'';
-    return `<article class="admin-design-card" data-design-key="${esc(slot.key)}" data-design-category="${slot.groupKey}" data-design-search="${esc(`${slot.label} ${slot.path}`.toLowerCase())}">${preview}<div class="admin-design-info"><h4>${esc(slot.label)}</h4><span class="admin-design-local-badge" data-local-photo-badge hidden>Локальная замена</span><code>${esc(slot.path)}</code></div><div class="admin-design-actions"><label class="admin-design-upload">Заменить<input type="file" accept="image/*" data-design-upload="${esc(slot.key)}" aria-label="Заменить фото: ${esc(slot.label)}"></label>${avatar?`<button type="button" class="admin-design-crop" data-design-crop>Настроить кадр</button>`:''}<button type="button" class="admin-design-download" data-design-download="${esc(slot.key)}">Скачать</button><button type="button" class="admin-design-reset" data-design-reset="${esc(slot.key)}" ${photoOverrides[slot.key]?'':'disabled'}>Сбросить</button></div>${cropEditor}</article>`;
+    const preview=avatar?`<div class="admin-design-preview is-avatar">${image}</div>`:`<div class="admin-design-preview">${image}</div>`;
+    const cropEditor=avatar?`<section class="admin-avatar-editor" data-avatar-editor role="dialog" aria-modal="true" aria-label="Кадрирование аватара" tabindex="-1" hidden><h4>${esc(slot.label)} · кадр аватарки</h4><p>Перетащи фото в круге. Точная круглая обрезка сохранится и в карточке номинанта.</p><canvas class="admin-avatar-crop-canvas" data-avatar-canvas width="512" height="512" aria-label="Круглый предпросмотр кадра аватарки"></canvas><div class="admin-avatar-crop-controls"><label>Размер <output data-avatar-zoom-value>100%</output><input type="range" min="100" max="300" step="1" value="100" data-avatar-zoom aria-label="Размер кадра"></label><label>По горизонтали<input type="range" min="-100" max="100" step="1" value="0" data-avatar-pan-x aria-label="Положение по горизонтали"></label><label>По вертикали<input type="range" min="-100" max="100" step="1" value="0" data-avatar-pan-y aria-label="Положение по вертикали"></label></div><div class="admin-avatar-crop-actions"><button type="button" class="button admin-avatar-crop-save" data-avatar-crop-save>Применить кадр</button><button type="button" class="button-quiet admin-avatar-crop-cancel" data-avatar-crop-cancel>Отмена</button></div></section>`:'';
+    return `<article class="admin-design-card" data-design-key="${esc(slot.key)}" data-design-category="${slot.groupKey}" data-design-search="${esc(`${slot.label} ${slot.path}`.toLowerCase())}">${preview}<div class="admin-design-info"><h4>${esc(slot.label)}</h4><span class="admin-design-local-badge" data-local-photo-badge hidden>Локальная замена</span><details class="admin-asset-file"><summary>Файл</summary><code>${esc(slot.path)}</code></details></div><div class="admin-design-actions"><label class="admin-design-upload">Заменить<input type="file" accept="image/*" data-design-upload="${esc(slot.key)}" aria-label="Заменить фото: ${esc(slot.label)}"></label>${avatar?`<button type="button" class="admin-design-crop" data-design-crop>Настроить кадр</button>`:''}<details class="admin-asset-more"><summary>Ещё</summary><div><button type="button" class="admin-design-download" data-design-download="${esc(slot.key)}">Скачать</button><button type="button" class="admin-design-reset" data-design-reset="${esc(slot.key)}" ${photoOverrides[slot.key]?'':'disabled'}>Сбросить</button></div></details></div>${cropEditor}</article>`;
   }).join('');
-  return `<section class="admin-tab-panel admin-design-panel" id="admin-panel-design" role="tabpanel" aria-labelledby="admin-tab-design" hidden><div class="admin-design-intro"><div class="admin-design-intro-copy"><span class="admin-design-kicker">МЕДИАТЕКА · ${photoSlots.length} ФОТО</span><h3>Фотографии сайта</h3><p>Загруженные изображения автоматически уменьшаются без искажения. Для аватаров можно отдельно настроить кадр.</p><p class="admin-design-note">Замены пока видны только в этом браузере. Чтобы опубликовать их, скачай изменения и замени файлы в репозитории.</p></div><div class="admin-design-export-actions"><button type="button" class="button admin-design-export" id="export-design-changes" disabled>Скачать изменения</button><button type="button" class="button-quiet admin-design-export" id="export-design-photos">Скачать все фото</button></div></div><div class="admin-design-sync" id="admin-design-sync-status" role="status" aria-live="polite"><div><strong data-design-sync-title></strong><p data-design-sync-copy></p></div><details data-design-sync-files hidden><summary data-design-sync-summary></summary><ul data-design-sync-list></ul></details></div>${renderVideoOptionsEditor()}<div class="admin-design-toolbar"><div class="admin-design-toolbar-main"><div class="admin-design-filters" role="group" aria-label="Фильтр фотографий"><button type="button" class="is-active" data-design-filter="all">Все (${photoSlots.length})</button><button type="button" data-design-filter="avatars">Аватары</button><button type="button" data-design-filter="nominees">Картинки</button><button type="button" data-design-filter="videos">Видео</button><button type="button" data-design-filter="changed">Изменены</button></div><div class="admin-design-search-row"><input id="admin-design-search" type="search" placeholder="Имя или путь к фото" aria-label="Найти фото по названию или пути"><button type="button" class="admin-design-clear" id="admin-design-clear" hidden>Сбросить</button></div></div><div class="admin-design-toolbar-meta"><span id="admin-design-results" aria-live="polite"></span><span>Быстрый фильтр «Изменены» покажет локальные замены</span></div></div><p class="admin-design-empty" id="admin-design-empty" hidden>Ничего не найдено. Измени запрос или сбрось фильтры.</p><div class="admin-design-grid">${cards}</div></section>`;
+  return `<section class="admin-tab-panel admin-design-panel" id="admin-panel-design" role="tabpanel" aria-labelledby="admin-tab-design" hidden><header class="admin-design-top"><div><span class="admin-design-kicker">ОФОРМЛЕНИЕ</span><h2>Медиатека</h2><p>Фотографии, видеоссылки и публикация.</p></div><span id="admin-design-pending-count" class="admin-workspace-count">Без локальных замен</span></header><nav class="admin-design-modes" role="tablist" aria-label="Разделы медиатеки"><button type="button" id="design-tab-photos" role="tab" aria-selected="true" aria-controls="admin-design-photos" data-design-mode="photos">Фотографии</button><button type="button" id="design-tab-videos" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-design-videos" data-design-mode="videos">Видео</button><button type="button" id="design-tab-publish" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-design-publish" data-design-mode="publish">Публикация</button></nav><section id="admin-design-photos" data-design-workspace="photos" role="tabpanel" aria-labelledby="design-tab-photos"><div class="admin-workspace-heading"><div><h3>Фотографии</h3><p>Замены сохраняются в этом браузере; публикация — отдельным шагом.</p></div><span class="admin-workspace-count">${photoSlots.length} файлов</span></div><div class="admin-design-toolbar"><div class="admin-design-filters" role="group" aria-label="Фильтр фотографий"><button type="button" class="is-active" data-design-filter="all">Все</button><button type="button" data-design-filter="avatars">Аватары</button><button type="button" data-design-filter="nominees">Картинки</button><button type="button" data-design-filter="videos">Обложки видео</button><button type="button" data-design-filter="changed">Изменённые</button></div><div class="admin-media-tools"><input id="admin-design-search" type="search" placeholder="Имя или название…" aria-label="Найти фотографию"><select id="admin-photo-category" aria-label="Номинация фотографии"><option value="all">Все номинации</option>${nominations.filter(n=>n.nominees.some(item=>item.type!=='person')).map(n=>`<option value="${esc(n.id)}">${esc(n.title)}</option>`).join('')}</select><button type="button" class="admin-design-clear" id="admin-design-clear" hidden>Сбросить</button></div><span id="admin-design-results" aria-live="polite"></span></div><p class="admin-design-empty" id="admin-design-empty" hidden>Ничего не найдено. Измени запрос или сбрось фильтры.</p><div class="admin-design-grid">${cards}</div><div class="admin-photo-pagination"><button type="button" data-photo-page="-1">Назад</button><span id="admin-photo-page" aria-live="polite"></span><button type="button" data-photo-page="1">Далее</button></div></section><section id="admin-design-videos" data-design-workspace="videos" role="tabpanel" aria-labelledby="design-tab-videos" hidden>${renderVideoOptionsEditor(videoReady)}</section><section id="admin-design-publish" data-design-workspace="publish" role="tabpanel" aria-labelledby="design-tab-publish" hidden><div class="admin-workspace-heading"><div><h3>Публикация фотографий</h3><p>Локальный предпросмотр не меняет фотографии у других участников.</p></div></div><div class="admin-design-sync" id="admin-design-sync-status" role="status" aria-live="polite"><div><strong data-design-sync-title></strong><p data-design-sync-copy></p></div><details data-design-sync-files hidden><summary data-design-sync-summary></summary><ul data-design-sync-list></ul></details></div><ol class="admin-publish-steps"><li><span>1</span><div><strong>Подготовь фотографии</strong><p>Загрузи замену или настрой кадр в разделе «Фотографии».</p></div></li><li><span>2</span><div><strong>Скачай изменения</strong><p>Архив содержит только изменённые изображения с правильными путями.</p></div></li><li><span>3</span><div><strong>Опубликуй файлы</strong><p>Замени файлы из архива в репозитории сайта и дождись публикации.</p></div></li></ol><div class="admin-design-export-actions"><button type="button" class="button admin-design-export" id="export-design-changes" disabled>Скачать изменения</button><button type="button" class="button-quiet admin-design-export" id="export-design-photos">Полный архив фото</button></div><p id="admin-export-feedback" role="status" aria-live="polite"></p><p class="admin-publish-note">Ссылки и названия видео сохраняются сразу в разделе «Видео» и не входят в архив фотографий.</p></section></section>`;
 }
 function applyAdminDesignFilters(){
   const panel=$('#admin-panel-design'),grid=$('.admin-design-grid',panel);if(!grid)return;
-  const activeFilter=$('.admin-design-filters .is-active',panel)?.dataset.designFilter||'all',query=$('#admin-design-search',panel)?.value.trim().toLowerCase()||'',cards=$$('.admin-design-card',grid);let visible=0;
-  cards.forEach(card=>{const categoryMatches=activeFilter==='all'||(activeFilter==='changed'?Boolean(photoOverrides[card.dataset.designKey]):card.dataset.designCategory===activeFilter),searchMatches=!query||card.dataset.designSearch.includes(query);card.hidden=!(categoryMatches&&searchMatches);if(!card.hidden)visible++});
+  const activeFilter=$('.admin-design-filters .is-active',panel)?.dataset.designFilter||'all',query=$('#admin-design-search',panel)?.value.trim().toLowerCase()||'',cards=$$('.admin-design-card',grid),nomination=$('#admin-photo-category',panel)?.value||'all';
+  const matches=cards.filter(card=>{
+   const categoryMatches=activeFilter==='all'||(activeFilter==='changed'?Boolean(photoOverrides[card.dataset.designKey]):card.dataset.designCategory===activeFilter),searchMatches=!query||card.dataset.designSearch.includes(query),nominationMatches=nomination==='all'||card.dataset.designKey.startsWith(`nominee:${nomination}:`);
+   return categoryMatches&&searchMatches&&nominationMatches;
+  });
+  const pages=Math.max(1,Math.ceil(matches.length/12)),page=Math.max(1,Math.min(Number(panel.dataset.photoPage)||1,pages));panel.dataset.photoPage=String(page);
+  cards.forEach(card=>card.hidden=true);matches.slice((page-1)*12,page*12).forEach(card=>card.hidden=false);
   const resultCount=$('#admin-design-results',panel),empty=$('#admin-design-empty',panel),clear=$('#admin-design-clear',panel);
-  if(resultCount)resultCount.textContent=`Показано ${visible} из ${cards.length}`;
-  if(empty)empty.hidden=visible>0;
-  if(clear)clear.hidden=activeFilter==='all'&&!query;
+  if(resultCount)resultCount.textContent=matches.length?`${(page-1)*12+1}–${Math.min(page*12,matches.length)} из ${matches.length} фото`:'Нет совпадений';
+  if(empty)empty.hidden=matches.length>0;if(clear)clear.hidden=activeFilter==='all'&&!query&&nomination==='all';
+  $('#admin-photo-page',panel).textContent=`${page} / ${pages}`;
+  $('[data-photo-page="-1"]',panel).disabled=page===1;$('[data-photo-page="1"]',panel).disabled=page===pages;
+
 }
-function updatePhotoSyncStatus(){const status=$('#admin-design-sync-status');if(!status)return;const pending=photoSlots.filter(slot=>Boolean(photoOverrides[slot.key])),title=$('[data-design-sync-title]',status),copy=$('[data-design-sync-copy]',status),details=$('[data-design-sync-files]',status),summary=$('[data-design-sync-summary]',status),list=$('[data-design-sync-list]',status),changedButton=$('#export-design-changes');if(title)title.textContent=pending.length?`Локально изменено: ${pending.length} фото`:'Нет локальных изменений';if(copy)copy.textContent=pending.length?'Эти замены видны только в этом браузере. На сайте пока прежние файлы. Скачай изменения и замени перечисленные файлы в репозитории.':'Предпросмотр использует опубликованные файлы. Новые замены сохранятся локально, пока ты не выгрузишь их.';if(details){details.hidden=!pending.length;if(summary)summary.textContent=`Показать файлы для публикации (${pending.length})`;if(list)list.innerHTML=pending.map(slot=>`<li><strong>${esc(slot.label)}</strong><code>${esc(slot.path)}</code></li>`).join('')}if(changedButton){changedButton.disabled=!pending.length;changedButton.textContent=`Скачать изменения${pending.length?` (${pending.length})`:''}`}const grid=$('.admin-design-grid');if(grid)$$('.admin-design-card',grid).forEach(card=>{const changed=Boolean(photoOverrides[card.dataset.designKey]),badge=$('[data-local-photo-badge]',card),reset=$('[data-design-reset]',card);card.classList.toggle('has-local-photo',changed);if(badge)badge.hidden=!changed;if(reset)reset.disabled=!changed});applyAdminDesignFilters()}
+function updatePhotoSyncStatus(){const status=$('#admin-design-sync-status');if(!status)return;const pending=photoSlots.filter(slot=>Boolean(photoOverrides[slot.key])),title=$('[data-design-sync-title]',status),copy=$('[data-design-sync-copy]',status),details=$('[data-design-sync-files]',status),summary=$('[data-design-sync-summary]',status),list=$('[data-design-sync-list]',status),changedButton=$('#export-design-changes');const count=$('#admin-design-pending-count');if(count)count.textContent=pending.length?countLabel(pending.length,'локальная замена','локальные замены','локальных замен'):'Без локальных замен';if(title)title.textContent=pending.length?`Локально изменено: ${pending.length} фото`:'Нет локальных изменений';if(copy)copy.textContent=pending.length?'Эти замены видны только в этом браузере. На сайте пока прежние файлы. Скачай изменения и замени перечисленные файлы в репозитории.':'Предпросмотр использует опубликованные файлы. Новые замены сохранятся локально, пока ты не выгрузишь их.';if(details){details.hidden=!pending.length;if(summary)summary.textContent=`Показать файлы для публикации (${pending.length})`;if(list)list.innerHTML=pending.map(slot=>`<li><strong>${esc(slot.label)}</strong><code>${esc(slot.path)}</code></li>`).join('')}if(changedButton){changedButton.disabled=photoExportActive||!pending.length;changedButton.textContent=`Скачать изменения${pending.length?` (${pending.length})`:''}`}const fullButton=$('#export-design-photos');if(fullButton)fullButton.disabled=photoExportActive;const grid=$('.admin-design-grid');if(grid)$$('.admin-design-card',grid).forEach(card=>{const changed=Boolean(photoOverrides[card.dataset.designKey]),badge=$('[data-local-photo-badge]',card),reset=$('[data-design-reset]',card);card.classList.toggle('has-local-photo',changed);if(badge)badge.hidden=!changed;if(reset)reset.disabled=!changed});applyAdminDesignFilters()}
 function crc32(bytes){let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let bit=0;bit<8;bit++)crc=(crc>>>1)^(crc&1?0xedb88320:0)}return(crc^0xffffffff)>>>0}
 function createZip(files){
   const encoder=new TextEncoder(),localParts=[],centralParts=[];let offset=0,centralSize=0;
@@ -272,34 +346,39 @@ function createZip(files){
   const end=new Uint8Array(22),ev=new DataView(end.buffer);ev.setUint32(0,0x06054b50,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);ev.setUint32(12,centralSize,true);ev.setUint32(16,offset,true);
   return new Blob([...localParts,...centralParts,end],{type:'application/zip'});
 }
+let photoExportActive=false;
 async function exportPhotoPack(changedOnly=false){
-  const slots=changedOnly?photoSlots.filter(slot=>photoOverrides[slot.key]):photoSlots,button=$(changedOnly?'#export-design-changes':'#export-design-photos');if(!slots.length){toast('Нет локальных изменений для скачивания.');return}if(button)button.disabled=true;
+  if(photoExportActive)return;
+  const feedback=$('#admin-export-feedback'),slots=changedOnly?photoSlots.filter(slot=>photoOverrides[slot.key]):photoSlots;
+  if(!slots.length){const message='Нет локальных изменений для скачивания.';if(feedback)feedback.textContent=message;toast(message);return}
+  photoExportActive=true;updatePhotoSyncStatus();if(feedback)feedback.textContent='Подготавливаем архив…';
   try{
     const files=[];
-    for(const slot of slots){const response=await fetch(photoSource(slot.key));if(!response.ok)throw new Error(`Не удалось загрузить ${slot.path}`);files.push({name:slot.path,data:new Uint8Array(await response.arrayBuffer())})}
-    const url=URL.createObjectURL(createZip(files)),link=document.createElement('a');link.href=url;link.download=changedOnly?'flare-photo-changes.zip':'flare-photos.zip';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);toast(changedOnly?'Архив изменений готов. Замени файлы по указанным путям в репозитории.':'Полный архив готов. Распакуй его в корень репозитория.');
-  }catch(error){toast(error.message)}finally{if(button)button.disabled=false;updatePhotoSyncStatus()}
+    for(const slot of slots){
+      const response=await fetch(photoSource(slot.key));if(!response.ok)throw new Error(`Не удалось загрузить ${slot.path}`);
+      files.push({name:slot.path,data:new Uint8Array(await response.arrayBuffer())});
+    }
+    const url=URL.createObjectURL(createZip(files)),link=document.createElement('a');link.href=url;link.download=changedOnly?'flare-photo-changes.zip':'flare-photos.zip';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    const message=changedOnly?'Архив изменений скачан. Фотографии ещё не опубликованы.':'Полный архив скачан.';
+    if(feedback)feedback.textContent=message;toast(message);
+  }catch(error){
+    const message=`${error.message}. Проверь фотографию в медиатеке и повтори скачивание.`;if(feedback)feedback.textContent=message;toast(message);
+  }finally{photoExportActive=false;updatePhotoSyncStatus()}
 }
+
 function bindDesignPanel(){
   const panel=$('#admin-panel-design'),grid=$('.admin-design-grid',panel);if(!grid)return;
-  $$('[data-design-filter]',panel).forEach(button=>button.onclick=()=>{$$('.admin-design-filters button',panel).forEach(item=>item.classList.toggle('is-active',item===button));applyAdminDesignFilters()});
+  $$('[data-design-filter]',panel).forEach(button=>button.onclick=()=>{panel.dataset.photoPage='1';$$('.admin-design-filters button',panel).forEach(item=>item.classList.toggle('is-active',item===button));applyAdminDesignFilters()});
   const search=$('#admin-design-search',panel),clear=$('#admin-design-clear',panel);
-  search.oninput=applyAdminDesignFilters;
-  clear.onclick=()=>{search.value='';$$('.admin-design-filters button',panel).forEach(item=>item.classList.toggle('is-active',item.dataset.designFilter==='all'));applyAdminDesignFilters();search.focus()};
+  const resetPage=()=>{panel.dataset.photoPage='1';applyAdminDesignFilters()};
+  search.oninput=resetPage;$('#admin-photo-category',panel).onchange=resetPage;
+  $$('[data-photo-page]',panel).forEach(button=>button.onclick=()=>{panel.dataset.photoPage=String((Number(panel.dataset.photoPage)||1)+Number(button.dataset.photoPage));applyAdminDesignFilters();$('.admin-design-toolbar',panel).scrollIntoView({block:'start'})});
+  $$('[data-design-mode]',panel).forEach(button=>button.onclick=()=>setAdminDesignMode(button.dataset.designMode));
+  bindTabKeyboard($('.admin-design-modes',panel),'[data-design-mode]');
+  clear.onclick=()=>{panel.dataset.photoPage='1';search.value='';$('#admin-photo-category',panel).value='all';$$('.admin-design-filters button',panel).forEach(item=>item.classList.toggle('is-active',item.dataset.designFilter==='all'));applyAdminDesignFilters();search.focus()};
   applyAdminDesignFilters();
-  $$('[data-video-save]',panel).forEach(button=>button.onclick=async()=>{
-    const id=button.dataset.videoSave,nameInput=$(`[data-video-name="${id}"]`,panel),urlInput=$(`[data-video-url="${id}"]`,panel),nominee=nominations.flatMap(nomination=>nomination.nominees).find(item=>item.id===id&&item.type==='video');
-    const name=nameInput.value.trim(),url=urlInput.value.trim();if(!name){nameInput.focus();toast('Укажи название видео-номинанта.');return}
-    button.disabled=true;
-    try{
-      const saved=await rpc('admin_update_video_option',{p_token:state.session.token,p_option_id:id,p_name:name,p_video_url:url||null});
-      if(nominee){nominee.name=saved.name;nominee.url=saved.video_url||''}
-      sortClipNominees();
-      syncPhotoSlotLabels();updatePhotoSyncStatus();
-      const identity=$('.admin-video-identity strong',button.closest('[data-video-row]'));if(identity)identity.textContent=saved.name;
-      nameInput.value=saved.name;urlInput.value=saved.video_url||'';toast('Название и ссылка видео сохранены для всех.');
-    }catch(error){toast(error.message)}finally{button.disabled=false}
-  });
+  $$('.admin-design-preview>img',grid).forEach(image=>{const card=image.closest('.admin-design-card'),check=()=>card.classList.toggle('is-missing',!image.naturalWidth);image.addEventListener('load',check);image.addEventListener('error',check);if(image.complete)check()});
+  bindAdminVideoEditor(panel);
   $$('[data-design-upload]',grid).forEach(input=>input.onchange=async()=>{const file=input.files?.[0];if(!file)return;const key=input.dataset.designUpload,slot=photoSlotByKey.get(key),card=input.closest('.admin-design-card');input.disabled=true;try{const blob=await resizePhoto(file);if(slot.groupKey==='avatars'){const url=URL.createObjectURL(blob);await openAvatarCrop(card,url,url);toast('Перетащи и настрой кадр в круглом предпросмотре.')}else{await savePhotoOverride(key,blob);card.querySelector(`[data-design-reset="${key}"]`).disabled=false;toast('Фото заменено для этого браузера.')}}catch(error){toast(error.message)}finally{input.disabled=false;input.value=''}});
   $$('[data-design-reset]',grid).forEach(button=>button.onclick=async()=>{const key=button.dataset.designReset;finishAvatarCrop(key);try{await resetPhotoOverride(key);button.disabled=true;toast('Вернул опубликованное фото для этого браузера.')}catch(error){toast(error.message)}});
   $$('[data-design-download]',grid).forEach(button=>button.onclick=()=>{const slot=photoSlotByKey.get(button.dataset.designDownload);const link=document.createElement('a');link.href=photoSource(slot.key);link.download=slot.path.split('/').pop();link.click()});
@@ -667,14 +746,17 @@ function renderTestBallotContent(ballot){
   return `<p class="admin-test-ballot-status">${status}</p><div class="admin-test-ballot-list">${rows}</div><div class="admin-test-ballot-event"><span>Опрос даты</span><strong>${eventLabel}</strong></div>`;
 }
 let adminRequestCounter=0;
-function adminHeaderMarkup(){return `<div class="admin-head"><nav class="admin-tabs" role="tablist" aria-label="Разделы панели организатора"><button class="admin-tab is-active" id="admin-tab-voting" type="button" role="tab" aria-selected="true" aria-controls="admin-panel-voting" data-admin-tab="voting">Голосование</button><button class="admin-tab" id="admin-tab-poll" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-poll" data-admin-tab="poll">Опрос</button><button class="admin-tab" id="admin-tab-statistics" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-statistics" data-admin-tab="statistics">Статистика</button><button class="admin-tab" id="admin-tab-design" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-design" data-admin-tab="design">Дизайн</button><button class="admin-tab" id="admin-tab-social" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-social" data-admin-tab="social">Соцсети</button><button class="admin-tab" id="admin-tab-access" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-access" data-admin-tab="access">Доступ</button></nav><button class="close-button" aria-label="Закрыть">×</button></div>`}
+function adminHeaderMarkup(){return `<div class="admin-head"><nav class="admin-tabs" role="tablist" aria-label="Разделы панели организатора"><button class="admin-tab is-active" id="admin-tab-voting" type="button" role="tab" aria-selected="true" aria-controls="admin-panel-voting" data-admin-tab="voting">Результаты</button><button class="admin-tab" id="admin-tab-statistics" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-statistics" data-admin-tab="statistics">Статистика</button><button class="admin-tab" id="admin-tab-design" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-design" data-admin-tab="design">Дизайн</button><button class="admin-tab" id="admin-tab-social" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-social" data-admin-tab="social">Соцсети</button><button class="admin-tab" id="admin-tab-access" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="admin-panel-access" data-admin-tab="access">Доступ</button></nav><button class="close-button" aria-label="Закрыть">×</button></div>`}
 function setAdminTab(selected){
+  if(selected==='poll')selected='voting';
+  closeAllAvatarCrops();
   const modal=$('.admin-modal');if(!modal)return;
   $$('[data-admin-tab]',modal).forEach(tab=>{const active=tab.dataset.adminTab===selected;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1});
   $$('.admin-tab-panel',modal).forEach(panel=>{panel.hidden=panel.id!==`admin-panel-${selected}`});
   modal.scrollTop=0;
 }
 function bindAdminTabs(){
+  bindTabKeyboard($('.admin-tabs'),'[data-admin-tab]');
   $$('[data-admin-tab]',$('.admin-modal')).forEach(tab=>tab.addEventListener('click',()=>setAdminTab(tab.dataset.adminTab)));
 }
 async function showAdmin(){
@@ -682,7 +764,7 @@ async function showAdmin(){
   openModal(`${adminHeaderMarkup()}<div class="admin-wrap" aria-live="polite"><div class="admin-loading" role="status"><span class="admin-loading-spinner" aria-hidden="true"></span><strong>Открываю панель организатора…</strong><span>Загружаю данные голосования</span></div></div>`,'admin-modal');
   bindAdminTabs();
   try{
-    const [result,,socials]=await Promise.all([rpc('admin_summary',{p_token:state.session.token}),loadVideoCatalog(),rpc('admin_get_member_socials',{p_token:state.session.token})]);
+    const [result,videoReady,socials]=await Promise.all([rpc('admin_summary',{p_token:state.session.token}),loadVideoCatalog(),rpc('admin_get_member_socials',{p_token:state.session.token})]);
     if(requestId!==adminRequestCounter||!$('.admin-modal'))return;
     adminSocialRows=Array.isArray(socials)?socials:[];
     const buckets=new Map();
@@ -732,10 +814,10 @@ async function showAdmin(){
     let accountsClosed=Boolean(result.accounts_closed),testerExists=Boolean(result.test_ballot?.exists);
     const accessControlReady=typeof result.accounts_closed==='boolean';
     const accessPanel=`<section class="admin-tab-panel admin-access-panel" id="admin-panel-access" role="tabpanel" aria-labelledby="admin-tab-access" hidden><article class="admin-access-card"><div><span class="admin-access-kicker">КОНТРОЛЬ ДОСТУПА</span><h3>Вход и регистрация</h3><p>В закрытом режиме войти смогут только <strong>FLARE_TESTER</strong> и <strong>Maronnix</strong>. Обычные уже открытые сессии тоже потеряют доступ к голосованию и аккаунтным действиям.</p></div><div class="admin-access-actions"><strong id="admin-access-status" class="admin-access-status ${accountsClosed?'is-closed':'is-open'}">${accountsClosed?'ЗАКРЫТ':'ОТКРЫТ'}</strong><button type="button" class="button" id="admin-access-toggle" ${accessControlReady?'':'disabled'}>${accountsClosed?'Открыть вход':'Закрыть вход'}</button></div></article>${accessControlReady?'':'<p class="admin-access-note">Сначала выполни актуальный <code>supabase/schema.sql</code> в Supabase SQL Editor.</p>'}<p class="admin-access-note">Голоса FLARE_TESTER хранятся отдельно и не попадают в результаты премии или опрос даты.</p><article class="admin-test-account-card"><div><span class="admin-access-kicker">ТЕСТОВАЯ УЧЁТКА</span><h3>Данные для тестировщика</h3><p>Создай случайные данные и передай их тестировщику. Почта на <code>example.invalid</code> фиктивная, письма на неё не отправляются. Новая генерация сбросит предыдущий PIN и тестовые голоса.</p></div><div class="admin-test-account-actions"><button type="button" class="button" id="admin-test-credentials-generate" ${accessControlReady?'':'disabled'}>Сгенерировать данные</button><button type="button" class="button-quiet admin-test-account-delete" id="admin-test-account-delete" ${accessControlReady&&testerExists?'':'disabled'}>Удалить аккаунт</button></div><div class="admin-test-credentials" id="admin-test-credentials" hidden><label><span>Почта</span><div><input id="admin-test-email" readonly><button type="button" class="button-quiet" data-copy-test="email">Копировать</button></div></label><label><span>PIN</span><div><input id="admin-test-pin" readonly><button type="button" class="button-quiet" data-copy-test="pin">Копировать</button></div></label><p>Сохрани данные до закрытия панели: PIN хранится только в виде хеша и повторно не показывается.</p></div></article><article class="admin-test-ballot-card"><div class="admin-test-ballot-heading"><div><span class="admin-access-kicker">ПРОВЕРКА БЮЛЛЕТЕНЯ</span><h3>Голоса тестировщика</h3><p>Выборы тестового аккаунта не учитываются в официальной статистике.</p></div><button type="button" class="button-quiet" id="admin-test-ballot-refresh">Обновить</button></div><div id="admin-test-ballot-content" aria-live="polite">${renderTestBallotContent(result.test_ballot)}</div></article></section>`;
-    const designPanel=renderDesignPanel();
+    const designPanel=renderDesignPanel(videoReady);
     const adminWrap=$('.admin-wrap',$('.admin-modal'));
     if(requestId!==adminRequestCounter||!adminWrap)return;
-    adminWrap.innerHTML=`<section class="admin-tab-panel admin-ballot-results" id="admin-panel-voting" role="tabpanel" aria-labelledby="admin-tab-voting"><div class="admin-results-heading"><h3>Результаты голосования</h3><span>Рейтинг по текущим голосам</span></div><div class="admin-nomination-results">${nominationCards}</div></section><section class="admin-tab-panel admin-poll" id="admin-panel-poll" role="tabpanel" aria-labelledby="admin-tab-poll" hidden><div class="admin-poll-heading"><h3>Результаты опроса</h3><span>${countLabel(total,'ответ','ответа','ответов')}</span></div><div class="admin-poll-results">${pollRows}</div></section>${statisticsPanel}${designPanel}${renderAdminSocialPanel()}${accessPanel}`;
+    adminWrap.innerHTML=`<section class="admin-tab-panel admin-ballot-results" id="admin-panel-voting" role="tabpanel" aria-labelledby="admin-tab-voting"><details class="admin-date-poll"><summary><strong>Опрос даты церемонии</strong><span>${countLabel(total,'ответ','ответа','ответов')}</span></summary><div class="admin-poll-results">${pollRows}</div></details><div class="admin-results-heading"><h3>Результаты голосования</h3><span>Рейтинг по текущим голосам</span></div><div class="admin-nomination-results">${nominationCards}</div></section>${statisticsPanel}${designPanel}${renderAdminSocialPanel()}${accessPanel}`;
     const selectedTab=$('.admin-tab.is-active',$('.admin-modal'))?.dataset.adminTab||'voting';
     setAdminTab(selectedTab);
     bindDesignPanel();bindAdminSocialPanel();

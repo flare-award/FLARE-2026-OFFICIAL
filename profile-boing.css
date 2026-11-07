@@ -809,3 +809,19 @@
  .boing-game-footer .ogonyok-copy strong{font-size:10px}
  .boing-game-footer .ogonyok-copy>div>span,.boing-game-footer .ogonyok-copy p{font-size:8px;white-space:normal}
 }
+
+/* Quiet HUD: the account balance lives in the header on every BOING screen. */
+.boing-header-balance{grid-column:1;grid-row:1;justify-self:start;min-width:0;max-width:100%;display:flex;flex-direction:column;gap:3px;user-select:none;-webkit-user-select:none}
+.boing-header-balance>span{color:#979180;font:700 8px "Sora",sans-serif;letter-spacing:.12em}
+.boing-header-balance>strong{overflow:hidden;text-overflow:ellipsis;color:#ebce89;font:800 17px "Sora",sans-serif;font-variant-numeric:tabular-nums}
+.boing-logo,.boing-logo *,.ogonyok-mark,.ogonyok-mark *{user-select:none;-webkit-user-select:none}
+.boing-arena>.ogonyok-game{position:absolute;z-index:4;right:13px;bottom:13px;display:block;min-width:0;margin:0;padding:0;border:0;border-radius:0;background:none;pointer-events:auto}
+.ogonyok-mini{display:flex;align-items:center;gap:5px;padding:2px 3px;cursor:default;border-radius:8px}
+.ogonyok-mini:focus-visible{outline:1px solid #c4a66c;outline-offset:3px}
+.boing-arena .ogonyok-mini .ogonyok-mark{width:30px;height:35px}
+.ogonyok-mini-progress{position:relative;width:2px;height:21px;border-radius:2px;background:#ffffff16;overflow:hidden}
+.ogonyok-mini-progress i{position:absolute;bottom:0;left:0;width:100%;background:#d9b779;border-radius:2px}
+.boing-game-footer{display:flex;justify-content:flex-start;gap:8px}
+.boing-game-actions{flex-direction:row;align-items:center;flex-wrap:wrap;gap:8px}
+@media(max-width:539px){.boing-game-actions .boing-rename{padding-inline:10px;font-size:10px}.boing-header-balance>strong{font-size:13px}.boing-header-balance>span{font-size:7px}.boing-arena>.ogonyok-game{right:10px;bottom:10px}}
+.boing-hud{grid-template-columns:repeat(2,minmax(0,1fr))}
