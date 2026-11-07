@@ -863,5 +863,7 @@
 
 /* One uniformly sized title, vertically centered beside the photo viewer close control. */
 .social-photo-title{flex:1;min-width:0}
-.social-photo-overlay .social-photo-title>span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f1ece2;font:600 14px/1.4 var(--font)}
-@media(max-width:700px){.social-photo-overlay .social-photo-title>span{font-size:13px}}
+.social-photo-overlay .social-photo-title>span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f1ece2;font:600 16px/1.4 var(--font)}
+@media(max-width:700px){.social-photo-overlay .social-photo-title>span{font-size:15px}}
+.social-photo-overlay[data-service="telegram"] .social-photo-title>span{color:#6898b1}
+.social-photo-overlay[data-service="discord"] .social-photo-title>span{color:#9991b5}
