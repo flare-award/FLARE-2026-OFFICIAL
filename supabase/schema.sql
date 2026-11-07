@@ -299,7 +299,7 @@ begin
   if not exists(select 1 from flare_options o join flare_nominations n on n.id=o.nomination_id where o.id=p_option_id and o.nomination_id=p_nomination_id) then raise exception 'Такого номинанта нет.'; end if;
   if v_is_test_account and exists(select 1 from flare_options where id=p_option_id and nomination_id=p_nomination_id and hidden_for_testers) then raise exception 'Этот номинант скрыт в тестовом режиме.'; end if;
   if exists(select 1 from flare_options o join flare_nominations n on n.id=o.nomination_id where o.id=p_option_id and o.nomination_id=p_nomination_id and o.kind='person' and o.person_nickname=v_nickname and not n.allow_self) then raise exception 'Нельзя голосовать за себя.'; end if;
-  if p_nomination_id='clip-of-year' and p_option_id<>'clip-4' and exists(
+  if p_nomination_id='scam-of-year' and exists(
     select 1 from flare_options o where o.id=p_option_id and o.nomination_id=p_nomination_id
     and lower(v_nickname)=any(regexp_split_to_array(lower(o.name),'[^[:alnum:]_]+'))
   ) then raise exception 'Нельзя голосовать за себя.'; end if;
@@ -560,9 +560,9 @@ INSERT INTO public.flare_nominations (id,title,category,display_type,allow_self)
 ('conflict-of-year','КОНФЛИКТ ГОДА','основная','Картинка',true),
 ('meme-of-year','ЧЕЛОВЕК-МЕМ ГОДА','основная','Участник',false),
 ('breakthrough','ПРОРЫВ ГОДА','основная','Участник',false),
-('clip-of-year','КЛИП ГОДА','основная','Видео',false),
+('clip-of-year','КЛИП ГОДА','основная','Видео',true),
 ('vibe-of-year','ВАЙБ ГОДА','основная','Участник',false),
-('scam-of-year','КИДАЛОВО ГОДА','основная','Участник',true),
+('scam-of-year','КИДАЛОВО ГОДА','основная','Участник',false),
 ('event-of-year','СОБЫТИЕ ГОДА','основная','Видео',true),
 ('squad-of-year','КОМПАШКА ГОДА','доп.','Картинка',true),
 ('style-of-year','СТИЛЬ ГОДА','доп.','Участник',false),

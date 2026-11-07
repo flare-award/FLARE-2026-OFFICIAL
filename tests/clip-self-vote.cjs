@@ -1,17 +1,11 @@
-// Run with: node tests/clip-self-vote.cjs
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('app.js','utf8');
-const start=source.indexOf('function isSelfNominee('),end=source.indexOf('function showNomination(',start);
-const context=vm.createContext({state:{session:{nickname:'Qusti'}}});
-vm.runInContext(source.slice(start,end),context);
-const cases=[['Qusti въебал все коины','Qusti',true],['Клип (QUSTI)!','qusti',true],['Qusti2 победил','Qusti',false],['NotQusti','Qusti',false],['Dony_zq — клип','Dony_zq',true],['Qusti и Eozik','Eozik',true],['Клип 03 · скоро','Qusti',false]];
-for(const [name,nick,expected] of cases)assert.equal(context.isSelfNominee({id:'clip-of-year'},{name,type:'video'},nick),expected,name);
-assert.equal(context.isSelfNominee({id:'event-of-year'},{name:'Qusti',type:'video'},'Qusti'),false);
-assert.equal(context.isSelfNominee({id:'scam-of-year',allowSelf:true},{name:'Qusti',type:'person'},'Qusti'),false);
+const start=source.indexOf('function isSelfNominee('),end=source.indexOf('function nomineeDisplayName(',start);
+const context=vm.createContext({state:{session:{nickname:'Qusti'}}});vm.runInContext(source.slice(start,end),context);
+const nominations=vm.runInNewContext(fs.readFileSync('data.js','utf8')+';nominations');
+const clip=nominations.find(n=>n.id==='clip-of-year'),scam=nominations.find(n=>n.id==='scam-of-year');
+assert.equal(clip.allowSelf,true);assert.equal(scam.allowSelf,false);
+for(const name of ['Qusti въебал все коины','Flourin зарифмовал в катке','У Flourin не грузит'])for(const nick of ['Qusti','Flourin'])assert.equal(context.isSelfNominee(clip,{name,type:'video'},nick),false);
+for(const [name,type,nick,expected] of [['Nodben','person','Nodben',true],['Qusti','person','qusti',true],['Akirakume, Dony_zq и Nodben','group','Dony_zq',true],['Akirakume, Dony_zq и Nodben','group','Nodben',true],['Akirakume, Dony_zq и Nodben','group','Maronnix',false],['Liwersi','person','Akirakume',false],['Qusti2','person','Qusti',false]])assert.equal(context.isSelfNominee(scam,{name,type},nick),expected);
 assert.equal(context.isSelfNominee({id:'flare-king'},{name:'Qusti',type:'person'},'qusti'),true);
-assert.equal(context.isSelfNominee({id:'clip-of-year'},{name:'Qusti',type:'video'},''),false);
-for(const nick of ['Flourin','flourin','Qusti','Maronnix'])assert.equal(context.isSelfNominee({id:'clip-of-year'},{id:'clip-4',name:'У Flourin не грузит',type:'video'},nick),false);
-assert.equal(context.isSelfNominee({id:'clip-of-year'},{id:'clip-3',name:'Flourin зарифмовал в катке',type:'video'},'Flourin'),true);
-assert.equal(context.isSelfNominee({id:'clip-of-year'},{id:'clip-3',name:'У Flourin не грузит',type:'video'},'Flourin'),true);
-assert.equal(context.isSelfNominee({id:'flare-king'},{id:'clip-4',name:'Flourin',type:'person'},'Flourin'),true);
-console.log('18 self-vote matching/regression checks passed');
+console.log('PASS: clip allows self votes; scam blocks individual/group self votes; other personal rules unchanged');
