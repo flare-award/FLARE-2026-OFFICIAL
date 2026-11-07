@@ -1434,7 +1434,7 @@ small{color:#bdb7ad;font-weight:500}
 /* The selected nominee layout is reflected both in the menu and its toggle button. */
 .nom-detail-top .back-link,.nom-detail-actions .nominee-view-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 13px;border:1px solid rgba(255,193,7,.26);border-radius:999px;background:rgba(255,193,7,.055);color:#e9c879;font:600 13px/1.2 var(--font);letter-spacing:0;white-space:nowrap}
 .nom-detail-actions .nominee-view-toggle{min-width:0;gap:7px;cursor:pointer;transition:transform .2s,border-color .2s,background .2s,color .2s}
-.nom-detail-actions .nominee-view-toggle:hover,.nom-detail-actions .nominee-view-toggle[aria-expanded=true]{transform:translateY(-1px);border-color:rgba(255,193,7,.52);background:rgba(255,193,7,.11);color:#ffe1a0}
+.nom-detail-actions .nominee-view-toggle:hover,.nom-detail-actions .nominee-view-toggle[aria-expanded=true]{transform:none;border-color:rgba(255,193,7,.52);background:rgba(255,193,7,.11);color:#ffe1a0}
 .nom-detail-top .back-link:hover{transform:translateX(-2px);border-color:rgba(255,193,7,.52);background:rgba(255,193,7,.11);color:#ffe1a0}
 .nominee-view-current-icon{display:grid;place-items:center;width:17px;height:17px;flex:0 0 17px}
 .nominee-view-current-icon svg{display:block;width:17px;height:17px;fill:currentColor;stroke:none}

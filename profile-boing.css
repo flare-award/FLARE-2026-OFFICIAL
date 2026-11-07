@@ -747,3 +747,15 @@
 }
 /* Keep BOB reachable without scrolling on short landscape screens. */
 @media(max-height:580px){.ogonyok-game{order:2;margin:12px 0 0}}
+
+/* Eclipse: a dark rim with a narrow orbiting platinum/gold solar corona. */
+.profile-avatar.frame-eclipse{border-color:#e9dfcc;box-shadow:0 0 0 2px #171522,0 0 0 4px #61505a,0 8px 25px #100c19aa}
+.profile-avatar.frame-eclipse::before,.profile-avatar.frame-eclipse::after{content:"";position:absolute;z-index:3;border-radius:50%;pointer-events:none;-webkit-mask:radial-gradient(closest-side,transparent calc(100% - 6px),#000 calc(100% - 5px),#000 calc(100% - 1px),transparent 100%);mask:radial-gradient(closest-side,transparent calc(100% - 6px),#000 calc(100% - 5px),#000 calc(100% - 1px),transparent 100%)}
+.profile-avatar.frame-eclipse::before{inset:-13px;background:conic-gradient(from 18deg,#30253f,#8e749d 30deg,#f9e9c6 48deg,#fff9e6 53deg,#b59666 62deg,#241c33 100deg,#58466b 154deg,#c8b6df 177deg,#fff4d9 187deg,#9c7d52 199deg,#231b32 235deg,#4b3b5d 308deg,#30253f);animation:profileEclipseCorona 34s linear infinite}
+.profile-avatar.frame-eclipse::after{inset:-7px;z-index:4;background:repeating-conic-gradient(from 8deg,transparent 0deg 12deg,#e5d3ab 13deg 14deg,transparent 15deg 28deg),conic-gradient(#e5d9fb,#36233d 60deg,#e5d3ab 130deg,#fff3d2 150deg,#37273e 190deg,#be9bcc 290deg,#e5d9fb);-webkit-mask:radial-gradient(closest-side,transparent calc(100% - 3px),#000 calc(100% - 2px),#000 calc(100% - .5px),transparent 100%);mask:radial-gradient(closest-side,transparent calc(100% - 3px),#000 calc(100% - 2px),#000 calc(100% - .5px),transparent 100%);animation:profileEclipseCorona 47s linear infinite reverse}
+.profile-frame-choice-swatch.frame-eclipse{border-color:#e9dfcc;background:#241d32;box-shadow:0 0 0 2px #79618b}
+@keyframes profileEclipseCorona{to{transform:rotate(360deg)}}
+.bob .bob-beard,.boing-preview-bob .bob-beard{position:absolute;z-index:4;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;transform:none}
+.boing-picture-preview{display:grid;place-items:center;min-height:126px;color:#e3c589;pointer-events:none}
+.boing-picture-preview svg{width:62px;height:62px;stroke-width:1.35}
+@media(prefers-reduced-motion:reduce){.profile-avatar.frame-eclipse::before,.profile-avatar.frame-eclipse::after{animation:none;transform:none}}

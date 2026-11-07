@@ -102,7 +102,7 @@ function profileBadgeEditToggleMarkup(){
   const editing=profileState.badgeEditing,pencil='<path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/>';
   return `<button class="profile-badge-edit-toggle ${editing?'is-editing':''}" id="profile-badge-edit-toggle" type="button" aria-label="Изменить оформление профиля" title="${editing?'Редактирование открыто':'Изменить оформление'}" ${editing?'disabled aria-disabled="true"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${pencil}</svg></button>`;
 }
-const profileFrameNames={'frame-default':'Без рамки','frame-gold':'GOLD FRAME','frame-aurora':'AURORA FRAME','frame-inferno':'INFERNO FRAME'};
+const profileFrameNames={'frame-default':'Без рамки','frame-gold':'GOLD FRAME','frame-aurora':'AURORA FRAME','frame-eclipse':'ECLIPSE FRAME','frame-inferno':'INFERNO FRAME'};
 function profileAppearanceFrameOptions(boing){
   const inventory=new Set(Array.isArray(boing?.inventory)?boing.inventory:[]),shop=Array.isArray(boing?.shop)?boing.shop:[];
   const frames=[{id:'frame-default',name:profileFrameNames['frame-default']}];
@@ -326,6 +326,13 @@ function bobAccessoryMarkup(accessory){
   if(accessory==='bob-fedora')return '<span class="bob-fedora bob-accessory-outside" aria-hidden="true"><i></i></span>';
   if(accessory==='bob-beanie')return '<span class="bob-beanie bob-accessory-outside" aria-hidden="true"><i></i></span>';
   if(accessory==='bob-sneakers')return '<span class="bob-sneakers bob-accessory-outside" aria-hidden="true"><i></i><i></i></span>';
+  if(accessory==='bob-beard'){
+    const hairs=Array.from({length:27},(_,i)=>{
+      const angle=(32+i*116/26)*Math.PI/180,inner=44.1+(i%3)*.55,outer=50.8+(i%4)*.65;
+      return `<path d="M${(50+inner*Math.cos(angle)).toFixed(2)} ${(50+inner*Math.sin(angle)).toFixed(2)}L${(50+outer*Math.cos(angle)).toFixed(2)} ${(50+outer*Math.sin(angle)).toFixed(2)}"/>`;
+    }).join('');
+    return `<svg class="bob-beard bob-accessory-outside" viewBox="0 0 100 100" fill="none" stroke="#20211f" stroke-width="1.15" stroke-linecap="round" aria-hidden="true">${hairs}</svg>`;
+  }
   if(accessory==='bob-bowtie')return '<span class="bob-bowtie bob-accessory-outside" aria-hidden="true"><i></i></span>';
   return '';
 }
@@ -781,6 +788,22 @@ const boingShopGroups={upgrades:{label:'Апгрейды',kinds:['click','coin']
 const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'ТОП',face:'BOB PNG',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
 function boingShopItemPreview(item,boing){
   if(item.kind==='accessory')return `<div class="boing-shop-preview" aria-hidden="true"><div class="boing-preview-bob">${bobCharacterMarkup({...boing,selected_accessory:item.id})}</div></div>`;
+  // Official Lucide image icon (ISC); source: assets/icons/lucide-image.svg.
+  if(item.id==='bob-face-upload')return `<div class="boing-picture-preview"><svg aria-hidden="true"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+  <circle cx="9" cy="9" r="2" />
+  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+</svg></div>`;
   if(item.kind==='frame')return `<div class="boing-frame-preview" aria-hidden="true">${profileAvatarMarkup({...profileState.data,boing:{...boing,selected_frame:item.id}},false)}</div>`;
   return '';
 }
@@ -789,6 +812,7 @@ function showBoingShop(category=profileState.shopCategory||'upgrades'){
   if(!boingShopGroups[category])category='upgrades';
   pauseBoingScene();profileState.view='shop';profileState.shopCategory=category;
   const allItems=Array.isArray(boing.shop)?boing.shop:[],items=allItems.filter(item=>item.id!=='leader-bob-name'&&boingShopGroups[category].kinds.includes(item.kind));
+  if(category==='profile'){const rank=item=>item.kind==='frame'?Math.max(0,['frame-gold','frame-aurora','frame-eclipse','frame-inferno'].indexOf(item.id)):item.kind==='banner'?100:200;items.sort((a,b)=>rank(a)-rank(b));}
   const tabs=Object.entries(boingShopGroups).map(([id,group])=>`<button type="button" data-shop-category="${id}" class="${id===category?'is-active':''}">${boingShopGroupIcon(id)}<span>${group.label}</span></button>`).join('');
   replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3>${boingShopItemPreview(item,boing)}<p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?(boing.economy_version>=3?'100 COINS за каждые полные 200 очков одного раунда. Остаток не переносится между раундами. Награда зачисляется после завершения; незасчитанный раунд ничего не приносит. COINS BOOST: +10% за уровень.':boing.economy_version===2?'POWER CLICK увеличивает очки, но не ускоряет выдачу COINS. Награда — за каждые 100 кликов: 100 COINS, с 10 000 кликов — 200. COINS BOOST добавляет 10% за уровень. Следующий уровень всегда дороже.':'Улучшения действуют на следующие клики и начисления COINS. Актуальные цены и эффекты указаны в карточках.'):category==='cosmetics'?'Аксессуары можно надевать и снимать. Имя BOB видно в таблице всем бесплатно. BOB PNG FACE открывает загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
   bindBoingNavigation('shop');bindProfileAvatarFallback();
