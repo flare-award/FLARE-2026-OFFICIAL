@@ -553,4 +553,4 @@
 @media(prefers-reduced-motion:reduce){.social-photo-close{transition:none}}
 
 /* Slightly quieter separator, retaining the surrounding text color in all states. */
-.nominee-name .nominee-versus{opacity:.85}
+.nominee-name .nominee-versus{opacity:.79}
