@@ -112,7 +112,7 @@
 .boing-back{display:inline-flex;align-items:center;justify-self:start;gap:8px;min-height:40px;padding:0 11px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:#121311;color:#99958a;font-family:"Manrope","DM Sans",sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;cursor:pointer}
 .boing-back:hover{border-color:rgba(255,211,112,.25);color:#e2c987}
 .boing-back>svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.boing-tabs{position:relative;z-index:4;display:flex;flex:0 0 auto;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-bottom:0;background:#0b0c0b}
+.boing-tabs{position:relative;z-index:4;display:flex;flex:0 0 auto;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-bottom:0;background:#0d0e0d}
 .boing-tabs button{min-width:94px;min-height:32px;padding:0 14px;border:1px solid transparent;border-radius:999px;background:transparent;color:#706e67;font-family:"Sora",sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;cursor:pointer;transition:color .18s ease,background-color .18s ease,border-color .18s ease}
 .boing-tabs button:hover{color:#d8c392}
 .boing-tabs button.is-active{border-color:rgba(255,207,99,.17);background:rgba(255,193,7,.065);color:#f2cf80}
@@ -614,8 +614,7 @@
 .boing-game-actions .boing-rename svg{flex:0 0 16px;width:16px;height:16px;pointer-events:none}
 .boing-rename:disabled{opacity:.4;cursor:not-allowed}
 .boing-rename:hover:not(:disabled){border-color:rgba(255,211,112,.25);color:#dbc489}
-/* Inset separator: no divider between the logo and tabs, no reserved scrollbar gap. */
+/* One continuous header surface; the lower rule reaches both window edges. */
 .boing-head,.boing-tabs{align-self:stretch;min-width:0}
-.boing-tabs::after{content:"";position:absolute;left:20px;right:20px;bottom:0;height:1px;background:rgba(255,255,255,.075);pointer-events:none}
-@media(max-width:700px){.boing-tabs::after{left:13px;right:13px}}
+.boing-tabs::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(255,255,255,.075);pointer-events:none}
 @media(max-height:580px){.boing-game-layout{overflow-y:auto;overscroll-behavior:contain}.boing-arena{flex-shrink:0}}
