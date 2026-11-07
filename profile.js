@@ -2,6 +2,10 @@ const profileState={data:null,request:0,view:'profile',email:null,leaderSort:'sc
 state.profile=profileState;
 let boingScene=null,bobFaceEditor=null;
 const boingGravity=1540;
+// Mass is 1; BOB is a uniform circular rigid body (I = mass * radius² / 2).
+// The old kick ranged from 340 to 375 px/s. Use its midpoint, with exactly +5%.
+const boingLegacyKick=(340+375)/2,boingClickStrength=1.05;
+const boingPhysicsStep=1/120;
 const numberFormat=new Intl.NumberFormat('ru-RU');
 const dateFormat=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'});
 const formatProfileNumber=value=>numberFormat.format(Math.max(0,Number(value)||0));
@@ -321,20 +325,25 @@ function pauseBoingScene(){
   scene.running=false;cancelAnimationFrame(scene.raf);scene.raf=0;
   if(scene.runId)queueBoingSync(scene,false);
 }
+// Unmodified Lucide text-cursor-input and palette icons (ISC); see assets/icons/lucide-LICENSE.txt.
+function boingControlIcon(name){
+  const paths=name==='name'?'<path d="M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6"/><path d="M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7"/><path d="M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1"/><path d="M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1"/><path d="M9 6v12"/>':'<path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+}
 function renderBoingGame(){
   if(!profileState.data?.boing)return;
   bobFaceEditor=null;profileState.view='game';
   const scene=ensureBoingScene(),boing=profileState.data.boing;
   scene.running=false;cancelAnimationFrame(scene.raf);scene.raf=0;
   const hint=scene.score>0?'НАЖМИ НА BOB, ЧТОБЫ ПРОДОЛЖИТЬ':'НАЖМИ НА BOB, ЧТОБЫ НАЧАТЬ';
-  const content=`${boingHeader('game')}<div class="boing-game-layout"><div class="boing-arena" id="boing-arena"><div class="boing-hud"><div><span>SCORE</span><strong id="boing-score">${formatProfileNumber(scene.score)}</strong></div><div><span>BEST</span><strong id="boing-best">${formatProfileNumber(Math.max(boing.best_score,scene.score))}</strong></div><div><span>COINS</span><strong id="boing-coins">${formatProfileNumber(boing.coins)}</strong></div></div><div class="boing-level">LEVEL 1 <span>НЕ УРОНИ BOB</span></div><div class="boing-hint" id="boing-hint">${hint}</div><button class="bob" id="bob" type="button" aria-label="Кликнуть по BOB и получить очки"><span class="bob-name" id="bob-name">${esc(boing.bob_name)}</span>${bobCharacterMarkup(boing)}</button><button class="bob-face-edit" id="bob-face-edit" type="button" aria-label="Нарисовать лицо BOB" title="Нарисовать лицо" ${canEditBobFace(scene)?'':'hidden'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5 4 4M4 20l3.8-.8L19 8a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L4.8 16.2 4 20Z"/><path d="m13 7 4 4"/></svg></button><div class="boing-impact" id="boing-impact" aria-live="polite"></div><div class="boing-floor" aria-hidden="true"></div></div><div class="boing-game-footer"><button class="boing-rename" id="boing-rename" type="button">Переименовать BOB</button><p class="boing-rewards-note">COINS за каждые 100 общих очков · больше после 1 000, 10 000, 50 000 и 100 000</p></div></div>`;
+  const content=`${boingHeader('game')}<div class="boing-game-layout"><div class="boing-arena" id="boing-arena"><div class="boing-hud"><div><span>SCORE</span><strong id="boing-score">${formatProfileNumber(scene.score)}</strong></div><div><span>BEST</span><strong id="boing-best">${formatProfileNumber(Math.max(boing.best_score,scene.score))}</strong></div><div><span>COINS</span><strong id="boing-coins">${formatProfileNumber(boing.coins)}</strong></div></div><div class="boing-hint" id="boing-hint">${hint}</div><button class="bob" id="bob" type="button" aria-label="Кликнуть по BOB и получить очки">${bobCharacterMarkup(boing)}</button><span class="bob-name" id="bob-name">${esc(boing.bob_name)}</span><div class="boing-impact" id="boing-impact" aria-live="polite"></div><div class="boing-floor" aria-hidden="true"></div></div><div class="boing-game-footer"><div class="boing-game-actions"><button class="boing-rename" id="boing-rename" type="button">${boingControlIcon('name')}<span>Сменить имя</span></button><button class="boing-rename" id="bob-face-edit" type="button" ${canEditBobFace(scene)?'':'disabled title="Можно менять перед началом нового раунда"'}>${boingControlIcon('face')}<span>Изменить лицо</span></button></div><div class="boing-level">LEVEL 1 <span>НЕ УРОНИ BOB</span></div></div></div>`;
   replaceModalView(content,'profile-modal boing-modal');
   bindBoingNavigation('game');
   scene.element=$('#bob');scene.arena=$('#boing-arena');
   scene.observer?.disconnect();
   if('ResizeObserver'in window){scene.observer=new ResizeObserver(()=>resetBobPosition(scene,false));scene.observer.observe(scene.arena)}
   resetBobPosition(scene,true);updateBoingHud();
-  scene.element.addEventListener('click',()=>clickBob(scene));
+  scene.element.addEventListener('click',event=>clickBob(scene,event));
   $('#bob-face-edit').onclick=showBoingFaceEditor;
   $('#boing-rename').onclick=showBoingRename;
 }
@@ -342,15 +351,31 @@ function resetBobPosition(scene,force=false){
   if(!scene?.arena?.isConnected||!scene.element)return;
   const width=scene.arena.clientWidth,height=scene.arena.clientHeight;if(!width||!height)return;
   scene.size=scene.element.offsetWidth||104;
-  if(force||!scene.running){scene.x=Math.max(0,(width-scene.size)/2);scene.y=Math.max(32,(height-scene.size)*.38);scene.vx=0;scene.vy=0;scene.rotation=0;scene.spin=0}
+  if(force||!scene.running){scene.x=Math.max(0,(width-scene.size)/2);scene.y=Math.max(32,(height-scene.size)*.38);scene.vx=0;scene.vy=0;scene.rotation=0;scene.spin=0;scene.accumulator=0}
   else{scene.x=clamp(scene.x,0,Math.max(0,width-scene.size));scene.y=clamp(scene.y,0,Math.max(0,height-scene.size))}
+  // Cache accessory geometry once per layout, rather than measuring on every frame.
+  const hat=scene.element.querySelector('.bob-crown,.bob-cap'),radius=scene.size/2;
+  scene.accessoryCorners=[];
+  if(hat){
+    const x=hat.offsetLeft,y=hat.offsetTop,w=hat.offsetWidth,h=hat.offsetHeight,isCap=hat.classList.contains('bob-cap');
+    const angle=isCap?-5*Math.PI/180:0,cx=x+w/2,cy=y+h/2,right=x+w+(isCap?14:0),bottom=y+h+(isCap?2:0);
+    scene.accessoryCorners=[[x,y],[right,y],[x,bottom],[right,bottom]].map(([px,py])=>[(px-cx)*Math.cos(angle)-(py-cy)*Math.sin(angle)+cx-radius,(px-cx)*Math.sin(angle)+(py-cy)*Math.cos(angle)+cy-radius]);
+  }
   paintBob(scene);
 }
 function paintBob(scene){
   if(!scene?.element?.isConnected)return;
   scene.element.style.transform=`translate3d(${scene.x}px,${scene.y}px,0) rotate(${scene.rotation}deg)`;
-  const edit=$('#bob-face-edit');
-  if(edit){edit.hidden=!canEditBobFace(scene);edit.style.transform=`translate3d(${scene.x+scene.size-7}px,${scene.y+5}px,0)`}
+  // The label follows the centre, not the body's rotation. Account for rotating hats too.
+  const name=$('#bob-name'),radius=scene.size/2;
+  if(name){
+    const angle=scene.rotation*Math.PI/180,corners=scene.accessoryCorners||[];
+    const below=Math.max(radius,...corners.map(([x,y])=>x*Math.sin(angle)+y*Math.cos(angle)));
+    const half=name.offsetWidth/2,left=clamp(scene.x+radius,half+6,scene.arena.clientWidth-half-6),top=scene.y+radius+below+8;
+    name.style.left=`${left}px`;name.style.top=`${top}px`;
+    name.classList.toggle('is-obscured',top+name.offsetHeight>scene.arena.clientHeight-8);
+  }
+  const edit=$('#bob-face-edit');if(edit)edit.disabled=!canEditBobFace(scene);
 }
 function updateBoingHud(){
   const boing=profileState.data?.boing;if(!boing)return;
@@ -397,16 +422,34 @@ function scheduleBoingSync(scene){
   scene.syncScheduled=true;
   scene.syncTimer=setTimeout(()=>{scene.syncScheduled=false;queueBoingSync(scene,false)},550);
 }
-function clickBob(scene){
+function bobClickPoint(scene,event){
+  // Keyboard/assistive activation is a centre hit. Screen-space coordinates remain
+  // correct at any body angle, unlike offsets inside the rotated face/image.
+  if(!event||event.detail===0)return {x:0,y:0};
+  const rect=scene.arena.getBoundingClientRect(),radius=scene.size/2;
+  let x=event.clientX-rect.left-scene.arena.clientLeft-scene.x-radius,y=event.clientY-rect.top-scene.arena.clientTop-scene.y-radius;
+  const distance=Math.hypot(x,y),limit=radius*.98;
+  if(distance>limit){x*=limit/distance;y*=limit/distance}
+  return {x,y};
+}
+function applyBobClickImpulse(scene,point){
+  const radius=scene.size/2,inertia=radius*radius/2,impulse=boingLegacyKick*boingClickStrength;
+  // A finger pushes upward and slightly inward. Contact velocity includes rotation;
+  // rubber grip opposes lateral slipping without increasing the impulse magnitude.
+  const omega=scene.spin*Math.PI/180,contactVx=scene.vx-omega*point.y;
+  const nx=-.55*point.x/radius+clamp(-contactVx/boingLegacyKick*.18,-.15,.15),ny=-1,length=Math.hypot(nx,ny);
+  const jx=impulse*nx/length,jy=impulse*ny/length;
+  scene.vx+=jx;scene.vy+=jy;
+  scene.spin+=(point.x*jy-point.y*jx)/inertia*180/Math.PI;
+}
+function clickBob(scene,event){
   if(!scene||scene.destroyed||scene.locked||scene.failed||!scene.arena?.isConnected)return;
   if(!scene.runId)startBoingRun(scene);
   const boing=profileState.data.boing,points=Math.max(1,Number(boing.points_per_click)||1);
   scene.score+=points;scene.clicks++;scene.running=true;
-  const impulse=340+Math.random()*35,twoJumpCeilingGuard=Math.sqrt(boingGravity*Math.max(1,scene.y)*.82);
-  scene.vy=-Math.min(impulse,twoJumpCeilingGuard);scene.vx=clamp(scene.vx*.35+(Math.random()*360-180),-340,340);
-  const spinDirection=Math.sign(scene.vx)||(Math.random()<.5?-1:1);scene.spin=spinDirection*Math.min(820,480+Math.abs(scene.vx)*1.15);
+  applyBobClickImpulse(scene,bobClickPoint(scene,event));
   scene.arena.classList.add('is-playing');$('#boing-hint').textContent='';paintBob(scene);
-  if(!scene.raf){scene.last=performance.now();scene.raf=requestAnimationFrame(now=>stepBoing(scene,now))}
+  if(!scene.raf){scene.last=performance.now();scene.accumulator=0;scene.raf=requestAnimationFrame(now=>stepBoing(scene,now))}
   updateBoingHud();if(scene.runId)scheduleBoingSync(scene);
 }
 function failBoingRound(scene){
@@ -420,14 +463,38 @@ function failBoingRound(scene){
     resetBobPosition(scene,true);updateBoingHud();
   });
 }
+function resolveBobContact(scene,rx,ry,nx,ny,restitution){
+  const radius=scene.size/2,inertia=radius*radius/2,normalSpeed=scene.vx*nx+scene.vy*ny;
+  if(normalSpeed>=0)return;
+  const normalImpulse=-(1+restitution)*normalSpeed;
+  scene.vx+=normalImpulse*nx;scene.vy+=normalImpulse*ny;
+  const tx=-ny,ty=nx,omega=scene.spin*Math.PI/180;
+  const slip=(scene.vx-omega*ry)*tx+(scene.vy+omega*rx)*ty;
+  const lever=rx*ty-ry*tx;
+  const friction=clamp(-slip/(1+lever*lever/inertia),-.22*normalImpulse,.22*normalImpulse);
+  scene.vx+=friction*tx;scene.vy+=friction*ty;scene.spin+=lever*friction/inertia*180/Math.PI;
+}
+function advanceBobPhysics(scene,dt,width,height){
+  const radius=scene.size/2,maxX=Math.max(0,width-scene.size),floor=height-scene.size-8;
+  const drag=Math.exp(-.08*dt);scene.vx*=drag;scene.vy*=drag;scene.spin*=Math.exp(-.12*dt);
+  scene.vy+=boingGravity*dt;scene.x+=scene.vx*dt;scene.y+=scene.vy*dt;
+  scene.rotation=((scene.rotation+scene.spin*dt)%360+360)%360;
+  if(scene.x<0){scene.x=0;resolveBobContact(scene,-radius,0,1,0,.82)}
+  else if(scene.x>maxX){scene.x=maxX;resolveBobContact(scene,radius,0,-1,0,.82)}
+  if(scene.y<0){scene.y=0;resolveBobContact(scene,0,-radius,0,1,.72)}
+  if(scene.y>=floor){scene.y=floor;return true}
+  return false;
+}
 function stepBoing(scene,now){
   if(!scene.running||scene.destroyed||!scene.arena?.isConnected){scene.raf=0;return}
-  const dt=Math.min(.032,Math.max(.001,(now-scene.last)/1000));scene.last=now;
-  const width=scene.arena.clientWidth,height=scene.arena.clientHeight,floor=height-scene.size-8;
-  scene.vy+=boingGravity*dt;scene.x+=scene.vx*dt;scene.y+=scene.vy*dt;scene.rotation+=scene.spin*dt;
-  if(scene.x<=0){scene.x=0;scene.vx=Math.abs(scene.vx)*.82}else if(scene.x>=width-scene.size){scene.x=width-scene.size;scene.vx=-Math.abs(scene.vx)*.82}
-  if(scene.y<=0){scene.y=0;scene.vy=Math.abs(scene.vy)*.72}
-  if(scene.y>=floor){scene.y=floor;paintBob(scene);failBoingRound(scene);return}
+  // Fixed substeps make trajectories and contacts stable at 30/60/120 Hz.
+  const dt=Math.min(.1,Math.max(0,(now-scene.last)/1000));scene.last=now;
+  scene.accumulator=(scene.accumulator||0)+dt;
+  const width=scene.arena.clientWidth,height=scene.arena.clientHeight;
+  while(scene.accumulator+1e-9>=boingPhysicsStep){
+    scene.accumulator-=boingPhysicsStep;
+    if(advanceBobPhysics(scene,boingPhysicsStep,width,height)){paintBob(scene);failBoingRound(scene);return}
+  }
   paintBob(scene);scene.raf=requestAnimationFrame(time=>stepBoing(scene,time));
 }
 function teardownBoing(sync=true){
