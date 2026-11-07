@@ -554,3 +554,14 @@
 
 /* Slightly quieter separator, retaining the surrounding text color in all states. */
 .nominee-name .nominee-versus{opacity:.79}
+
+/* Past-season honors: category-specific marks; repeated wins receive a two-tone finish. */
+.profile-badge[data-badge-id^="legacy-"]{--badge-accent:#e6bf76;--badge-rgb:230,191,118;--badge-secondary-rgb:206,130,77}
+.profile-badge[data-badge-id^="legacy-conflict-"]{--badge-accent:#ffab91;--badge-rgb:255,171,145;--badge-secondary-rgb:235,100,114}
+.profile-badge[data-badge-id^="legacy-track-"],.profile-badge[data-badge-id^="legacy-phrase-"]{--badge-accent:#d9aeff;--badge-rgb:217,174,255;--badge-secondary-rgb:155,137,242}
+.profile-badge[data-badge-id^="legacy-cs-"],.profile-badge[data-badge-id^="legacy-fortnite-"],.profile-badge[data-badge-id^="legacy-multigaming-"]{--badge-accent:#91dbe8;--badge-rgb:145,219,232;--badge-secondary-rgb:153,153,245}
+.profile-badge[data-badge-id^="legacy-"][data-badge-id$="-2"].is-equipped{border-color:rgba(var(--badge-rgb),.65);box-shadow:inset 0 0 0 1px rgba(var(--badge-secondary-rgb),.15),0 0 12px rgba(var(--badge-rgb),.1)}
+.profile-badge[data-badge-id^="legacy-laureate-"]{--badge-accent:#ffd87c;--badge-rgb:255,216,124;--badge-secondary-rgb:246,145,103}
+.profile-badge[data-badge-id^="legacy-laureate-"].is-equipped{border-color:rgba(var(--badge-rgb),.65);background:linear-gradient(135deg,rgba(var(--badge-rgb),.2),rgba(var(--badge-secondary-rgb),.08)),#121210}
+.profile-badge[data-badge-id^="legacy-"] .profile-badge-tooltip{width:380px;max-width:calc(100vw - 32px)}
+.profile-badge[data-badge-id^="legacy-"] .profile-badge-tooltip-head>strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

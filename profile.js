@@ -39,6 +39,32 @@ function profileLoadingMarkup(){
   return `${profileHeader('Ваш аккаунт',true)}<div class="profile-loading" aria-live="polite"><span class="profile-loading-orbit"></span><strong>${esc(nickname)}</strong><span>Загружаем твой FLARE ID…</span></div>`;
 }
 function profileBadgeIcon(id){
+  if(id.startsWith('legacy-')){
+    const category=id.slice(7).replace(/-\d+$/,'');
+    const icons={
+      king:'<path d="m3 7 4 4 5-7 5 7 4-4-2 11H5Z"/><path d="M6 21h12"/>',
+      multigaming:'<rect x="3" y="6" width="18" height="12" rx="4"/><path d="M6 12h6M9 9v6m6-4h.01M18 14h.01"/>',
+      conflict:'<path d="m4 3 12 12m-1-5 5 5-5 5-5-5M20 3 8 15m1-5-5 5 5 5 5-5"/>',
+      sos:'<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 10h16m-12 5 3 3 5-5"/>',
+      track:'<path d="M9 18V5l11-2v13M9 9l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>',
+      scam:'<path d="M12 3a7 7 0 0 0-7 7v11l4-3 3 3 3-3 4 3V10a7 7 0 0 0-7-7Z"/><path d="M9 10h.01M15 10h.01"/>',
+      duo:'<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="3"/><path d="M2 21v-3a6 6 0 0 1 12 0v3m2-6a5 5 0 0 1 6 5v1"/>',
+      freak:'<path d="m3 8 4 3 5-8 5 8 4-3-3 13H6Z"/><path d="M9 16h.01m6 0h.01"/>',
+      fail:'<path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5m0 3h.01"/>',
+      toxic:'<path d="M6 3h12v6l-3 3 3 3v6H6v-6l3-3-3-3V3Z"/><path d="m9 6 6 12m0-12-6 12"/>',
+      breakthrough:'<path d="M8 16c-3-5 2-11 12-12 0 9-7 15-12 12Zm0 0-4 4m4-8-5 1 1 5m8-2-1 5 5-1"/><circle cx="15" cy="9" r="2"/>',
+      phrase:'<path d="M4 4h16v12H9l-5 4V4Z"/><path d="M8 8h8m-8 4h5"/>',
+      fortnite:'<path d="M5 21V4h14v4h-9v4h7v4h-7v5H5Z"/>',
+      meme:'<circle cx="12" cy="12" r="9"/><path d="M7 10h3m4 0h3m-9 4c2 4 6 4 8 0"/>',
+      event:'<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 10h16m-9 3-3 4h4l-1 3 5-5h-4l1-2"/>',
+      cs:'<circle cx="12" cy="12" r="7"/><path d="M12 2v6m0 8v6M2 12h6m8 0h6"/>',
+      player:'<path d="m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z"/>',
+      cringe:'<circle cx="12" cy="12" r="9"/><path d="m7 9 3 2m4 0 3-2m-8 8 2-2 2 2 2-2"/>',
+      laureate:'<path d="m12 3 2 5 5 1-4 4 1 6-4-3-4 3 1-6-4-4 5-1Z"/><path d="M4 5C0 12 3 20 9 22M20 5c4 7 1 15-5 17"/>'
+    };
+    const repeat=id.endsWith('-2')?'<path d="M3 2h2m14 0h2"/>':'';
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[category]||icons.laureate}${repeat}</svg>`;
+  }
   const paths={
     creator:'<path d="m3 7 4 4 5-7 5 7 4-4-2 11H5L3 7Z"/><path d="M6 21h12"/>',
     tester:'<path d="M9 3h6M10 3v6l-5 8c-1.2 2 .1 4 2.4 4h9.2c2.3 0 3.6-2 2.4-4l-5-8V3"/><path d="m8.5 15 2.2 2.2 4.8-5"/>',
@@ -170,8 +196,17 @@ async function logoutAccount(){
 function bindProfileAvatarFallback(){
   $$('.profile-avatar img, .boing-leader-avatar img').forEach(image=>{const hide=()=>image.closest('.profile-avatar, .boing-leader-avatar')?.classList.add('no-image');if(image.complete&&image.naturalWidth===0)hide();else image.addEventListener('error',hide,{once:true})});
 }
+function positionLegacyBadgeTooltips(){
+  $$('.profile-badge[data-badge-id^="legacy-"]').forEach(badge=>{
+    const tip=$('.profile-badge-tooltip',badge),scroll=badge.closest('.profile-scroll');if(!tip||!scroll)return;
+    const area=scroll.getBoundingClientRect(),rect=badge.getBoundingClientRect(),width=Math.max(120,Math.min(380,scroll.clientWidth-24));
+    const center=Math.max(area.left+12+width/2,Math.min(rect.left+rect.width/2,area.left+scroll.clientWidth-12-width/2));
+    tip.style.width=`${width}px`;tip.style.left=`${center-rect.left}px`;
+  });
+}
+window.addEventListener('resize',positionLegacyBadgeTooltips,{passive:true});
 function bindProfileControls(){
-  bindProfileAvatarFallback();
+  bindProfileAvatarFallback();positionLegacyBadgeTooltips();
   $('#open-boing')?.addEventListener('click',showBoing);
   $('#profile-logout')?.addEventListener('click',logoutAccount);
   $('#profile-email-toggle')?.addEventListener('click',async event=>{
@@ -608,7 +643,7 @@ function renderPublicFlareProfile(){
   const boing=profile.boing,badges=sortProfileBadges(Array.isArray(boing.badges)?boing.badges:[]).filter(badge=>badge.equipped),created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   const stats=[['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],['COINS',formatProfileNumber(boing.coins),'баланс участника'],['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации']];
   const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badges.length?badges.map(badge=>publicProfileBadgeMarkup(badge,true)).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div><div class="profile-footer-actions public-profile-footer">${profileReputationMarkup(profile)}</div></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
-  replaceModalView(content,'profile-modal public-profile-modal');$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();bindPublicReputationControls();
+  replaceModalView(content,'profile-modal public-profile-modal');$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();positionLegacyBadgeTooltips();bindPublicReputationControls();
 }
 function bindPublicReputationControls(){
   $$('[data-reputation-value]',$('.public-profile-modal')||document).forEach(button=>button.onclick=()=>ratePublicProfile(Number(button.dataset.reputationValue)));
