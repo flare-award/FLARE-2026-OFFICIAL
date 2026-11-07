@@ -18,3 +18,12 @@ for(const [id,,description,rarity] of seed.badges){assert(description.length>=65
 console.log('PASS: all 9 winners, 32 wins, shared awards, repeated-win tiers, 18 category SVGs and concise descriptions');
 
 for(const id of ['legacy-king-2','legacy-multigaming-2'])assert(!ctx.profileBadgeIcon(id).includes('M3 2h2m14 0h2'));
+
+const sortingStart=src.indexOf('const profileBadgeRarityRank'),sortingEnd=src.indexOf('function profileBadgeRarityLabel',sortingStart);
+vm.runInContext(src.slice(sortingStart,sortingEnd),ctx);
+const unsorted=[{id:'tester',rarity:'special',name:'Tester'},{id:'ordinary',rarity:'rare',name:'Ordinary'},{id:'legend',rarity:'legendary',name:'Legend'},{id:'creator',rarity:'special',name:'Creator'},{id:'legacy-king-2',rarity:'legendary',name:'King'}];
+assert.deepEqual(Array.from(ctx.sortProfileBadges(unsorted),b=>b.id),['creator','legacy-king-2','legend','ordinary','tester']);
+assert.equal(unsorted[0].id,'tester');
+assert(!ctx.profileBadgeIcon('creator').includes('m3 7 4 4 5-7'));
+assert(ctx.profileBadgeIcon('legacy-conflict-1').includes('m14 3 7-1'));
+console.log('PASS: creator first, legendary before rare/special, repeat wins promoted, new creator and single-sword icons');

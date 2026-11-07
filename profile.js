@@ -44,7 +44,7 @@ function profileBadgeIcon(id){
     const icons={
       king:'<path d="m3 7 4 4 5-7 5 7 4-4-2 11H5Z"/><path d="M6 21h12"/>',
       multigaming:'<rect x="3" y="6" width="18" height="12" rx="4"/><path d="M6 12h6M9 9v6m6-4h.01M18 14h.01"/>',
-      conflict:'<path d="m4 3 12 12m-1-5 5 5-5 5-5-5M20 3 8 15m1-5-5 5 5 5 5-5"/>',
+      conflict:'<path d="m14 3 7-1-1 7-9 9-5-5 8-10Z"/><path d="m4 11 9 9m-6-3-4 4m-1-1 2 2M9 14l8-8"/>',
       sos:'<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 10h16m-12 5 3 3 5-5"/>',
       track:'<path d="M9 18V5l11-2v13M9 9l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>',
       scam:'<path d="M12 3a7 7 0 0 0-7 7v11l4-3 3 3 3-3 4 3V10a7 7 0 0 0-7-7Z"/><path d="M9 10h.01M15 10h.01"/>',
@@ -65,7 +65,7 @@ function profileBadgeIcon(id){
     return `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[category]||icons.laureate}</svg>`;
   }
   const paths={
-    creator:'<path d="m3 7 4 4 5-7 5 7 4-4-2 11H5L3 7Z"/><path d="M6 21h12"/>',
+    creator:'<path d="m5 20 2-10 7-7 7 7-7 7-9 3Z"/><path d="m5 20 7-7m-5-3 7 7"/><circle cx="13" cy="12" r="1.5"/><path d="m4 2 .7 2.3L7 5l-2.3.7L4 8l-.7-2.3L1 5l2.3-.7L4 2Z"/>',
     tester:'<path d="M9 3h6M10 3v6l-5 8c-1.2 2 .1 4 2.4 4h9.2c2.3 0 3.6-2 2.4-4l-5-8V3"/><path d="m8.5 15 2.2 2.2 4.8-5"/>',
     legend:'<path d="m12 2 8 7-8 13L4 9l8-7Z"/><path d="m4 9 8 3 8-3M12 12v10"/>',
     'boing-10k':'<path d="M8 4h8v5c0 3-1.8 5-4 5s-4-2-4-5V4Z"/><path d="M8 6H4v2c0 2 1.5 3 4 3m8-5h4v2c0 2-1.5 3-4 3M12 14v4m-4 3h8m-6-3h4"/>',
@@ -75,14 +75,19 @@ function profileBadgeIcon(id){
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[id]||(id.startsWith('winner-')?paths.winner:paths.legend)}</svg>`;
 }
-const profileBadgeRarityRank={special:0,rare:1,legendary:2};
-function sortProfileBadges(badges){return [...badges].sort((a,b)=>(profileBadgeRarityRank[a.rarity]??99)-(profileBadgeRarityRank[b.rarity]??99)||a.name.localeCompare(b.name,'ru',{sensitivity:'base'})||a.id.localeCompare(b.id))}
+const profileBadgeRarityRank={legendary:0,rare:1,special:2};
+function isDoubleWinnerBadge(badge){return badge.id.startsWith('legacy-')&&badge.id.endsWith('-2')}
+function sortProfileBadges(badges){
+  const rank=badge=>badge.id==='creator'?-1:(profileBadgeRarityRank[badge.rarity]??99);
+  return [...badges].sort((a,b)=>rank(a)-rank(b)||Number(isDoubleWinnerBadge(b))-Number(isDoubleWinnerBadge(a))||a.name.localeCompare(b.name,'ru',{sensitivity:'base'})||a.id.localeCompare(b.id));
+}
 function profileBadgeRarityLabel(rarity){return {special:'ОСОБЫЙ',rare:'РЕДКИЙ',legendary:'ЛЕГЕНДАРНЫЙ'}[rarity]||'ОСОБЫЙ'}
 function profileBadgeMarkup(badge,compact=false,action=''){
-  const classes=`profile-badge ${badge.equipped?'is-equipped':''} rarity-${esc(badge.rarity)}${action?' is-editing':''}${action&&!badge.equipped?' is-draft-removed':''}`,tooltipId=`badge-tip-${compact?'compact-':''}${badge.id}`;
+  const classes=`profile-badge ${badge.equipped?'is-equipped':''} rarity-${esc(badge.rarity)}${isDoubleWinnerBadge(badge)?' profile-badge--double':''}${action?' is-editing':''}${action&&!badge.equipped?' is-draft-removed':''}`,tooltipId=`badge-tip-${compact?'compact-':''}${badge.id}`;
   const tooltip=`<span class="profile-badge-tooltip" id="${esc(tooltipId)}" role="tooltip"><span class="profile-badge-tooltip-head"><strong>${esc(badge.name)}</strong><span class="profile-badge-rarity">${profileBadgeRarityLabel(badge.rarity)}</span></span><span class="profile-badge-description">${esc(badge.description)}</span></span>`;
+  const victoryMark=isDoubleWinnerBadge(badge)?'<span class="profile-badge-victories" aria-hidden="true">×2</span>':'';
   const actionMarkup=action?`<button class="profile-badge-action is-${action}" type="button" data-badge-${action}="${esc(badge.id)}" aria-label="${action==='remove'?'Снять':'Вернуть'} бейдж ${esc(badge.name)}" title="${action==='remove'?'Снять':'Вернуть'}"><svg viewBox="0 0 24 24" aria-hidden="true">${action==='remove'?'<path d="M6 12h12"/>':'<path d="M12 6v12M6 12h12"/>'}</svg></button>`:'';
-  if(compact)return `<div class="${classes} profile-badge-compact" data-badge-id="${esc(badge.id)}" tabindex="0" aria-label="${esc(badge.name)}" aria-describedby="${esc(tooltipId)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span>${actionMarkup}${tooltip}</div>`;
+  if(compact)return `<div class="${classes} profile-badge-compact" data-badge-id="${esc(badge.id)}" tabindex="0" aria-label="${esc(badge.name)}" aria-describedby="${esc(tooltipId)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span>${victoryMark}${actionMarkup}${tooltip}</div>`;
   return `<div class="${classes}" data-badge-id="${esc(badge.id)}" tabindex="0" aria-describedby="${esc(tooltipId)}"><span class="profile-badge-icon">${profileBadgeIcon(badge.id)}</span><span>${esc(badge.name)}</span>${action?'':`<small>${badge.equipped?'Надет':'Снят'}</small>`}${actionMarkup}${tooltip}</div>`;
 }
 function profileBadgeEditToggleMarkup(){
@@ -158,7 +163,7 @@ function renderProfile(preserveScroll=false){
   const badgeList=visibleBadges.map(badge=>profileBadgeMarkup(badge,true,editing?(badge.equipped?'remove':'restore'):'')).join('');
   const frameEditor=frameOptions.length>1?`<div class="profile-frame-editor"><span class="profile-appearance-label">РАМКА АВАТАРА</span><div class="profile-frame-options" role="group" aria-label="Рамка аватара">${frameOptions.map(frame=>`<button class="profile-frame-choice ${previewFrame===frame.id?'is-selected':''}" type="button" data-profile-frame="${esc(frame.id)}" aria-pressed="${previewFrame===frame.id}"><span class="profile-frame-choice-swatch ${esc(frame.id)}" aria-hidden="true"></span><span>${esc(frame.name)}</span></button>`).join('')}</div></div>`:'';
   const bannerEditor=hasBannerUpgrade?`<div class="profile-banner-controls"><span>Фотобаннер · JPG, PNG или WebP до 12 МБ</span><div><label class="profile-small-button">Выбрать фото<input id="profile-banner-input" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><button class="profile-small-button" id="profile-banner-remove" type="button" ${previewBanner?'':'disabled'}>Убрать</button></div></div>`:'';
-  const appearanceEditor=editing?`<section class="profile-appearance-controls" aria-label="Настройки оформления"><div class="profile-appearance-title"><span>ОФОРМЛЕНИЕ</span><small>Изменения применятся после сохранения</small></div>${frameEditor}${bannerEditor}<div class="profile-appearance-actions"><button class="profile-small-button profile-appearance-cancel" id="profile-appearance-cancel" type="button">Отменить</button><button class="profile-small-button profile-appearance-save" id="profile-appearance-save" type="button">Сохранить</button></div></section>`:'';
+  const appearanceEditor=editing?`<section class="profile-appearance-controls" aria-label="Настройки оформления"><div class="profile-appearance-title"><span>ОФОРМЛЕНИЕ</span><small>Изменения применятся после сохранения</small></div>${frameEditor}${bannerEditor}<div class="profile-appearance-actions"><button class="profile-small-button profile-appearance-cancel" id="profile-appearance-cancel" type="button">Отменить</button><button class="button profile-appearance-save" id="profile-appearance-save" type="button">Сохранить</button></div></section>`:'';
   const created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   syncBoingUnlock();
   const previewProfile={...profile,boing:{...boing,selected_frame:previewFrame}};
@@ -195,17 +200,17 @@ async function logoutAccount(){
 function bindProfileAvatarFallback(){
   $$('.profile-avatar img, .boing-leader-avatar img').forEach(image=>{const hide=()=>image.closest('.profile-avatar, .boing-leader-avatar')?.classList.add('no-image');if(image.complete&&image.naturalWidth===0)hide();else image.addEventListener('error',hide,{once:true})});
 }
-function positionLegacyBadgeTooltips(){
-  $$('.profile-badge[data-badge-id^="legacy-"]').forEach(badge=>{
+function positionProfileBadgeTooltips(){
+  $$('.profile-badge').forEach(badge=>{
     const tip=$('.profile-badge-tooltip',badge),scroll=badge.closest('.profile-scroll');if(!tip||!scroll)return;
     const area=scroll.getBoundingClientRect(),rect=badge.getBoundingClientRect(),width=Math.max(120,Math.min(380,scroll.clientWidth-24));
     const center=Math.max(area.left+12+width/2,Math.min(rect.left+rect.width/2,area.left+scroll.clientWidth-12-width/2));
     tip.style.width=`${width}px`;tip.style.left=`${center-rect.left}px`;
   });
 }
-window.addEventListener('resize',positionLegacyBadgeTooltips,{passive:true});
+window.addEventListener('resize',positionProfileBadgeTooltips,{passive:true});
 function bindProfileControls(){
-  bindProfileAvatarFallback();positionLegacyBadgeTooltips();
+  bindProfileAvatarFallback();positionProfileBadgeTooltips();
   $('#open-boing')?.addEventListener('click',showBoing);
   $('#profile-logout')?.addEventListener('click',logoutAccount);
   $('#profile-email-toggle')?.addEventListener('click',async event=>{
@@ -642,7 +647,7 @@ function renderPublicFlareProfile(){
   const boing=profile.boing,badges=sortProfileBadges(Array.isArray(boing.badges)?boing.badges:[]).filter(badge=>badge.equipped),created=profile.created_at?dateFormat.format(new Date(profile.created_at)):'—';
   const stats=[['Голосование',`${formatProfileNumber(profile.votes_done)} / ${formatProfileNumber(profile.total_nominations)}`,'номинаций заполнено'],['Рекорд BOING!',formatProfileNumber(boing.best_score),'очков за один раунд'],['COINS',formatProfileNumber(boing.coins),'баланс участника'],['Во FLARE',formatProfileNumber(profile.days_with_flare),'дней с регистрации']];
   const content=`${publicProfileHeader(profile.nickname)}<div class="public-profile-body"><div class="profile-scroll public-profile-scroll"><div class="public-profile-layout"><div class="public-profile-info"><section class="profile-identity ${profile.banner?'has-custom-banner':''}">${profile.banner?`<img class="profile-banner" src="${profile.banner}" alt="Фотобаннер профиля">`:''}<div class="profile-identity-shade"></div><div class="profile-identity-main">${profileAvatarMarkup(profile)}<div class="profile-details"><div class="profile-nickname-line"><h3>${esc(profile.nickname)}</h3><div class="profile-equipped-badges">${badges.length?badges.map(badge=>publicProfileBadgeMarkup(badge,true)).join(''):'<span class="profile-no-badge">Без бейджей</span>'}</div></div><dl class="profile-meta"><div><dt>Дата регистрации</dt><dd>${esc(created)}</dd></div></dl></div></div></section><div class="profile-stats">${stats.map(([label,value,hint])=>`<div class="profile-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(hint)}</small></div>`).join('')}</div><div class="profile-footer-actions public-profile-footer">${profileReputationMarkup(profile)}</div></div></div></div><aside class="public-profile-bob-card"><span>BOB УЧАСТНИКА</span><div class="bob public-bob-character" aria-label="BOB участника ${esc(profile.nickname)}">${bobCharacterMarkup(boing)}</div><strong>${esc(boing.bob_name||'BOB')}</strong><small>${boing.face?'лицо нарисовано в BOING!':'классическое лицо BOB'}</small></aside></div>`;
-  replaceModalView(content,'profile-modal public-profile-modal');const bobCard=$('.public-profile-bob-card');if(bobCard)$('.public-profile-layout').append(bobCard);$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();positionLegacyBadgeTooltips();bindPublicReputationControls();
+  replaceModalView(content,'profile-modal public-profile-modal');const bobCard=$('.public-profile-bob-card');if(bobCard)$('.public-profile-layout').append(bobCard);$('#public-profile-back').onclick=()=>showBoingLeaders();bindProfileAvatarFallback();positionProfileBadgeTooltips();bindPublicReputationControls();
 }
 function bindPublicReputationControls(){
   $$('[data-reputation-value]',$('.public-profile-modal')||document).forEach(button=>button.onclick=()=>ratePublicProfile(Number(button.dataset.reputationValue)));

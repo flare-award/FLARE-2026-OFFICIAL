@@ -53,7 +53,7 @@
 .profile-badge.rarity-legendary.is-equipped{animation:profileBadgeLegendaryGlow 4.6s ease-in-out infinite}
 .profile-badge[data-badge-id="boing-100k"].is-equipped .profile-badge-icon{filter:drop-shadow(0 0 4px rgba(var(--badge-rgb),.3))}
 .profile-badge[data-badge-id="legend"].is-equipped .profile-badge-icon{filter:drop-shadow(0 0 4px rgba(var(--badge-secondary-rgb),.26))}
-.profile-badge[data-badge-id="creator"] .profile-badge-icon svg path:first-child{fill:rgba(var(--badge-rgb),.1)}
+.profile-badge[data-badge-id="creator"] .profile-badge-icon svg path:first-child{fill:rgba(var(--badge-rgb),.08)}
 .profile-badge[data-badge-id="boing-100k"] .profile-badge-icon svg{fill:rgba(var(--badge-rgb),.08)}
 @keyframes profileBadgeLegendaryGlow{0%,100%{box-shadow:0 0 0 1px rgba(var(--badge-rgb),.02),0 0 9px rgba(var(--badge-rgb),.08),inset 0 0 12px rgba(var(--badge-secondary-rgb),.035)}50%{box-shadow:0 0 0 1px rgba(var(--badge-rgb),.06),0 0 18px rgba(var(--badge-rgb),.17),inset 0 0 16px rgba(var(--badge-secondary-rgb),.07)}}
 .profile-meta{display:grid;grid-template-columns:1fr 1.25fr;gap:16px;margin:19px 0 0}
@@ -503,9 +503,6 @@
 .profile-title-line .profile-mystery{min-width:0;padding:0}
 .profile-head-actions>.profile-badge-edit-toggle:disabled,.profile-head-actions>.profile-badge-edit-toggle:disabled:hover{border-color:rgba(255,255,255,.08);background:#11110f;color:#68645b;opacity:.62;cursor:not-allowed}
 .profile-appearance-actions{gap:10px}
-.profile-small-button.profile-appearance-save{min-width:112px;border-color:rgba(242,84,103,.34);background:rgba(242,84,103,.09);color:#f28391}
-.profile-small-button.profile-appearance-save:hover:not(:disabled){border-color:rgba(242,84,103,.58);background:rgba(242,84,103,.15);color:#ffb0ba}
-.profile-small-button.profile-appearance-save:disabled{opacity:.5;cursor:wait}
 .profile-footer-actions{align-items:center;flex-direction:row}
 .profile-footer-actions .profile-logout{width:auto}
 .profile-reputation{align-items:center}
@@ -592,3 +589,25 @@
 @media(prefers-reduced-motion:reduce){
  .profile-badge[data-badge-id^="legacy-"][data-badge-id$="-2"].is-equipped{animation:none;background-position:50% 50%}
 }
+
+/* Double wins have a permanent visual tier, even with motion disabled. */
+.profile-equipped-badges .profile-badge--double{border:2px solid var(--badge-accent);border-radius:10px}
+.profile-equipped-badges .profile-badge--double::before{content:"";position:absolute;inset:2px;border:1px solid rgba(var(--badge-rgb),.32);border-radius:6px;pointer-events:none}
+.profile-badge--double .profile-badge-victories{position:absolute;z-index:1;right:1px;bottom:1px;display:grid;place-items:center;min-width:13px;height:11px;padding:0 2px;border-radius:4px 0 5px 0;background:var(--badge-accent);color:#17130c;font-family:"Sora",sans-serif;font-size:8px;font-weight:800;line-height:1;pointer-events:none}
+.profile-equipped-badges .profile-badge--double>.profile-badge-icon{width:18px;height:18px;margin:-3px 3px 0 0}
+.profile-equipped-badges .profile-badge--double>.profile-badge-icon svg{width:18px;height:18px}
+.profile-badge--double.is-draft-removed .profile-badge-victories{opacity:.4}
+.profile-badge--double.is-draft-removed::before{opacity:.3}
+/* Creator: a pen-nib maker's seal, brighter and more distinctive than winner honors. */
+.profile-badge[data-badge-id="creator"]{--badge-accent:#ffd88c;--badge-rgb:255,216,140;--badge-secondary-rgb:241,123,183;border-width:2px;border-radius:11px}
+.profile-badge[data-badge-id="creator"].is-equipped{border-color:#ffd88c;background:linear-gradient(125deg,rgba(255,216,140,.1),rgba(241,123,183,.3),rgba(255,216,140,.24),rgba(241,123,183,.08)),#18110e;background-size:220% 100%;animation:profileCreatorHonor 6s ease-in-out infinite;box-shadow:inset 0 0 0 1px rgba(255,238,189,.23),0 0 13px rgba(255,204,114,.25)}
+.profile-badge[data-badge-id="creator"].is-equipped>.profile-badge-icon{filter:drop-shadow(0 0 3px rgba(255,216,140,.45))}
+@keyframes profileCreatorHonor{
+ 0%,100%{background-position:100% 50%;box-shadow:inset 0 0 0 1px rgba(255,238,189,.23),0 0 12px rgba(255,204,114,.22),0 0 3px rgba(241,123,183,.16)}
+ 50%{background-position:0% 50%;box-shadow:inset 0 0 0 1px rgba(255,238,189,.38),0 0 18px rgba(255,204,114,.34),0 0 8px rgba(241,123,183,.22)}
+}
+/* Same primary-button family as login, in affirmative gold rather than red. */
+.profile-appearance-actions .profile-appearance-save{display:inline-flex;align-items:center;justify-content:center;min-width:128px;min-height:44px;padding:12px 22px;border:0;border-radius:11.25px;background:linear-gradient(110deg,#ffc107,#ff8300);color:#17120a;font:700 14px var(--font);letter-spacing:.02em;cursor:pointer;transition:filter .2s,opacity .2s}
+.profile-appearance-actions .profile-appearance-save:hover:not(:disabled){background:linear-gradient(110deg,#ffd044,#ff9c28);color:#17120a;filter:brightness(1.04)}
+.profile-appearance-actions .profile-appearance-save:disabled{opacity:.5;cursor:wait}
+@media(prefers-reduced-motion:reduce){.profile-badge[data-badge-id="creator"].is-equipped{animation:none;background-position:50% 50%}.profile-appearance-actions .profile-appearance-save{transition:none}}
