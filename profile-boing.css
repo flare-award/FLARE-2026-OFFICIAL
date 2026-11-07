@@ -759,3 +759,53 @@
 .boing-picture-preview{display:grid;place-items:center;min-height:126px;color:#e3c589;pointer-events:none}
 .boing-picture-preview svg{width:62px;height:62px;stroke-width:1.35}
 @media(prefers-reduced-motion:reduce){.profile-avatar.frame-eclipse::before,.profile-avatar.frame-eclipse::after{animation:none;transform:none}}
+
+/* One shared row grid: banner/BOB, 2x2 stats/full-height record, then actions. */
+.public-profile-layout,.own-profile-layout{align-items:stretch;gap:14px 16px}
+.public-profile-info,.own-profile-info,.profile-bob-aside{display:contents}
+.public-profile-info>.profile-identity,.own-profile-info>.profile-identity{grid-column:1;grid-row:1;margin:0;align-self:stretch;min-width:0}
+.profile-bob-aside>.public-profile-bob-card{grid-column:2;grid-row:1;align-self:stretch;min-height:0;height:auto;justify-content:center;margin:0;z-index:1}
+.public-profile-info>.profile-stats,.own-profile-info>.profile-stats{grid-column:1;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;align-self:stretch}
+.profile-bob-aside>.profile-streak-record{grid-column:2;grid-row:2;align-self:stretch;justify-content:center;min-height:0;margin:0;box-sizing:border-box}
+.public-profile-info>.profile-footer-actions,.own-profile-info>.profile-footer-actions{grid-column:1/-1;grid-row:3;display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin:0;padding:8px 0 0}
+.own-profile-info>.profile-appearance-controls{grid-column:1/-1;grid-row:2;margin:0}
+.own-profile-layout:has(.is-appearance-editing) .profile-stats,.own-profile-layout:has(.is-appearance-editing) .profile-streak-record{grid-row:3}
+.own-profile-layout:has(.is-appearance-editing) .profile-footer-actions{grid-row:4}
+/* Elevate the entire isolated banner, not just its tooltip's local stacking context. */
+.profile-identity:has(.profile-badge:hover),.profile-identity:has(.profile-badge:focus-within){z-index:10}
+.profile-badge-tooltip{max-width:calc(100vw - 24px);-webkit-backdrop-filter:none;backdrop-filter:none;background:#15130f}
+/* The logo keeps its centre column even without the account/back button. */
+.boing-head>.boing-logo{grid-column:2;grid-row:1}
+.boing-head>.close-button{grid-column:3;grid-row:1;justify-self:end}
+.boing-game-footer{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;margin-top:12px}
+.boing-game-footer>.ogonyok-game{order:0;min-width:0;margin:0;padding:6px 10px;border-radius:13px;gap:8px;align-self:stretch}
+.boing-game-footer .ogonyok-mark{width:34px;height:39px}
+.boing-game-footer .ogonyok-copy strong{font-size:11px}
+.boing-game-footer .ogonyok-copy>div{flex-wrap:wrap;gap:3px 8px}
+.boing-game-footer .ogonyok-copy p{font-size:9px;margin:3px 0 5px}
+.boing-game-footer .ogonyok-copy p span{display:none}
+@media(max-width:700px){
+ .public-profile-layout,.own-profile-layout{gap:10px}
+ .profile-bob-aside>.public-profile-bob-card{justify-content:center}
+ .profile-streak-record>span{font-size:8px;line-height:1.6;letter-spacing:.04em}
+ .profile-footer-actions .profile-logout{width:auto;flex:0 0 auto}
+ .boing-game-footer{grid-template-columns:minmax(0,1fr);gap:9px}
+ .boing-game-footer>.ogonyok-game{width:100%;box-sizing:border-box}
+ .boing-game-actions{justify-content:flex-start}
+}
+@media(min-width:540px) and (max-width:700px){.boing-game-footer{grid-template-columns:auto minmax(0,1fr)}}
+@media(max-width:420px){
+ .public-profile-info>.profile-stats,.own-profile-info>.profile-stats{gap:8px}
+ .public-profile-info .profile-stat,.own-profile-info .profile-stat{padding:11px 8px}
+ .profile-stat>span{font-size:7px}.profile-stat>strong{font-size:20px}.profile-stat>small{font-size:8px;line-height:1.5}
+ .profile-footer-actions .profile-logout{padding-inline:10px;font-size:9px}
+}
+@media(max-width:539px){
+ .boing-game-footer{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8px}
+ .boing-game-actions{flex-direction:column;align-items:stretch;gap:6px;min-width:0}
+ .boing-game-actions .boing-rename{gap:6px;padding-inline:6px;font-size:9px}
+ .boing-game-footer>.ogonyok-game{padding:6px;gap:5px}
+ .boing-game-footer .ogonyok-mark{width:27px;height:32px}
+ .boing-game-footer .ogonyok-copy strong{font-size:10px}
+ .boing-game-footer .ogonyok-copy>div>span,.boing-game-footer .ogonyok-copy p{font-size:8px;white-space:normal}
+}

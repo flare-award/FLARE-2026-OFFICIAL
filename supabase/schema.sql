@@ -2800,3 +2800,36 @@ insert into public.flare_boing_items(id,kind,name,description,base_price,max_lev
 on conflict(id) do update set kind=excluded.kind,name=excluded.name,description=excluded.description,base_price=excluded.base_price,max_level=excluded.max_level,sort_order=excluded.sort_order;
 update public.flare_boing_items set sort_order=99 where id='banner-custom';
 commit;
+
+-- Concise badge copy only; identities, ownership, rarities and award counts stay intact.
+update public.flare_badges b set description=v.description from (values
+('legacy-king-2','Две победы подряд в номинации FLARE KING.'),
+('legacy-multigaming-2','Две победы подряд в номинации MULTIGAMING года.'),
+('legacy-conflict-1','Командная победа в «Конфликте года».'),
+('legacy-conflict-2','Две победы в «Конфликте года».'),
+('legacy-sos-1','Победа за 4-й эпизод «THE FANTASTIC SPIDER-MAN».'),
+('legacy-track-1','Победа за трек Maronnix и Eozik «Лютый гандон».'),
+('legacy-scam-1','Победа Nodben в «Кидалове года».'),
+('legacy-duo-1','Победный дуэт Dony_zq и Nodben.'),
+('legacy-freak-1','Победа в номинации «Фрик года».'),
+('legacy-fail-1','Победа за несостоявшуюся встречу Flourin и Nodben.'),
+('legacy-toxic-1','Победа в номинации «Токсик года».'),
+('legacy-breakthrough-1','Победа в номинации «Прорыв года».'),
+('legacy-phrase-1','Победа за фразу Eozik «Я НЕ ВЕРЮ».'),
+('legacy-fortnite-2','Два титула лучшего Fortnite-участника.'),
+('legacy-meme-2','Две победы Qusti в номинации «Человек-мем года».'),
+('legacy-event-1','Победа за событие «Qusti побрился налысо».'),
+('legacy-cs-1','Титул лучшего CS-участника прошлого сезона.'),
+('legacy-player-1','Победа Rezo1n в номинации «Игрок года».'),
+('legacy-cringe-1','Победа Cloury в номинации «Кринж года».'),
+('community-favorite','Получил 5 положительных оценок от участников.'),
+('boing-10k','Набрал 10 000 очков за один раунд BOING.'),
+('boing-100k','Набрал 100 000 очков за один раунд BOING.'),
+('legend','Легендарный бейдж из магазина BOING.'),
+('creator','Создатель премии FLARE.'),
+('tester','Помогал тестировать FLARE.'),
+('legacy-laureate-3','3 победы в прошлых сезонах FLARE.'),
+('legacy-laureate-4','4 победы в прошлых сезонах FLARE.'),
+('legacy-laureate-5','5 побед в прошлых сезонах FLARE.'),
+('legacy-laureate-7','7 побед в прошлых сезонах FLARE.')
+) as v(id,description) where b.id=v.id;
