@@ -637,7 +637,7 @@ INSERT INTO public.flare_options AS existing_option (id,nomination_id,name,kind,
 ('person-12-rezo1n','shame-of-year','Rezo1n','person','Rezo1n') ,
 ('person-2-akirakume','multigaming','Akirakume','person','Akirakume') ,
 ('person-2-awal','multigaming','Awal','person','Awal') ,
-('person-2-dony-zq','multigaming','Dony_zq','person','Dony_zq') ,
+('person-2-dony-zq','multigaming','Nodben','person','Nodben') ,
 ('person-2-izumrudik','multigaming','Izumrudik','person','Izumrudik') ,
 ('person-2-maronnix','multigaming','Maronnix','person','Maronnix') ,
 ('person-3-akirakume','best-cs','Akirakume','person','Akirakume') ,
@@ -2833,3 +2833,8 @@ update public.flare_badges b set description=v.description from (values
 ('legacy-laureate-5','5 побед в прошлых сезонах FLARE.'),
 ('legacy-laureate-7','7 побед в прошлых сезонах FLARE.')
 ) as v(id,description) where b.id=v.id;
+
+-- Preserve the option ID and all ballot references; change only this nomination's participant.
+update public.flare_options
+set name='Nodben', person_nickname='Nodben'
+where id='person-2-dony-zq' and nomination_id='multigaming' and kind='person';
