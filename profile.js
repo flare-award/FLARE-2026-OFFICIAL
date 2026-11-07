@@ -291,9 +291,13 @@ function bindBoingNavigation(active){
   $$('[data-boing-view]').forEach(button=>button.onclick=()=>{if(button.dataset.boingView===active)return;if(button.dataset.boingView==='game')renderBoingGame();else if(button.dataset.boingView==='shop')showBoingShop();else showBoingLeaders()});
 }
 function bobAccessoryMarkup(accessory){
-  if(accessory==='bob-crown')return '<span class="bob-crown" aria-hidden="true"><i></i><i></i><i></i></span>';
-  if(accessory==='bob-cap')return '<span class="bob-cap" aria-hidden="true"></span>';
+  if(accessory==='bob-crown')return '<span class="bob-crown bob-accessory-outside" aria-hidden="true"><i></i><i></i><i></i></span>';
+  if(accessory==='bob-cap')return '<span class="bob-cap bob-accessory-outside" aria-hidden="true"></span>';
   if(accessory==='bob-shades')return '<span class="bob-shades" aria-hidden="true"><i></i><i></i></span>';
+  if(accessory==='bob-fedora')return '<span class="bob-fedora bob-accessory-outside" aria-hidden="true"><i></i></span>';
+  if(accessory==='bob-beanie')return '<span class="bob-beanie bob-accessory-outside" aria-hidden="true"><i></i></span>';
+  if(accessory==='bob-sneakers')return '<span class="bob-sneakers bob-accessory-outside" aria-hidden="true"><i></i><i></i></span>';
+  if(accessory==='bob-bowtie')return '<span class="bob-bowtie bob-accessory-outside" aria-hidden="true"><i></i></span>';
   return '';
 }
 let defaultBobFaceSource='';
@@ -354,7 +358,7 @@ function resetBobPosition(scene,force=false){
   if(force||!scene.running){scene.x=Math.max(0,(width-scene.size)/2);scene.y=Math.max(32,(height-scene.size)*.38);scene.vx=0;scene.vy=0;scene.rotation=0;scene.spin=0;scene.accumulator=0}
   else{scene.x=clamp(scene.x,0,Math.max(0,width-scene.size));scene.y=clamp(scene.y,0,Math.max(0,height-scene.size))}
   // Cache accessory geometry once per layout, rather than measuring on every frame.
-  const hat=scene.element.querySelector('.bob-crown,.bob-cap'),radius=scene.size/2;
+  const hat=scene.element.querySelector('.bob-accessory-outside'),radius=scene.size/2;
   scene.accessoryCorners=[];
   if(hat){
     const x=hat.offsetLeft,y=hat.offsetTop,w=hat.offsetWidth,h=hat.offsetHeight,isCap=hat.classList.contains('bob-cap');
@@ -375,7 +379,7 @@ function paintBob(scene){
     name.style.left=`${left}px`;name.style.top=`${top}px`;
     name.classList.toggle('is-obscured',top+name.offsetHeight>scene.arena.clientHeight-8);
   }
-  const edit=$('#bob-face-edit');if(edit)edit.disabled=!canEditBobFace(scene);
+  for(const id of ['bob-face-edit','boing-rename']){const control=$('#'+id);if(control){control.disabled=!canEditBobFace(scene);control.title=control.disabled?'Можно менять перед началом нового раунда':''}}
 }
 function updateBoingHud(){
   const boing=profileState.data?.boing;if(!boing)return;
@@ -447,6 +451,9 @@ function clickBob(scene,event){
   if(!scene.runId)startBoingRun(scene);
   const boing=profileState.data.boing,points=Math.max(1,Number(boing.points_per_click)||1);
   scene.score+=points;scene.clicks++;scene.running=true;
+  // Tap assist cancels falling speed before the kick, so gravity cannot swallow a late tap.
+  // The actual click impulse is unchanged (+5%); rising momentum and torque are preserved.
+  scene.vy=Math.min(scene.vy,0);
   applyBobClickImpulse(scene,bobClickPoint(scene,event));
   scene.arena.classList.add('is-playing');$('#boing-hint').textContent='';paintBob(scene);
   if(!scene.raf){scene.last=performance.now();scene.accumulator=0;scene.raf=requestAnimationFrame(now=>stepBoing(scene,now))}
@@ -541,7 +548,7 @@ async function openBoingQuickEntry(){
   }catch(error){if(request===profileState.request&&token===profileToken())renderProfileError(error)}
 }
 function showBoingRename(){
-  const boing=profileState.data?.boing;if(!boing)return;
+  const boing=profileState.data?.boing;if(!boing||!canEditBobFace(boingScene))return;
   pauseBoingScene();profileState.view='rename';
   const price=Number(boing.rename_price)||0;
   replaceModalView(`${boingHeader('game')}<form class="boing-rename-panel" id="boing-rename-form"><span class="eyebrow">НОВОЕ ИМЯ</span><h3>Как назовём BOB?</h3><p>1–16 букв, цифр, пробелов, дефисов или подчёркиваний.</p><input id="boing-name-input" name="name" value="${esc(boing.bob_name)}" maxlength="16" required autocomplete="off" aria-label="Новое имя BOB"><span class="boing-rename-cost">${price?`${formatProfileNumber(price)} COINS`:`Бесплатно · осталось ${boing.free_renames_left}`}</span><div><button class="profile-small-button" id="boing-rename-cancel" type="button">Отмена</button><button class="button" type="submit">Сохранить имя</button></div></form>`,'profile-modal boing-modal');
@@ -665,6 +672,12 @@ function shopItemButton(item,boing){
   }else if(item.owned)return '<button type="button" disabled>Куплено</button>';
   return `<button type="button" data-buy-item="${esc(item.id)}">${formatProfileNumber(item.price)} COINS</button>`;
 }
+// Official Lucide sliders-horizontal / palette / user-round (ISC).
+function boingShopGroupIcon(category){
+  if(category==='cosmetics')return boingControlIcon('face');
+  const paths='<path d="M10 5H3" />  <path d="M12 19H3" />  <path d="M14 3v4" />  <path d="M16 17v4" />  <path d="M21 12h-9" />  <path d="M21 19h-5" />  <path d="M21 5h-7" />  <path d="M8 10v4" />  <path d="M8 12H3" />' ,profilePaths='<circle cx="12" cy="8" r="5" />  <path d="M20 21a8 8 0 0 0-16 0" />';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${category==='upgrades'?paths:profilePaths}</svg>`;
+}
 const boingShopGroups={upgrades:{label:'Апгрейды',kinds:['click','coin']},cosmetics:{label:'Косметика',kinds:['accessory','leader','face']},profile:{label:'Профиль',kinds:['frame','banner','badge']}};
 const boingShopKindLabels={click:'CLICK',coin:'COINS',accessory:'BOB',leader:'ТОП',face:'BOB PNG',frame:'AVATAR',banner:'PROFILE',badge:'BADGE'};
 function showBoingShop(category=profileState.shopCategory||'upgrades'){
@@ -672,8 +685,8 @@ function showBoingShop(category=profileState.shopCategory||'upgrades'){
   if(!boingShopGroups[category])category='upgrades';
   pauseBoingScene();profileState.view='shop';profileState.shopCategory=category;
   const allItems=Array.isArray(boing.shop)?boing.shop:[],items=allItems.filter(item=>boingShopGroups[category].kinds.includes(item.kind));
-  const tabs=Object.entries(boingShopGroups).map(([id,group])=>`<button type="button" data-shop-category="${id}" class="${id===category?'is-active':''}">${group.label}</button>`).join('');
-  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3><p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?'Улучшения действуют на все следующие клики и начисления COINS.':category==='cosmetics'?'Аксессуары можно надевать и снимать. BOB NAME IN LEADERS открывает имя в таблице, а BOB PNG FACE — загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
+  const tabs=Object.entries(boingShopGroups).map(([id,group])=>`<button type="button" data-shop-category="${id}" class="${id===category?'is-active':''}">${boingShopGroupIcon(id)}<span>${group.label}</span></button>`).join('');
+  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-balance"><span>ТВОЙ БАЛАНС</span><strong>${formatProfileNumber(boing.coins)} <small>COINS</small></strong></div><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3>${item.kind==='accessory'?`<div class="boing-shop-preview" aria-hidden="true"><div class="boing-preview-bob">${bobCharacterMarkup({...boing,selected_accessory:item.id})}</div></div>`:''}<p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?(boing.economy_version===2?'POWER CLICK увеличивает очки, но не ускоряет выдачу COINS. Награда — за каждые 100 кликов: 100 COINS, с 10 000 кликов — 200. COINS BOOST добавляет 10% за уровень. Следующий уровень всегда дороже.':'Улучшения действуют на следующие клики и начисления COINS. Актуальные цены и эффекты указаны в карточках.'):category==='cosmetics'?'Аксессуары можно надевать и снимать. BOB NAME IN LEADERS открывает имя в таблице, а BOB PNG FACE — загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
   bindBoingNavigation('shop');
   $$('[data-shop-category]').forEach(button=>button.onclick=()=>showBoingShop(button.dataset.shopCategory));
   $$('[data-buy-item]').forEach(button=>button.onclick=async()=>{
@@ -701,7 +714,7 @@ function boingLeaderAvatarMarkup(nickname){
 }
 function renderBoingLeaderRows(){
   const panel=$('.boing-leaders-panel');if(!panel)return;
-  const rows=profileState.leaders.length?profileState.leaders.map(player=>`<div class="boing-leader-row ${player.nickname===state.session?.nickname?'is-me':''}"><span class="boing-leader-rank">${String(player.rank).padStart(2,'0')}</span><div class="boing-leader-user">${boingLeaderAvatarMarkup(player.nickname)}<div><button class="boing-leader-name" type="button" data-public-profile="${esc(player.nickname)}" aria-label="Открыть профиль ${esc(player.nickname)}"><strong>${esc(player.nickname)}</strong></button><small>${player.bob_name?`BOB: ${esc(player.bob_name)}`:'Имя BOB скрыто'}</small></div></div><span><b>${formatProfileNumber(player.best_score)}</b><small>очков</small></span><span><b>${formatProfileNumber(player.coins)}</b><small>COINS</small></span></div>`).join(''):'<div class="boing-leaders-empty"><strong>Пока никто не играл</strong><p>Первый рекорд может быть твоим.</p></div>';
+  const rows=profileState.leaders.length?profileState.leaders.map(player=>`<div class="boing-leader-row ${player.nickname===state.session?.nickname?'is-me':''}"><span class="boing-leader-rank">${String(player.rank).padStart(2,'0')}</span><div class="boing-leader-user">${boingLeaderAvatarMarkup(player.nickname)}<div class="boing-leader-identity"><button class="boing-leader-name" type="button" data-public-profile="${esc(player.nickname)}" aria-label="Открыть профиль ${esc(player.nickname)}"><strong>${esc(player.nickname)}</strong></button>${player.bob_name?`<span class="boing-leader-bob-name" title="BOB: ${esc(player.bob_name)}">${esc(player.bob_name)}</span>`:''}</div></div><span><b>${formatProfileNumber(player.best_score)}</b><small>очков</small></span><span><b>${formatProfileNumber(player.coins)}</b><small>COINS</small></span></div>`).join(''):'<div class="boing-leaders-empty"><strong>Пока никто не играл</strong><p>Первый рекорд может быть твоим.</p></div>';
   $('.boing-leaders-loading',panel)?.remove();panel.insertAdjacentHTML('beforeend',`<div class="boing-leader-list">${rows}</div>`);
   bindProfileAvatarFallback();$$('[data-public-profile]',panel).forEach(button=>button.onclick=()=>showPublicFlareProfile(button.dataset.publicProfile));
 }
