@@ -840,7 +840,7 @@
 .boing-leaders-panel{display:flex;flex-direction:column}
 .boing-leaders-head{flex:0 0 auto}.boing-leader-list{flex:0 0 auto;gap:10px}
 .boing-leaders-tip{display:flex;align-items:flex-start;gap:9px;flex:0 0 auto;margin: auto 0 0;padding-top:20px;font-size:13px;line-height:1.6;color:#bab8a9}
-.boing-leaders-tip>img{flex:0 0 18px;width:18px;height:18px;margin-top:2px;opacity:.72}
+.boing-leaders-tip>img{flex:0 0 18px;width:18px;height:1lh;margin-top:0;object-fit:contain;opacity:.72}
 .boing-leader-labels{gap:17px}
 .boing-leader-row{padding:16px 17px}
 .boing-leader-avatar{flex-basis:40px;width:40px;height:40px}
