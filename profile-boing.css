@@ -651,3 +651,53 @@
 /* Real profile-avatar classes are reused, including gold ornaments and reduced motion. */
 .boing-frame-preview{display:grid;place-items:center;min-height:164px;margin-top:8px;padding:24px;pointer-events:none}
 .boing-frame-preview .profile-avatar{flex:0 0 104px;width:104px;height:104px;margin:0}
+
+/* Premium frames: two small, masked annuli; only the ornament rotates, never the photo.
+   All decoration stays within the same 13px envelope as GOLD. No blur or layout animation. */
+.profile-avatar.frame-aurora{
+ border-color:#b1f3ed;
+ box-shadow:0 0 0 2px #243c61,0 0 0 4px rgba(155,139,255,.35),0 8px 28px rgba(88,182,213,.17),0 0 16px rgba(178,112,238,.16);
+}
+.profile-avatar.frame-aurora::before,.profile-avatar.frame-aurora::after,
+.profile-avatar.frame-inferno::before,.profile-avatar.frame-inferno::after{
+ content:"";position:absolute;z-index:3;border-radius:50%;pointer-events:none;
+ -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 6px),#000 calc(100% - 5px),#000 calc(100% - 1px),transparent 100%);
+ mask:radial-gradient(closest-side,transparent calc(100% - 6px),#000 calc(100% - 5px),#000 calc(100% - 1px),transparent 100%);
+}
+.profile-avatar.frame-aurora::before{
+ inset:-13px;
+ background:conic-gradient(from 12deg,#243861 0deg,#72dcd8 28deg,#ecfff9 43deg,#87b7f2 56deg,#624aa0 87deg,#252c50 112deg,#7161be 145deg,#ddbfff 165deg,#faf3ff 174deg,#9d82e2 190deg,#343361 225deg,#2d696e 260deg,#b0fff0 282deg,#dffdfc 291deg,#619cc4 309deg,#243861 360deg);
+ animation:profileAuroraOrbit 28s linear infinite;
+}
+.profile-avatar.frame-aurora::after{
+ z-index:4;inset:-7px;
+ background:repeating-conic-gradient(from 0deg,rgba(210,246,255,.18) 0deg 8deg,rgba(237,255,252,.75) 9deg 10deg,transparent 11deg 18deg),conic-gradient(transparent 0deg 38deg,#e3fff7 45deg,#a68fff 59deg,transparent 80deg 214deg,#94f9e1 231deg,#f2e0ff 240deg,transparent 264deg 360deg);
+ -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 3px),#000 calc(100% - 2px),#000 calc(100% - .5px),transparent 100%);
+ mask:radial-gradient(closest-side,transparent calc(100% - 3px),#000 calc(100% - 2px),#000 calc(100% - .5px),transparent 100%);
+ animation:profileAuroraCounterOrbit 36s linear infinite;
+}
+.profile-avatar.frame-inferno{
+ border-color:#ffe0a0;
+ box-shadow:0 0 0 2px #703021,0 0 0 4px rgba(255,165,82,.38),0 8px 30px rgba(205,67,32,.22),0 0 17px rgba(255,172,70,.15);
+}
+.profile-avatar.frame-inferno::before{
+ inset:-13px;
+ background:repeating-conic-gradient(from 2deg,rgba(45,12,10,.75) 0deg 3deg,transparent 4deg 11deg,rgba(255,232,166,.8) 12deg 13deg,transparent 14deg 18deg),conic-gradient(from 8deg,#652719 0deg,#d26532 31deg,#fff1bf 45deg,#e99a4d 62deg,#773120 97deg,#c75828 135deg,#ffdf88 160deg,#fff0bc 173deg,#ae4b25 204deg,#5e241a 239deg,#d56c31 278deg,#ffedb4 300deg,#bf592e 327deg,#652719 360deg);
+ animation:profileInfernoForgeOrbit 32s linear infinite;
+}
+.profile-avatar.frame-inferno::after{
+ z-index:4;inset:-7px;
+ background:conic-gradient(from 0deg,#78301b 0deg,#ffd17d 32deg,#fff4d5 42deg,#d85b2e 57deg,#762819 96deg,#f5ad5b 135deg,#ffe4aa 146deg,#ad4123 169deg,#662219 216deg,#ffbd65 262deg,#fff0c8 276deg,#d35c30 294deg,#78301b 360deg);
+ -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 3px),#000 calc(100% - 2px),#000 calc(100% - .5px),transparent 100%);
+ mask:radial-gradient(closest-side,transparent calc(100% - 3px),#000 calc(100% - 2px),#000 calc(100% - .5px),transparent 100%);
+ animation:profileInfernoEmberOrbit 19s linear infinite reverse,profileInfernoEmberLight 7s ease-in-out infinite;
+}
+@keyframes profileAuroraOrbit{to{transform:rotate(360deg)}}
+@keyframes profileAuroraCounterOrbit{to{transform:rotate(-360deg)}}
+@keyframes profileInfernoForgeOrbit{to{transform:rotate(360deg)}}
+@keyframes profileInfernoEmberOrbit{to{transform:rotate(360deg)}}
+@keyframes profileInfernoEmberLight{0%,100%{opacity:.67}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+ .profile-avatar.frame-aurora::before,.profile-avatar.frame-aurora::after,
+ .profile-avatar.frame-inferno::before,.profile-avatar.frame-inferno::after{animation:none;transform:none;opacity:1}
+}
