@@ -15,10 +15,12 @@ const profileViewIsActive=view=>profileState.view===view&&Boolean($('.profile-mo
 const boingSeenKey=nickname=>`flare-boing-intro:${String(nickname||'').toLowerCase()}`;
 function readBoingSeen(nickname){try{return localStorage.getItem(boingSeenKey(nickname))==='1'}catch{return false}}
 function writeBoingSeen(nickname){try{localStorage.setItem(boingSeenKey(nickname),'1')}catch{}}
+function isBoingUnlocked(){
+  const nickname=state.session?.nickname||'',ownsProfile=Boolean(nickname&&profileState.data?.nickname?.toLowerCase()===nickname.toLowerCase());
+  return Boolean(nickname&&(readBoingSeen(nickname)||(ownsProfile&&profileState.data?.boing?.game_intro_seen)));
+}
 function updateBoingQuickEntry(){
-  const button=$('#boing-quick-entry');if(!button)return;
-  const nickname=state.session?.nickname||'',ownsProfile=profileState.data?.nickname?.toLowerCase()===nickname.toLowerCase();
-  button.hidden=!Boolean(nickname&&(readBoingSeen(nickname)||(ownsProfile&&profileState.data?.boing?.game_intro_seen)));
+  const button=$('#boing-quick-entry');if(button)button.hidden=!isBoingUnlocked();
 }
 function syncBoingUnlock(){
   if(profileState.data?.boing?.game_intro_seen&&state.session?.nickname)writeBoingSeen(state.session.nickname);
@@ -37,7 +39,8 @@ function mergeBoingState(boing){
   const firePanel=$('.ogonyok-game'),fireKey=JSON.stringify(boing.streak||{});if(firePanel&&firePanel.dataset.streakState!==fireKey&&!firePanel.contains(document.activeElement)){firePanel.innerHTML=ogonyokPanel(boing);firePanel.dataset.streakState=fireKey;}
 }
 function profileHeader(title='Ваш аккаунт',mystery=false,appearance=false){
-  return `<header class="profile-menu-head"><div class="profile-menu-heading"><span class="eyebrow">FLARE ID</span><div class="profile-title-line"><h2>${esc(title)}</h2>${mystery?'<span class="profile-title-divider" aria-hidden="true"></span><button class="profile-mystery" id="open-boing" type="button" aria-label="Открыть BOING!">???</button>':''}</div></div><div class="profile-head-actions">${appearance?profileBadgeEditToggleMarkup():''}<button class="close-button" type="button" aria-label="Закрыть">×</button></div></header>`;
+  const showMystery=mystery&&!isBoingUnlocked();
+  return `<header class="profile-menu-head"><div class="profile-menu-heading"><span class="eyebrow">FLARE ID</span><div class="profile-title-line"><h2>${esc(title)}</h2>${showMystery?'<span class="profile-title-divider" aria-hidden="true"></span><button class="profile-mystery" id="open-boing" type="button" aria-label="Открыть BOING!">???</button>':''}</div></div><div class="profile-head-actions">${appearance?profileBadgeEditToggleMarkup():''}<button class="close-button" type="button" aria-label="Закрыть">×</button></div></header>`;
 }
 function profileLoadingMarkup(){
   const nickname=state.session?.nickname||'Профиль';
@@ -213,7 +216,7 @@ async function showProfile(){
   profileState.view='profile';profileState.email=null;profileState.busy=false;resetProfileAppearanceDraft();
   const request=++profileState.request,token=profileToken();
   replaceModalView(profileLoadingMarkup(),'profile-modal account-profile-modal');
-  $('#open-boing').onclick=()=>{const button=$('#open-boing');if(button)button.disabled=true;openBoingQuickEntry()};
+  const mysteryButton=$('#open-boing');if(mysteryButton)mysteryButton.onclick=()=>{const button=$('#open-boing');if(button)button.disabled=true;openBoingQuickEntry()};
   try{
     const reputation=await rpc('prepare_flare_profile',{p_token:token,p_nickname:null});
     const profile=await rpc('get_my_profile',{p_token:token});
