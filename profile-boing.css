@@ -608,6 +608,6 @@
 }
 /* Same primary-button family as login, in affirmative gold rather than red. */
 .profile-appearance-actions .profile-appearance-save{display:inline-flex;align-items:center;justify-content:center;min-width:128px;min-height:44px;padding:12px 22px;border:0;border-radius:11.25px;background:linear-gradient(110deg,#ffc107,#ff8300);color:#17120a;font:700 14px var(--font);letter-spacing:.02em;cursor:pointer;transition:filter .2s,opacity .2s}
-.profile-appearance-actions .profile-appearance-save:hover:not(:disabled){background:linear-gradient(110deg,#ffd044,#ff9c28);color:#17120a;filter:brightness(1.04)}
+.profile-appearance-actions .profile-appearance-save:hover:not(:disabled){transform:none;background:linear-gradient(110deg,#ffd044,#ff9c28);color:#17120a;filter:brightness(1.04)}
 .profile-appearance-actions .profile-appearance-save:disabled{opacity:.5;cursor:wait}
 @media(prefers-reduced-motion:reduce){.profile-badge[data-badge-id="creator"].is-equipped{animation:none;background-position:50% 50%}.profile-appearance-actions .profile-appearance-save{transition:none}}

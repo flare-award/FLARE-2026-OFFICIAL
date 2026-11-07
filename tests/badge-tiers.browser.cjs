@@ -15,6 +15,11 @@ for(const width of [1360,390,320]){
  assert.equal(tiers.creator.animation,'profileCreatorHonor');assert.equal(tiers.double.border,'2px');assert.equal(tiers.mark,'×2');assert.equal(tiers.markPointer,'none');assert.equal(tiers.normal.border,'1px');
  await page.evaluate(()=>beginProfileAppearanceEdit());
  const save=await page.$eval('#profile-appearance-save',el=>{const s=getComputedStyle(el);return {button:el.classList.contains('button'),background:s.backgroundImage,radius:s.borderRadius,color:s.color}});assert(save.button);assert.equal(save.radius,login.radius);assert.equal(save.background,login.background);assert.equal(save.color,'rgb(23, 18, 10)');
+ await page.$eval('#profile-appearance-save',el=>el.scrollIntoView({block:'center',behavior:'instant'}));await new Promise(r=>setTimeout(r,350));
+ const saveBefore=await page.$eval('#profile-appearance-save',el=>el.getBoundingClientRect().y-el.parentElement.getBoundingClientRect().y);
+ await page.hover('#profile-appearance-save');await new Promise(r=>setTimeout(r,250));
+ assert.equal(await page.$eval('#profile-appearance-save',el=>getComputedStyle(el).transform),'none');
+ assert.equal(await page.$eval('#profile-appearance-save',el=>el.getBoundingClientRect().y-el.parentElement.getBoundingClientRect().y),saveBefore);
  await page.screenshot({path:`/tmp/flare-badge-tiers-${width}.png`});
  await page.evaluate(()=>changeBoingBadgeDraft('legacy-king-2',false));await page.evaluate(()=>cancelProfileAppearanceEdit());assert.equal(await page.evaluate(()=>calls.length),0);
  await page.evaluate(()=>beginProfileAppearanceEdit());await page.evaluate(()=>changeBoingBadgeDraft('legacy-king-2',false));await page.evaluate(()=>saveProfileAppearance());assert.equal(await page.evaluate(()=>calls.filter(x=>x.name==='set_my_profile_appearance').length),1);
