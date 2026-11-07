@@ -658,6 +658,16 @@ async function openSocialProfileMenu(button){
     $$('[data-social-photo]',socialPopover).forEach(photoButton=>photoButton.onclick=event=>{event.stopPropagation();const service=photoButton.dataset.socialPhoto;openSocialPhotoPreview(nickname,service,data[`${service}_image`])});positionSocialProfileMenu();
   }catch(error){if(request===socialPopoverRequest&&socialPopover)socialPopover.innerHTML=`<p class="social-profile-empty">${esc(error.message)}</p>`;positionSocialProfileMenu()}
 }
+// Missing photos must never interrupt binding the nomination's voting controls.
+function renderNomineeImageFallback(image){
+  if(!image?.isConnected)return;
+  if(image.classList.contains('visual-photo')){
+    image.classList.add('is-missing');image.closest('.visual')?.classList.add('no-photo');return;
+  }
+  if(image.classList.contains('portrait')){
+    const placeholder=document.createElement('span');placeholder.className='portrait portrait-placeholder';placeholder.setAttribute('aria-hidden','true');placeholder.textContent='Нет фото';image.replaceWith(placeholder);
+  }
+}
 function bindSocialProfileControls(){
   $$('.nominee-grid img').forEach(image=>{if(image.dataset.fallbackBound)return;image.dataset.fallbackBound='true';image.addEventListener('error',()=>renderNomineeImageFallback(image),{once:true});if(image.complete&&image.naturalWidth===0)renderNomineeImageFallback(image)});
   $$('[data-social-nickname]').forEach(button=>button.onclick=event=>{event.preventDefault();event.stopPropagation();openSocialProfileMenu(button)});

@@ -1766,3 +1766,6 @@ body.modal-scroll-locked{position:fixed;left:0;right:0;width:100%;overflow:hidde
 .admin-media-tools #admin-design-search{width:auto}
 #admin-export-feedback{margin:0;color:#c2ad7e;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
 #admin-export-feedback:empty{display:none}
+
+/* Honest fallback for a nominee without a photo; it remains a selectable card. */
+.nominee-card .portrait.portrait-placeholder{display:grid;place-items:center;background:#171716;color:#8c877d;font:500 12px var(--font);border:1px solid #ffffff12}
