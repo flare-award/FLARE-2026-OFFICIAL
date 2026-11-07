@@ -10,4 +10,8 @@ assert.equal(context.isSelfNominee({id:'event-of-year'},{name:'Qusti',type:'vide
 assert.equal(context.isSelfNominee({id:'scam-of-year',allowSelf:true},{name:'Qusti',type:'person'},'Qusti'),false);
 assert.equal(context.isSelfNominee({id:'flare-king'},{name:'Qusti',type:'person'},'qusti'),true);
 assert.equal(context.isSelfNominee({id:'clip-of-year'},{name:'Qusti',type:'video'},''),false);
-console.log('11 self-vote matching/regression checks passed');
+for(const nick of ['Flourin','flourin','Qusti','Maronnix'])assert.equal(context.isSelfNominee({id:'clip-of-year'},{id:'clip-4',name:'У Flourin не грузит',type:'video'},nick),false);
+assert.equal(context.isSelfNominee({id:'clip-of-year'},{id:'clip-3',name:'Flourin зарифмовал в катке',type:'video'},'Flourin'),true);
+assert.equal(context.isSelfNominee({id:'clip-of-year'},{id:'clip-3',name:'У Flourin не грузит',type:'video'},'Flourin'),true);
+assert.equal(context.isSelfNominee({id:'flare-king'},{id:'clip-4',name:'Flourin',type:'person'},'Flourin'),true);
+console.log('18 self-vote matching/regression checks passed');

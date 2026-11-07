@@ -524,6 +524,8 @@ function bindNomineeViewControl(){
 function isSelfNominee(nomination,item,nickname=state.session?.nickname){
   if(!nickname||!item)return false;
   const nick=nickname.toLowerCase();
+  // clip-4: «У Flourin не грузит» features other players, so everyone may vote.
+  if(nomination.id==='clip-of-year'&&item.id==='clip-4')return false;
   if(nomination.id==='clip-of-year')return String(item.name).toLowerCase().split(/[^\p{L}\p{N}_]+/u).includes(nick);
   return item.type==='person'&&!nomination.allowSelf&&item.name.toLowerCase()===nick;
 }
