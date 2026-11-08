@@ -16,3 +16,7 @@ const rank=ctx.adminResultRanking([{option:'A',voter:'Awal'},{option:'B',voter:'
 assert.equal(ctx.adminResultModel({votes:[rows[0],{...rows[0],option_name:'Last'}]},catalog).votes.length,1);
 assert.equal(JSON.stringify(rows),before);
 console.log('PASS independent/combined filters, exact nickname tokens, groups toggle, archive votes, search, ties, duplicate guard and immutable source');
+
+const rankModel=ctx.adminResultModel({votes:[...rows,{...rows[0],nickname:'Qusti'}]},catalog),standings=ctx.adminResultStandings(rankModel);assert.equal(standings.get('king').get('Nodben').rank,2);
+const selected=ctx.adminResultFilter(model,{...base,voter:'Maronnix'});assert.equal(selected.length,1);assert.equal(standings.get(selected[0].nomination.id).get(selected[0].option).rank,2);
+console.log('PASS global standing remains second place even when the selected ballot contains only that candidate');

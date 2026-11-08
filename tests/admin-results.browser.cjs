@@ -31,7 +31,7 @@ for(const width of [1360,1000,768,390,320]){
  await select('#admin-filter-voter','Qusti');assert(await page.$('.admin-result-empty'));
  await page.click('#admin-results-reset');assert.equal(await page.$$eval('.admin-result-card',es=>es.length),18);
  await search('ОченьДлинное');assert.equal(await page.$$eval('.admin-result-card',es=>es.length),1);assert.equal(await page.$('#admin-result-output img'),null);assert.equal(await page.evaluate(()=>injected),false);
- const overflow=await page.evaluate(()=>({page:document.documentElement.scrollWidth>innerWidth,modal:document.querySelector('.admin-modal').scrollWidth>document.querySelector('.admin-modal').clientWidth,rows:[...document.querySelectorAll('.admin-rank-row,.admin-result-card,.admin-result-filters')].some(e=>e.scrollWidth>e.clientWidth+1),overlap:[...document.querySelectorAll('.admin-rank-row')].some(e=>{const name=e.querySelector('.admin-rank-candidate').getBoundingClientRect(),count=e.querySelector('.admin-rank-count').getBoundingClientRect();return name.right>count.left+1})}));assert.deepEqual(overflow,{page:false,modal:false,rows:false,overlap:false});
+ const overflow=await page.evaluate(()=>({page:document.documentElement.scrollWidth>innerWidth,modal:document.querySelector('.admin-modal').scrollWidth>document.querySelector('.admin-modal').clientWidth,rows:[...document.querySelectorAll('.admin-rank-row,.admin-result-card,.admin-result-filters')].some(e=>e.scrollWidth>e.clientWidth+1),overlap:[...document.querySelectorAll('.admin-rank-row')].some(e=>{const name=e.querySelector('.admin-rank-candidate').getBoundingClientRect(),count=e.querySelector('.admin-rank-count').getBoundingClientRect();return name.top<count.bottom&&count.top<name.bottom&&name.right>count.left+1})}));assert.deepEqual(overflow,{page:false,modal:false,rows:false,overlap:false});
  await page.screenshot({path:`/tmp/admin-results-long-names-${width}.png`});
  await page.click('#admin-results-reset');await select('#admin-filter-recipient','Maronnix');await page.screenshot({path:`/tmp/admin-results-recipient-${width}.png`});
  await page.click('#admin-results-refresh');await page.waitForFunction(()=>!document.querySelector('#admin-results-refresh').disabled);assert.equal(await page.$eval('#admin-filter-recipient',e=>e.value),'Maronnix');
@@ -41,8 +41,24 @@ for(const width of [1360,1000,768,390,320]){
  assert.equal(await page.evaluate(()=>calls.some(c=>/save|update|delete|set_/.test(c.name))),false);
  console.log('PASS overview, individual ballot, votes for person/groups/exact mode, combined filters/search/reset, long names/XSS/no overlap, readonly refresh/error/retry',width);
 }
-await page.click('#admin-results-reset');const first=await page.$('.admin-result-card>summary');await first.focus();await page.keyboard.press('Space');assert.equal(await page.$eval('.admin-result-card',e=>e.open),true);
+for(const width of [1360,768,390,320]){
+ await page.setViewport({width,height:900});await open();
+ await page.evaluate(()=>{const title=nominations.find(n=>n.id==='flare-king').title;resultFixture.votes=['Akirakume','Awal','Balabol','Cloury','Dony_zq','Eozik','Flourin','Izumrudik','Nodben','Rezo1n'].map((nickname,i)=>({nomination_title:title,option_name:i<4?'Maronnix':i<7?'Nodben':i<9?'Awal':'Qusti',nickname}))});
+ await page.click('#admin-results-refresh');await page.waitForFunction(()=>!document.querySelector('#admin-results-refresh').disabled);
+ const rows='.admin-result-card[data-result-nomination="flare-king"] .admin-rank-row';
+ assert.deepEqual(await page.$$eval(rows,es=>es.map(e=>e.dataset.rank)),['1','2','3','4']);
+ const palette=await page.$$eval(rows,es=>es.map(e=>({bg:getComputedStyle(e).backgroundColor,border:getComputedStyle(e).borderLeftColor,text:getComputedStyle(e.querySelector('.admin-rank-candidate>strong')).color})));
+ assert.equal(new Set(palette.slice(0,3).map(x=>x.bg)).size,3);assert.equal(new Set(palette.slice(0,3).map(x=>x.border)).size,3);assert.equal(new Set(palette.slice(0,3).map(x=>x.text)).size,3);
+ await page.$eval('.admin-result-card[data-result-nomination="flare-king"]',e=>e.open=true);await (await page.$('.admin-result-card[data-result-nomination="flare-king"]')).screenshot({path:`/tmp/admin-results-podium-${width}.png`});
+ await select('#admin-filter-recipient','Awal');assert.equal(await page.$eval('.admin-rank-row',e=>e.dataset.rank),'3');assert(await page.$('.admin-rank-row.is-third'));assert.notEqual(await page.$eval('.admin-rank-badge',e=>getComputedStyle(e).display),'none');
+ await select('#admin-filter-voter','Nodben');assert.equal(await page.$eval('.admin-rank-row',e=>e.dataset.rank),'3');assert.equal(await page.$eval('.admin-rank-count small',e=>e.textContent),'из 2 всего');
+ await (await page.$('.admin-result-card')).screenshot({path:`/tmp/admin-results-filtered-rank-${width}.png`});
+ await select('#admin-filter-recipient','');await select('#admin-filter-voter','Eozik');assert.equal(await page.$eval('[data-result-nomination="flare-king"] .admin-ballot-standing',e=>e.dataset.rank),'2');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth||document.querySelector('.admin-modal').scrollWidth>document.querySelector('.admin-modal').clientWidth),false);
+ console.log('PASS readable podium palette and actual global places 1–4, third place retained under recipient/voter filters, overall totals and ballot place',width);
+}
+await page.$eval('#admin-results-reset',e=>e.click());const first=await page.$('.admin-result-card>summary');const wasOpen=await page.$eval('.admin-result-card',e=>e.open);await first.focus();await page.keyboard.press('Space');assert.equal(await page.$eval('.admin-result-card',e=>e.open),!wasOpen);
 await page.focus('#admin-filter-query');await page.type('#admin-filter-query','Maronnix');assert.equal(await page.evaluate(()=>document.activeElement.id),'admin-filter-query');await page.keyboard.press('Enter');assert(await page.$('#admin-result-filters'));
-await page.evaluate(()=>{window.oldRpc=rpc;rpc=(name,args)=>name==='admin_summary'?new Promise(resolve=>{window.finishOldRequest=resolve}):oldRpc(name,args)});await page.click('#admin-results-refresh');await page.evaluate(()=>{openModal('<h2 id="new-view-marker">Другой экран</h2>','auth-modal');finishOldRequest(resultFixture)});await new Promise(r=>setTimeout(r,30));assert(await page.$('#new-view-marker'));assert.equal(await page.$('#admin-result-filters'),null);
+await page.evaluate(()=>{window.oldRpc=rpc;rpc=(name,args)=>name==='admin_summary'?new Promise(resolve=>{window.finishOldRequest=resolve}):oldRpc(name,args)});await page.$eval('#admin-results-refresh',e=>e.click());await page.waitForFunction(()=>typeof window.finishOldRequest==='function');await page.evaluate(()=>{openModal('<h2 id="new-view-marker">Другой экран</h2>','auth-modal');finishOldRequest(resultFixture)});await new Promise(r=>setTimeout(r,30));assert(await page.$('#new-view-marker'));assert.equal(await page.$('#admin-result-filters'),null);
 assert.deepEqual(errors,[]);
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
