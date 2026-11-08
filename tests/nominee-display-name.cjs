@@ -1,0 +1,13 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const source=fs.readFileSync('app.js','utf8');
+const context=vm.createContext({esc:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')});
+vm.runInContext(source.slice(source.indexOf('function nomineeDisplayName('),source.indexOf('function showNomination(')),context);
+const nom={id:'sos-of-year'},item={id:'sos-4',name:'Починил инет Nodben',type:'image'};
+const before=JSON.stringify(item);
+assert.equal(context.nomineeDisplayName(nom,item),'Починили инет Nodben');
+assert.equal(JSON.stringify(item),before);
+assert.equal(context.nomineeDisplayName(nom,{...item,name:'Новое название'}),'Новое название');
+assert.equal(context.nomineeDisplayName(nom,{...item,id:'sos-1'}),item.name);
+assert.equal(context.nomineeDisplayName({id:'conflict-of-year'},{name:'Awal vs Izumrudik'}),'Awal <span class="nominee-versus">vs</span> Izumrudik');
+assert.equal(context.nomineeDisplayName(nom,{...item,name:'<script>'}),'&lt;script&gt;');
+console.log('PASS display-only SOS typo correction, unchanged source option, scoped alias, future renames, escaping and conflict formatting');
