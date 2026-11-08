@@ -4,8 +4,8 @@ let boingScene=null,bobFaceEditor=null;
 // Slightly gentler downward acceleration: 1% below the previous gravity.
 const boingGravity=1540*.99;
 // Mass is 1; BOB is a uniform circular rigid body (I = mass * radius² / 2).
-// The old kick ranged from 340 to 375 px/s. Preserve both previous 5% boosts, then add another 2%.
-const boingLegacyKick=(340+375)/2,boingClickStrength=1.05*1.05*1.02;
+// The old kick ranged from 340 to 375 px/s. Preserve the previous boosts and add another 4% to the current impulse.
+const boingLegacyKick=(340+375)/2,boingClickStrength=1.05*1.05*1.02*1.04;
 const boingPhysicsStep=1/120;
 const numberFormat=new Intl.NumberFormat('ru-RU');
 const dateFormat=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'});
