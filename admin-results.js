@@ -27,12 +27,39 @@ function adminResultStandings(model){
  for(const nomination of model.nominations)byNomination.set(nomination.id,new Map(adminResultRanking(model.votes.filter(v=>v.nomination.id===nomination.id)).map(c=>[c.name,c])));
  return byNomination;
 }
+// Only actual, positive-vote ties near the podium need a decision.
+// A pair on places 2–4 is allowed; any tie for first needs a winner.
+function adminResultIssues(model){
+ const standings=adminResultStandings(model),issues=[];
+ for(const nomination of model.nominations){
+  const groups=new Map();
+  for(const choice of standings.get(nomination.id).values()){
+   if(!groups.has(choice.rank))groups.set(choice.rank,[]);
+   groups.get(choice.rank).push(choice);
+  }
+  const ties=[...groups].filter(([rank,choices])=>(rank===1&&choices.length>1)||(rank>=2&&rank<=4&&choices.length>2)).map(([rank,choices])=>({rank,count:choices[0].count,choices}));
+  if(ties.length)issues.push({nomination,ties});
+ }
+ return issues;
+}
 function mountAdminResults(host,initial){
  let summary=initial,model=adminResultModel(summary,nominations),revision=0,updated=new Date();
  const filters={voter:'',recipient:'',nomination:'',query:'',groups:true},expanded=new Set();
- host.innerHTML=`<div class="admin-results-heading"><div><h3>Результаты голосования</h3></div><button class="profile-small-button" id="admin-results-refresh" type="button">Обновить голоса</button></div><form class="admin-result-filters" id="admin-result-filters" aria-label="Фильтры результатов"><label><span>Кто голосовал</span><select id="admin-filter-voter"><option value="">Все участники</option></select></label><label><span>За кого голосовали</span><select id="admin-filter-recipient"><option value="">Все номинанты</option></select></label><label><span>Номинация</span><select id="admin-filter-nomination"><option value="">Все номинации</option></select></label><label><span>Поиск по голосам</span><input id="admin-filter-query" type="search" placeholder="Ник, состав или название" autocomplete="off" maxlength="200"></label><div class="admin-result-filter-footer"><label class="admin-result-checkbox"><input type="checkbox" id="admin-filter-groups" checked><span>Составы и противостояния</span></label><button class="admin-result-reset" id="admin-results-reset" type="button">Сбросить фильтры</button></div></form><p class="admin-result-error" id="admin-results-error" role="alert" hidden></p><div id="admin-result-summary" class="admin-result-summary" role="status" aria-live="polite"></div><div id="admin-result-output" aria-live="off"></div>`;
+ host.innerHTML=`<div class="admin-results-heading"><div><h3>Результаты голосования</h3></div><button class="profile-small-button" id="admin-results-refresh" type="button">Обновить голоса</button></div><div id="admin-result-issues"></div><form class="admin-result-filters" id="admin-result-filters" aria-label="Фильтры результатов"><label><span>Кто голосовал</span><select id="admin-filter-voter"><option value="">Все участники</option></select></label><label><span>За кого голосовали</span><select id="admin-filter-recipient"><option value="">Все номинанты</option></select></label><label><span>Номинация</span><select id="admin-filter-nomination"><option value="">Все номинации</option></select></label><label><span>Поиск по голосам</span><input id="admin-filter-query" type="search" placeholder="Ник, состав или название" autocomplete="off" maxlength="200"></label><div class="admin-result-filter-footer"><label class="admin-result-checkbox"><input type="checkbox" id="admin-filter-groups" checked><span>Составы и противостояния</span></label><button class="admin-result-reset" id="admin-results-reset" type="button">Сбросить фильтры</button></div></form><p class="admin-result-error" id="admin-results-error" role="alert" hidden></p><div id="admin-result-summary" class="admin-result-summary" role="status" aria-live="polite"></div><div id="admin-result-output" aria-live="off"></div>`;
  const find=s=>host.querySelector(s),voter=find('#admin-filter-voter'),recipient=find('#admin-filter-recipient'),nomination=find('#admin-filter-nomination'),query=find('#admin-filter-query'),groups=find('#admin-filter-groups'),output=find('#admin-result-output'),status=find('#admin-result-summary'),reset=find('#admin-results-reset'),refresh=find('#admin-results-refresh'),error=find('#admin-results-error');
  const option=(value,label)=>`<option value="${esc(value)}">${esc(label)}</option>`;
+ function renderIssues(){
+  const container=find('#admin-result-issues'),wasOpen=container.querySelector('details')?.open,issues=adminResultIssues(model);
+  container.innerHTML=`<details class="admin-result-issues" ${wasOpen?'open':''}><summary><strong>Спорные места</strong><span class="admin-issues-count ${issues.length?'':'is-clear'}">${issues.length?countLabel(issues.length,'номинация','номинации','номинаций'):'Всё спокойно'}</span></summary><div class="admin-issues-body"><p class="admin-issues-help">По всем голосам, независимо от фильтров: ничья за первое место или три и более номинанта на одном из мест со второго по четвёртое.</p>${issues.length?issues.map(issue=>`<article class="admin-issue" data-issue-nomination="${esc(issue.nomination.id)}"><div class="admin-issue-heading"><h4>${esc(issue.nomination.title)}</h4><button type="button" class="admin-issue-open" data-issue-open="${esc(issue.nomination.id)}">Открыть рейтинг</button></div>${issue.ties.map(tie=>`<div class="admin-issue-tie"><div class="admin-issue-label"><strong>${tie.rank===1?'Ничья за победу':tie.rank+' место делят '+countLabel(tie.choices.length,'номинант','номинанта','номинантов')}</strong><span>По ${countLabel(tie.count,'голосу','голоса','голосов')}</span></div><div class="admin-issue-names">${tie.choices.map(choice=>`<span>${esc(choice.name)}</span>`).join('')}</div></div>`).join('')}</article>`).join(''):'<p class="admin-issues-empty">Спорных мест нет. Пары на втором, третьем и четвёртом местах допустимы.</p>'}</div></details>`;
+ }
+ find('#admin-result-issues').addEventListener('click',event=>{
+  const button=event.target.closest('[data-issue-open]');if(!button)return;
+  Object.assign(filters,{voter:'',recipient:'',nomination:button.dataset.issueOpen,query:'',groups:true});
+  voter.value=recipient.value=query.value='';nomination.value=filters.nomination;groups.checked=true;
+  expanded.add(filters.nomination);render();
+  const card=[...output.querySelectorAll('.admin-result-card')].find(c=>c.dataset.resultNomination===filters.nomination);
+  if(card){card.open=true;card.querySelector('summary').focus({preventScroll:true});card.scrollIntoView({block:'start',behavior:'auto'});}
+ });
  function fillOptions(){
   const names=[...new Set([...MEMBERS,...(Array.isArray(summary.statistics?.registered_nicknames)?summary.statistics.registered_nicknames:[]),...model.votes.map(v=>v.voter)].filter(n=>typeof n==='string'))].sort((a,b)=>a.localeCompare(b,'ru'));
   const candidates=[...new Set([...MEMBERS,...nominations.flatMap(n=>n.nominees.filter(c=>c.type==='person').map(c=>c.name))])].sort((a,b)=>a.localeCompare(b,'ru'));
@@ -68,9 +95,9 @@ function mountAdminResults(host,initial){
  refresh.addEventListener('click',async()=>{
   const current=++revision,token=state.session?.token;if(!token)return;
   refresh.disabled=true;refresh.textContent='Обновляю…';error.hidden=true;
-  try{const latest=await rpc('admin_summary',{p_token:token});if(!host.isConnected||state.session?.token!==token||current!==revision)return;if(!latest||!Array.isArray(latest.votes))throw Error('Сервер не вернул список голосов.');summary=latest;model=adminResultModel(summary,nominations);updated=new Date();fillOptions();render();}
+  try{const latest=await rpc('admin_summary',{p_token:token});if(!host.isConnected||state.session?.token!==token||current!==revision)return;if(!latest||!Array.isArray(latest.votes))throw Error('Сервер не вернул список голосов.');summary=latest;model=adminResultModel(summary,nominations);updated=new Date();fillOptions();renderIssues();render();}
   catch(e){if(host.isConnected&&state.session?.token===token&&current===revision){error.textContent='Не удалось обновить голоса. Показаны ранее загруженные данные. '+(e.message||'Попробуй ещё раз.');error.hidden=false;}}
   finally{if(host.isConnected&&current===revision){refresh.disabled=false;refresh.textContent='Обновить голоса';}}
  });
- fillOptions();render();
+ fillOptions();renderIssues();render();
 }

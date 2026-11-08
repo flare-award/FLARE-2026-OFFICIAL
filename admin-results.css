@@ -81,3 +81,30 @@
 .admin-result-error{padding:16px;border:1px solid #e1907040;border-radius:10px;background:#e1907008;color:#e9b6a0;font-size:14px;line-height:1.7;overflow-wrap:anywhere}
 #admin-panel-voting .admin-date-poll>summary strong,#admin-panel-voting .admin-date-poll>summary>span{font-size:14px}
 @media(max-width:700px){#admin-panel-voting .admin-results-heading{align-items:flex-start;flex-direction:column;gap:14px}#admin-panel-voting #admin-results-refresh{width:100%}.admin-result-filters{grid-template-columns:minmax(0,1fr);gap:16px;padding:16px}.admin-result-filters select,.admin-result-filters input[type="search"]{font-size:16px}.admin-result-filter-footer{flex-direction:column;align-items:flex-start;gap:8px}.admin-result-summary{gap:8px}.admin-result-summary>span{padding:14px 10px}.admin-result-summary>span>strong{font-size:24px}.admin-result-summary>span>span{font-size:13px}.admin-result-summary>small{text-align:left}.admin-result-ballot-row{grid-template-columns:minmax(0,1fr);gap:10px;padding:16px}.admin-ballot-standing{flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px}.admin-result-context h4{font-size:18px}#admin-panel-voting .admin-result-card>summary{padding:16px;gap:12px}#admin-panel-voting .admin-result-card h4{font-size:16px}#admin-panel-voting .admin-result-card .admin-rankings{padding:0 10px 10px}#admin-panel-voting .admin-rank-row{grid-template-columns:44px minmax(0,1fr);gap:10px 12px;padding:14px 10px}#admin-panel-voting .admin-rank-badge{grid-column:1;grid-row:1/4}#admin-panel-voting .admin-rank-badge>strong{width:34px;height:34px;flex-basis:34px;font-size:20px}#admin-panel-voting .admin-rank-candidate{grid-column:2;grid-row:1}#admin-panel-voting .admin-rank-count{grid-column:2;grid-row:2;align-items:flex-start;padding:0;white-space:normal}#admin-panel-voting .admin-voter-list{grid-column:2;grid-row:3}#admin-panel-voting .admin-rank-count>strong{white-space:nowrap}#admin-panel-voting .admin-result-card>summary>div{grid-column:1/-1;grid-row:1}#admin-panel-voting .admin-result-card .admin-nomination-total{grid-column:1;grid-row:2;justify-self:start}#admin-panel-voting .admin-result-card>summary::after{grid-column:2;grid-row:2;align-self:center}}
+
+/* Compact global tie audit. Filters never change which nominations need attention. */
+#admin-panel-voting .admin-result-issues{margin:0 0 22px;border:1px solid #c995593d;border-radius:12px;background:#1c1812;overflow:hidden}
+#admin-panel-voting .admin-result-issues>summary{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;cursor:pointer;list-style:disclosure-closed inside;color:#e0bf8a}
+#admin-panel-voting .admin-result-issues>summary::-webkit-details-marker{display:revert}
+#admin-panel-voting .admin-result-issues>summary>strong{font-size:17px;font-weight:600;line-height:1.5}
+.admin-issues-count{padding:4px 10px;border:1px solid #c9955940;border-radius:6px;background:#c9955912;color:#e7bc80;font-size:14px;line-height:1.5}
+.admin-issues-count.is-clear{color:#abc4a3;border-color:#abc4a330;background:#abc4a308}
+.admin-issues-body{padding:14px 18px 18px}
+.admin-issues-help{margin:0 0 16px;color:#c1b39d;font-size:14px;line-height:1.7}
+.admin-issue{min-width:0;padding:16px;border:1px solid #bc9a5e2b;border-radius:10px;background:#12110e}
+.admin-issue+.admin-issue{margin-top:12px}
+.admin-issue-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+#admin-panel-voting .admin-issue-heading h4{min-width:0;margin:0;color:#e8d9bd;font-size:16px;line-height:1.6;overflow-wrap:anywhere}
+.admin-issue-open{flex:0 0 auto;min-height:40px;padding:7px 10px;border:1px solid #c8a46645;border-radius:7px;background:#c8a4660a;color:#dfc18c;font:500 14px/1.6 var(--font);cursor:pointer}
+.admin-issue-open:focus-visible{outline:2px solid #d8b66c;outline-offset:3px}
+.admin-issue-tie{margin-top:14px;padding-top:14px;border-top:1px solid #ffffff12}
+.admin-issue-label{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;color:#dcb37e;font-size:14px;line-height:1.6}
+.admin-issue-label strong{font-weight:500}
+.admin-issue-label>span{color:#baad98}
+.admin-issue-names{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.admin-issue-names>span{min-width:0;max-width:100%;padding:5px 10px;border:1px solid #ffffff16;border-radius:6px;background:#ffffff04;color:#ddd1be;font-size:14px;line-height:1.6;overflow-wrap:anywhere;box-sizing:border-box}
+.admin-issues-empty{margin:0;color:#b9c6ae;font-size:14px;line-height:1.7}
+#admin-panel-voting .admin-result-card{scroll-margin-top:100px}
+@media(max-width:600px){#admin-panel-voting .admin-result-issues>summary{padding:14px}.admin-issues-body{padding:14px 12px 12px}.admin-issue{padding:12px}.admin-issue-heading{flex-direction:column;gap:10px}.admin-issue-open{width:100%;text-align:center}}
+#admin-panel-voting .admin-result-issues>summary::after{content:'Показать';color:#c9ae75;font-size:14px;line-height:1.5}
+#admin-panel-voting .admin-result-issues[open]>summary::after{content:'Свернуть'}
