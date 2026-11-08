@@ -1,0 +1,18 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const ctx=vm.createContext({});vm.runInContext(fs.readFileSync('admin-results.js','utf8').split('function mountAdminResults(')[0],ctx);
+const catalog=[{id:'king',title:'KING'},{id:'squad',title:'SQUAD'}],rows=[{nomination_title:'KING',option_name:'Maronnix',nickname:'Awal'},{nomination_title:'KING',option_name:'Nodben',nickname:'Maronnix'},{nomination_title:'SQUAD',option_name:'Akirakume, Maronnix, Nodben',nickname:'Qusti'},{nomination_title:'SQUAD',option_name:'Maronnix_extra',nickname:'Awal'},{nomination_title:'OLD',option_name:'Maronnix',nickname:'Nodben'},null,{option_name:'bad'}];
+const before=JSON.stringify(rows),model=ctx.adminResultModel({votes:rows},catalog),base={voter:'',recipient:'',nomination:'',query:'',groups:true};
+assert.equal(model.votes.length,5);assert.equal(model.nominations.length,3);
+assert.equal(ctx.adminResultFilter(model,{...base,recipient:'Maronnix'}).length,3);
+assert.equal(ctx.adminResultFilter(model,{...base,recipient:'Maronnix',groups:false}).length,2);
+assert.equal(ctx.adminResultFilter(model,{...base,voter:'Maronnix'}).length,1);
+assert.equal(ctx.adminResultFilter(model,{...base,voter:'Maronnix',recipient:'Maronnix'}).length,0);
+assert.equal(ctx.adminResultFilter(model,{...base,recipient:'Maronnix',nomination:'squad'}).length,1);
+assert.equal(ctx.adminResultFilter(model,{...base,query:'  nodBEN  '}).length,3);
+assert.equal(ctx.adminResultFilter(model,{...base,query:'<script>'}).length,0);
+assert.equal(ctx.adminResultMatchesPerson('Akirakume, Dony_zq и Nodben','Dony_zq',true),true);
+assert.equal(ctx.adminResultMatchesPerson('Maronnix_extra','Maronnix',true),false);
+const rank=ctx.adminResultRanking([{option:'A',voter:'Awal'},{option:'B',voter:'Qusti'},{option:'A',voter:'Nodben'},{option:'B',voter:'Maronnix'},{option:'C',voter:'Rezo1n'}]);assert.equal(rank.map(r=>r.rank).join(','),'1,1,3');
+assert.equal(ctx.adminResultModel({votes:[rows[0],{...rows[0],option_name:'Last'}]},catalog).votes.length,1);
+assert.equal(JSON.stringify(rows),before);
+console.log('PASS independent/combined filters, exact nickname tokens, groups toggle, archive votes, search, ties, duplicate guard and immutable source');

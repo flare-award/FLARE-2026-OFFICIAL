@@ -1,0 +1,69 @@
+/* Read-only results workspace. Everything is scoped to the voting tab. */
+#admin-panel-voting #admin-results-explorer{min-width:0;margin-top:26px}
+#admin-panel-voting .admin-results-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 18px}
+#admin-panel-voting .admin-results-heading h3{margin:0;color:#eee8dd;font-size:19px;font-weight:600;letter-spacing:-.025em}
+#admin-panel-voting .admin-results-heading p{margin:7px 0 0;color:#aaa398;font-size:12px;line-height:1.6}
+#admin-panel-voting #admin-results-refresh{flex:0 0 auto;min-height:40px;white-space:nowrap}
+.admin-result-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:18px;border:1px solid #ffffff14;border-radius:14px;background:#ffffff02}
+.admin-result-filters>label{display:flex;flex-direction:column;min-width:0;gap:8px}
+.admin-result-filters>label>span{color:#c9c1b4;font-size:11px;font-weight:600}
+.admin-result-filters select,.admin-result-filters input[type="search"]{width:100%;min-width:0;max-width:100%;min-height:44px;margin:0;padding:10px 12px;border:1px solid #ffffff20;border-radius:9px;background:#10100f;color:#eee8de;font:400 13px/1.4 var(--font);box-sizing:border-box;text-overflow:ellipsis}
+.admin-result-filters select option{background:#151412;color:#eee8de}
+.admin-result-filters input::placeholder{color:#827d74}
+.admin-result-filters :is(input,select,button):focus-visible,#admin-panel-voting summary:focus-visible{outline:2px solid #d8b66c;outline-offset:3px}
+.admin-result-filter-footer{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.admin-result-checkbox{display:flex;align-items:center;gap:9px;min-width:0;color:#bdb5a7;font-size:11px;line-height:1.6;cursor:pointer}
+.admin-result-checkbox input{flex:0 0 16px;width:16px;height:16px;margin:0;accent-color:#d4b06b}
+.admin-result-checkbox span{overflow-wrap:anywhere}
+.admin-result-checkbox.is-muted{color:#8e887e;cursor:default}
+.admin-result-reset{min-height:36px;padding:6px 0;border:0;background:none;color:#dac08a;font:500 11px var(--font);cursor:pointer;text-align:left}
+.admin-result-reset:disabled{color:#756f65;cursor:default}
+.admin-result-help{margin:11px 2px 18px;color:#aaa195;font-size:11px;line-height:1.7}
+.admin-result-summary{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 20px;padding:0 0 16px;color:#b6ae9f;font-size:11px;line-height:1.7;border-bottom:1px solid #ffffff12}
+.admin-result-summary strong{margin-right:3px;color:#f0e6d2;font-size:16px;font-variant-numeric:tabular-nums}
+.admin-result-summary small{margin-left:auto;color:#9d9588;font-size:10px;overflow-wrap:anywhere}
+.admin-result-context{padding:20px 0 4px}
+.admin-result-context h4{margin:0;color:#f0e6d2;font-size:15px;line-height:1.6;font-weight:600;overflow-wrap:anywhere}
+.admin-result-context p{margin:6px 0 12px;color:#b0a697;font-size:11px;line-height:1.7}
+#admin-panel-voting .admin-nomination-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:12px;margin-top:18px}
+#admin-panel-voting .admin-result-card{min-width:0;padding:0;border:1px solid #ffffff12;border-radius:12px;background:#ffffff02;box-shadow:none;overflow:visible}
+#admin-panel-voting .admin-result-card>summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;align-items:start;padding:16px;list-style:none;cursor:pointer}
+#admin-panel-voting .admin-result-card>summary::-webkit-details-marker{display:none}
+#admin-panel-voting .admin-result-card>summary>div{grid-column:1;grid-row:1/3;min-width:0}
+#admin-panel-voting .admin-result-card h4{margin:6px 0 0;color:#eee7dc;font-size:12px;line-height:1.6;letter-spacing:.015em;font-weight:600;overflow-wrap:anywhere}
+#admin-panel-voting .admin-result-card .admin-nomination-category{font-size:8px;line-height:1.6;letter-spacing:.04em;color:#a39985}
+#admin-panel-voting .admin-result-card .admin-nomination-total{grid-column:2;grid-row:1;white-space:nowrap;font-size:10px;line-height:1.6;color:#caba98}
+#admin-panel-voting .admin-result-card>summary::after{content:'Подробнее';grid-column:2;grid-row:2;align-self:end;color:#ab9a79;font-size:10px;text-align:right}
+#admin-panel-voting .admin-result-card[open]>summary::after{content:'Свернуть'}
+.admin-result-leader{margin:8px 0 0;color:#b9ad98;font-size:10px;line-height:1.7;overflow-wrap:anywhere}
+#admin-panel-voting .admin-result-card .admin-rankings{padding:0 12px 12px;gap:8px}
+#admin-panel-voting .admin-rank-row{grid-template-columns:52px minmax(0,1fr) auto;align-items:start;gap:8px;padding:10px;background:#ffffff02;border-color:#ffffff0c;border-radius:8px}
+#admin-panel-voting .admin-rank-row.is-winner{border-color:#d4af6633;background:#d4af6608}
+#admin-panel-voting .admin-rank-badge{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+#admin-panel-voting .admin-rank-badge>small{font-size:7px;line-height:1.5;letter-spacing:0}
+#admin-panel-voting .admin-rank-candidate>strong{font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+#admin-panel-voting .admin-rank-count{padding-top:3px;font-size:10px;line-height:1.6;font-variant-numeric:tabular-nums}
+#admin-panel-voting .admin-voter-list{min-width:0;grid-column:2/-1;margin-top:2px}
+#admin-panel-voting .admin-voter-list summary{display:list-item;list-style:disclosure-closed inside;width:auto;padding:5px 0;font-size:10px;line-height:1.6}
+#admin-panel-voting .admin-voter-list[open] summary{list-style-type:disclosure-open}
+#admin-panel-voting .admin-voter-list summary::-webkit-details-marker{display:revert}
+#admin-panel-voting .admin-voter-list summary::before{content:none}
+#admin-panel-voting .admin-voter-list>div span{max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;font-size:10px;line-height:1.5}
+.admin-result-ballot{display:grid;gap:0;margin-top:8px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff02;overflow:hidden}
+.admin-result-ballot-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:start;gap:12px 24px;padding:16px 18px;border-bottom:1px solid #ffffff0c}
+.admin-result-ballot-row:last-child{border:0}
+.admin-result-ballot-row>span{color:#b7ac99;font-size:10px;font-weight:500;line-height:1.8;overflow-wrap:anywhere}
+.admin-result-ballot-row>strong{min-width:0;color:#eee6d8;font-size:12px;font-weight:500;line-height:1.7;overflow-wrap:anywhere}
+.admin-result-ballot-row>.is-empty{color:#8f897e;font-weight:400}
+.admin-result-empty{padding:30px 18px;margin-top:18px;border:1px dashed #ffffff1c;border-radius:12px;text-align:center}
+.admin-result-empty strong{color:#d4c8b4;font-size:14px;font-weight:500}
+.admin-result-empty p{margin:8px 0 0;color:#a79c8a;font-size:11px;line-height:1.7}
+.admin-result-error{padding:12px 14px;border:1px solid #e1907040;border-radius:10px;background:#e1907008;color:#e9b6a0;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+@media(max-width:1000px){#admin-panel-voting .admin-nomination-results{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){#admin-panel-voting .admin-results-heading{flex-direction:column;gap:12px}#admin-panel-voting #admin-results-refresh{width:100%}.admin-result-filters{grid-template-columns:minmax(0,1fr);gap:14px;padding:14px}.admin-result-filter-footer{flex-direction:column;align-items:flex-start;gap:8px}.admin-result-summary{gap:6px 14px}.admin-result-summary small{flex-basis:100%;margin:0}.admin-result-ballot-row{grid-template-columns:minmax(0,1fr);gap:5px;padding:14px}#admin-panel-voting .admin-rank-row{grid-template-columns:24px minmax(0,1fr) auto}#admin-panel-voting .admin-rank-badge>small{display:none}#admin-panel-voting .admin-result-card>summary{padding:14px}}
+@media(max-width:380px){#admin-panel-voting .admin-result-card>summary>div{grid-column:1/-1;grid-row:1}#admin-panel-voting .admin-result-card .admin-nomination-total{grid-column:1;grid-row:2}#admin-panel-voting .admin-result-card>summary::after{grid-column:2;grid-row:2}}
+
+/* Filtered selections show supporting votes, never a misleading new winner. */
+#admin-panel-voting .admin-result-card.is-filtered .admin-rank-row{grid-template-columns:minmax(0,1fr) auto}
+#admin-panel-voting .admin-result-card.is-filtered .admin-rank-badge{display:none}
+#admin-panel-voting .admin-result-card.is-filtered .admin-voter-list{grid-column:1/-1}

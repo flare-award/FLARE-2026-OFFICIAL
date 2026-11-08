@@ -780,31 +780,6 @@ async function showAdmin(){
     const [result,videoReady,socials]=await Promise.all([rpc('admin_summary',{p_token:state.session.token}),loadVideoCatalog(),rpc('admin_get_member_socials',{p_token:state.session.token})]);
     if(requestId!==adminRequestCounter||!$('.admin-modal'))return;
     adminSocialRows=Array.isArray(socials)?socials:[];
-    const buckets=new Map();
-    for(const row of result.votes||[]){
-      if(!buckets.has(row.nomination_title))buckets.set(row.nomination_title,new Map());
-      const options=buckets.get(row.nomination_title);
-      if(!options.has(row.option_name))options.set(row.option_name,[]);
-      options.get(row.option_name).push(row.nickname);
-    }
-    const nominationCards=nominations.map(nom=>{
-      const options=buckets.get(nom.title)||new Map();
-      const candidateNames=[...new Set([...nom.nominees.map(x=>x.name),...options.keys()])];
-      const ranked=candidateNames.map(name=>({name,voters:options.get(name)||[],count:(options.get(name)||[]).length}))
-        .filter(option=>option.count>0)
-        .sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ru'));
-      const total=ranked.reduce((sum,option)=>sum+option.count,0);
-      let previousCount=null,rank=0;
-      ranked.forEach((option,index)=>{if(index===0||option.count<previousCount)rank=index+1;option.rank=rank;previousCount=option.count});
-      const leaders=ranked.filter(option=>option.rank===1).length;
-      const rows=ranked.map(option=>{
-        const winner=option.rank===1;
-        const place=winner?(leaders>1?'НИЧЬЯ · 1 МЕСТО':'ПОБЕДИТЕЛЬ'):`${option.rank} МЕСТО`;
-        const percent=ranked[0]?.count?Math.round(option.count/ranked[0].count*100):0;
-        return `<div class="admin-rank-row ${winner?'is-winner':''} ${option.rank===2?'is-second':''} ${option.rank===3?'is-third':''}"><span class="admin-rank-badge"><strong>${winner?'★':option.rank}</strong><small>${place}</small></span><div class="admin-rank-candidate"><strong>${esc(option.name)}</strong><span class="admin-rank-track"><i style="width:${percent}%"></i></span></div><strong class="admin-rank-count">${countLabel(option.count,'голос','голоса','голосов')}</strong><details class="admin-voter-list"><summary>Участники (${option.voters.length})</summary><div>${option.voters.map(name=>`<span>${esc(name)}</span>`).join('')}</div></details></div>`
-      }).join('');
-      return `<section class="admin-nomination-card"><header><div><span class="admin-nomination-category">${nom.category==='основная'?'ОСНОВНАЯ НОМИНАЦИЯ':'ДОПОЛНИТЕЛЬНАЯ НОМИНАЦИЯ'}</span><h4>${esc(nom.title)}</h4></div><span class="admin-nomination-total">${countLabel(total,'голос','голоса','голосов')}</span></header><div class="admin-rankings">${rows||'<p class="admin-no-votes">Пока нет голосов</p>'}</div></section>`
-    }).join('');
     const prefs=result.event_preferences||[];
     const total=prefs.length;
     const pollRows=eventChoices.map(([id,date,day])=>{
@@ -830,7 +805,9 @@ async function showAdmin(){
     const designPanel=renderDesignPanel(videoReady);
     const adminWrap=$('.admin-wrap',$('.admin-modal'));
     if(requestId!==adminRequestCounter||!adminWrap)return;
-    adminWrap.innerHTML=`<section class="admin-tab-panel admin-ballot-results" id="admin-panel-voting" role="tabpanel" aria-labelledby="admin-tab-voting"><details class="admin-date-poll"><summary><strong>Опрос даты церемонии</strong><span>${countLabel(total,'ответ','ответа','ответов')}</span></summary><div class="admin-poll-results">${pollRows}</div></details><div class="admin-results-heading"><h3>Результаты голосования</h3><span>Рейтинг по текущим голосам</span></div><div class="admin-nomination-results">${nominationCards}</div></section>${statisticsPanel}${designPanel}${renderAdminSocialPanel()}${accessPanel}`;
+    adminWrap.innerHTML=`<section class="admin-tab-panel admin-ballot-results" id="admin-panel-voting" role="tabpanel" aria-labelledby="admin-tab-voting"><details class="admin-date-poll"><summary><strong>Опрос даты церемонии</strong><span>${countLabel(total,'ответ','ответа','ответов')}</span></summary><div class="admin-poll-results">${pollRows}</div></details><div id="admin-results-explorer"></div></section>${statisticsPanel}${designPanel}${renderAdminSocialPanel()}${accessPanel}`;
+    adminWrap.removeAttribute('aria-live');
+    mountAdminResults($('#admin-results-explorer'),result);
     const selectedTab=$('.admin-tab.is-active',$('.admin-modal'))?.dataset.adminTab||'voting';
     setAdminTab(selectedTab);
     bindDesignPanel();bindAdminSocialPanel();

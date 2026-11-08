@@ -26,7 +26,7 @@ jobs:
       - name: Prepare static site (no build)
         run: |
           mkdir -p _site
-          cp index.html styles.css ui-polish.css brand-experience.css profile-boing.css app.js data.js config.js profile.js _site/
+          cp index.html styles.css ui-polish.css brand-experience.css profile-boing.css app.js data.js config.js profile.js admin-results.css admin-results.js _site/
           cp -R assets _site/
       - name: Verify referenced CSS and JS
         run: |
