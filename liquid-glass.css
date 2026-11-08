@@ -1,0 +1,52 @@
+/* The standard theme is untouched until explicitly enabled. */
+.profile-site-theme{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px;padding:16px 18px;border:1px solid #ffffff18;border-radius:16px;background:#ffffff04}
+.profile-site-theme-copy{min-width:0;display:flex;flex-direction:column;gap:5px}
+.profile-site-theme-copy strong{color:#f3f0e9;font-size:14px;font-weight:600}
+.profile-site-theme-copy small{color:#aaa69e;font-size:11px;line-height:1.5}
+.liquid-glass-switch{display:flex;align-items:center;flex:0 0 50px;width:50px;height:30px;padding:3px;border:1px solid #ffffff30;border-radius:99px;background:#ffffff12;cursor:pointer;box-shadow:inset 0 1px 3px #0004}
+.liquid-glass-switch::after{content:"";display:block;width:22px;height:22px;border-radius:50%;background:#e7e5df;box-shadow:0 2px 5px #0005;transition:transform .2s ease,background .2s ease}
+.liquid-glass-switch[aria-checked="true"]{background:#7bd6d0;border-color:#b2fff2}
+.liquid-glass-switch[aria-checked="true"]::after{transform:translateX(20px);background:#fff}
+.liquid-glass-switch:focus-visible{outline:2px solid #a7f2ff;outline-offset:4px}
+html[data-theme="liquid-glass"]{color-scheme:dark;--glass-line:rgba(218,237,255,.25);--glass-surface:linear-gradient(145deg,rgba(179,214,255,.14),rgba(89,116,157,.07) 48%,rgba(228,186,221,.09));--glass-shadow:inset 0 1px 0 #ffffff28,inset 0 -1px 0 #ffffff08,0 12px 36px #00000020;--line:rgba(222,236,255,.18)}
+html[data-theme="liquid-glass"] body{background:#080e1c;background-image:radial-gradient(ellipse at 0% 12%,#24435680,transparent 52%),radial-gradient(ellipse at 100% 42%,#52344f70,transparent 55%),radial-gradient(ellipse at 25% 95%,#26376080,transparent 55%);background-attachment:fixed;color:#f4f7ff}
+/* Keep the original intro artwork, crop, logo and fade intact. */
+html[data-theme="liquid-glass"] :is(.winners-section,.faq-section){background-color:transparent;background-image:linear-gradient(135deg,#93c8ff08,#efb8ff05);border-color:var(--glass-line)}
+html[data-theme="liquid-glass"] .topbar{background:linear-gradient(130deg,#bedfff18,#141c3380);border-color:var(--glass-line);box-shadow:var(--glass-shadow);border-radius:28px}
+html[data-theme="liquid-glass"] .modal-backdrop{background:rgba(3,8,20,.68)}
+html[data-theme="liquid-glass"] .modal{background:linear-gradient(145deg,rgba(30,46,66,.96),rgba(19,25,44,.97) 55%,rgba(42,31,52,.97));border:1px solid var(--glass-line);box-shadow:inset 0 1px 0 #ffffff36,0 30px 110px #0009}
+html[data-theme="liquid-glass"] :is(.category-card,.winner-card,.poll-option,.faq-item,.nomination-tile,.nominee-card,.profile-stat,.public-profile-bob-card,.profile-streak-record,.profile-site-theme,.boing-shop-item,.boing-leader-row,.admin-stat-card,.admin-stat-list-card,.admin-card,.admin-design-card,.admin-nomination-card,.admin-poll-row,.admin-rank-row,.admin-design-intro,.admin-design-sync){background:var(--glass-surface);border-color:var(--glass-line);box-shadow:var(--glass-shadow)}
+html[data-theme="liquid-glass"] :is(.category-card,.winner-card,.nomination-tile,.nominee-card){border-radius:22px}
+html[data-theme="liquid-glass"] :is(.category-card,.nomination-tile,.nominee-card,.poll-option):hover{border-color:#c3e8ff80;background-color:#a3d5ff0a}
+html[data-theme="liquid-glass"] :is(.nominee-card.selected,.poll-option.selected){border-color:#f4ce92;background:linear-gradient(140deg,#ffe2a326,#ecc8ff14);box-shadow:inset 0 1px 0 #fff4,0 0 0 1px #f4ce9233}
+html[data-theme="liquid-glass"] .nominee-card.saved{border-color:#9ee4c8}
+html[data-theme="liquid-glass"] :is(.modal-header,.nom-detail-top,.profile-menu-head,.public-profile-head,.boing-head,.boing-tabs,.admin-head,.admin-tabs,.vote-actions,.profile-appearance-controls){background:linear-gradient(120deg,#ccdfff0c,#131d32e8);border-color:var(--glass-line)}
+html[data-theme="liquid-glass"] :is(.account-button,.boing-quick-entry,.button-quiet,.profile-small-button,.profile-logout,.profile-reputation-button,.boing-rename,.close-button,.boing-header-balance,.boing-shop-categories button,.boing-tabs button,.nominee-view-button,.admin-tab){background:linear-gradient(150deg,#d2ebff16,#c4b8ed08);border-color:#e3f2ff33;box-shadow:inset 0 1px 0 #fff2}
+html[data-theme="liquid-glass"] :is(.boing-tabs button.is-active,.boing-shop-categories button.is-active){background:linear-gradient(135deg,#e3f2ff24,#bfc6ff12);border-color:#c1dcff70;color:#fff}
+html[data-theme="liquid-glass"] :is(.form-field input,.form-field select,.admin-wrap input,.admin-wrap select,.admin-wrap textarea){background:#080f2080;border-color:#e3f2ff38;color:#f4f7ff;border-radius:12px}
+html[data-theme="liquid-glass"] :is(input,textarea)::placeholder{color:#aeb8ca}
+html[data-theme="liquid-glass"] select option{background:#172238;color:#fff}
+html[data-theme="liquid-glass"] .profile-identity:not(.has-custom-banner){background:linear-gradient(130deg,#bfdfff16,#adc4e408 50%,#f4c1e817);border-color:var(--glass-line);box-shadow:var(--glass-shadow)}
+html[data-theme="liquid-glass"] .profile-identity:not(.has-custom-banner) .profile-identity-shade{background:linear-gradient(120deg,#bfeeff07,transparent)}
+html[data-theme="liquid-glass"] :is(.profile-meta dt,.profile-stat>span,.profile-stat>small,.vote-message,.nom-detail .description,.boing-shop-item p,.boing-shop-note){color:#b5c0d2}
+html[data-theme="liquid-glass"] :is(.profile-stat strong,.nominee-name,.nomination-tile h3){color:#f4f7ff}
+/* The arena stays opaque: predictable contrast, compositing and physics. */
+html[data-theme="liquid-glass"] .boing-arena{background:radial-gradient(ellipse at 50% 0%,#283b50,#101a2c 72%);border-color:var(--glass-line);box-shadow:inset 0 1px 0 #fff2}
+html[data-theme="liquid-glass"] :is(.profile-badge-tooltip,.nominee-social-menu,.toast){background:#1a273e;border-color:#c0e1ff55;color:#f4f7ff;box-shadow:0 12px 32px #0007}
+/* Only two large surfaces blur; no filters on cards, media, tooltips or the game. */
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ html[data-theme="liquid-glass"] .topbar{-webkit-backdrop-filter:blur(18px) saturate(135%);backdrop-filter:blur(18px) saturate(135%)}
+ html[data-theme="liquid-glass"] .modal{background:linear-gradient(145deg,#1e2e42ed,#13192cee 55%,#2a1f34ef);-webkit-backdrop-filter:blur(22px) saturate(125%);backdrop-filter:blur(22px) saturate(125%)}
+}
+@media(max-width:600px){.profile-site-theme{gap:12px;padding:14px}.profile-site-theme-copy small{font-size:10px}html[data-theme="liquid-glass"] body{background-attachment:scroll}html[data-theme="liquid-glass"] .topbar{border-radius:20px}}
+@media(prefers-reduced-transparency:reduce){html[data-theme="liquid-glass"] .topbar,html[data-theme="liquid-glass"] .modal{background:#172238;-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media(prefers-reduced-motion:reduce){.liquid-glass-switch::after{transition:none}}
+@media(forced-colors:active){.liquid-glass-switch{border:1px solid ButtonText}.liquid-glass-switch::after{background:ButtonText}.liquid-glass-switch[aria-checked="true"]{outline:2px solid Highlight}}
+/* Keep reputation/logout as the last row, including while editing appearance. */
+.own-profile-info>.profile-site-theme{grid-column:1/-1;grid-row:3;margin:0}
+.own-profile-info>.profile-footer-actions{grid-row:4}
+.own-profile-layout:has(.is-appearance-editing) .profile-site-theme{grid-row:4}
+.own-profile-layout:has(.is-appearance-editing) .profile-footer-actions{grid-row:5}
+html[data-theme="liquid-glass"] .button:not(:disabled){background:linear-gradient(145deg,#f5c88c38,#f2546733);color:#fff0dc;border:1px solid #ffe0ad70;box-shadow:inset 0 1px 0 #ffffff4d,inset 0 -1px 0 #ffffff0d,0 6px 20px #0002}
+html[data-theme="liquid-glass"] .button:not(:disabled):hover{background:linear-gradient(145deg,#f5c88c50,#f2546748);border-color:#ffe0ada0}
+html[data-theme="liquid-glass"] .boing-head .boing-header-balance{background-color:rgba(184,214,255,.04)}
