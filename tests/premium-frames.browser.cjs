@@ -1,0 +1,25 @@
+// Browser regression: use external puppeteer-core@24.31.0 + @sparticuz/chromium@143.0.4 via NODE_PATH.
+const fs=require('fs'),path=require('path'),assert=require('assert'),p=require('puppeteer-core'),C=require('@sparticuz/chromium');
+(async()=>{const dir=path.dirname(require.resolve('@sparticuz/chromium'));await require(path.join(dir,'lambdafs.cjs')).inflate(path.join(dir,'../../bin/al2023.tar.br'));require(path.join(dir,'helper.cjs')).setupLambdaEnvironment('/tmp/al2023/lib');const browser=await p.launch({executablePath:await C.executablePath(),args:C.args,headless:true});try{const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.setRequestInterception(true);page.on('request',r=>{const u=new URL(r.url());if(u.origin==='http://flare.test'){try{const f=path.join(process.cwd(),u.pathname==='/'?'index.html':u.pathname),ext=path.extname(f);return r.respond({status:200,contentType:({'.html':'text/html','.css':'text/css','.js':'application/javascript','.jpg':'image/jpeg','.png':'image/png','.woff2':'font/woff2'})[ext]||'application/octet-stream',body:fs.readFileSync(f)})}catch{return r.respond({status:404,body:''})}}r.abort()});await page.goto('http://flare.test/',{waitUntil:'load'});
+
+
+
+
+const frameAnimations={"frame-aurora":['profileAuroraOrbit','profileAuroraCounterOrbit'],"frame-inferno":['profileInfernoForgeOrbit','profileInfernoEmberOrbit, profileInfernoEmberLight']};
+for(const width of [1360,390,320])for(const frame of Object.keys(frameAnimations))for(const view of ['own','public']){
+ await page.setViewport({width,height:900});await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'no-preference'}]);
+ await page.evaluate(({frame,view})=>{teardownBoing(false);state.session={nickname:'Maronnix',token:'test'};const profile={nickname:'Maronnix',created_at:'2025-01-01',email_masked:'m•••@test.invalid',votes_done:0,total_nominations:18,days_with_flare:10,boing:{bob_name:'BOB',best_score:0,coins:0,inventory:['frame-gold','frame-aurora','frame-inferno'],badges:[],selected_frame:frame}};profileState.data=profile;profileState.publicData=profile;resetProfileAppearanceDraft();view==='own'?renderProfile():renderPublicFlareProfile()}, {frame,view});
+ await new Promise(r=>setTimeout(r,350));await page.waitForFunction(()=>document.querySelector('.profile-avatar img').complete);await page.evaluate(()=>document.fonts.ready);await new Promise(r=>setTimeout(r,400));
+ const inspect=()=>page.$eval('.profile-avatar',el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el),imgStyle=getComputedStyle(el.querySelector('img'));return {x:r.x,y:r.y,width:r.width,height:r.height,transform:style.transform,imgTransform:imgStyle.transform,before:{animation:getComputedStyle(el,'::before').animationName,transform:getComputedStyle(el,'::before').transform,mask:getComputedStyle(el,'::before').maskImage,inset:getComputedStyle(el,'::before').top,pointer:getComputedStyle(el,'::before').pointerEvents},after:{animation:getComputedStyle(el,'::after').animationName,transform:getComputedStyle(el,'::after').transform,pointer:getComputedStyle(el,'::after').pointerEvents},overflow:document.documentElement.scrollWidth>innerWidth}});
+ const a=await inspect();assert.equal(a.before.animation,frameAnimations[frame][0]);assert.equal(a.after.animation,frameAnimations[frame][1]);assert.notEqual(a.before.mask,'none');assert.equal(a.before.inset,'-13px');assert.equal(a.before.pointer,'none');assert.equal(a.after.pointer,'none');assert.equal(a.transform,'none');assert.equal(a.imgTransform,'none');assert(!a.overflow);
+ await new Promise(r=>setTimeout(r,400));const b=await inspect();assert.notEqual(a.before.transform,b.before.transform);assert.notEqual(a.after.transform,b.after.transform);for(const key of ['x','y','width','height'])assert.equal(a[key],b[key]);
+ // Decorative rings must leave the actual face pixels untouched, not just look transparent in CSS.
+ const clip={x:b.x+b.width/2-20,y:b.y+b.height/2-20,width:40,height:40};const face=await page.screenshot({clip});
+ await page.$eval('.profile-avatar',el=>el.className='profile-avatar frame-default');const bare=await page.screenshot({clip});assert(Buffer.from(face).equals(Buffer.from(bare)),'Frame painted over the centre of the face');
+ await page.$eval('.profile-avatar',(el,frame)=>el.className='profile-avatar '+frame,frame);
+ await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);const reduced=await inspect();assert.equal(reduced.before.animation,'none');assert.equal(reduced.after.animation,'none');assert.notEqual(reduced.before.mask,'none');assert.equal(reduced.before.transform,'none');assert.equal(reduced.after.transform,'none');
+ await page.screenshot({path:`/tmp/flare-premium-${frame}-${view}-${width}.png`});
+ console.log('PASS premium frame',frame,view,width,'two moving ring layers, stationary/unobscured face, no layout movement/overflow, retained static ornament for reduced motion');
+}
+assert.deepEqual(errors,[]);
+}finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
