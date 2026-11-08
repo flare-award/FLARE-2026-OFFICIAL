@@ -21,7 +21,7 @@ function isBoingUnlocked(){
   return Boolean(nickname&&(readBoingSeen(nickname)||(ownsProfile&&profileState.data?.boing?.game_intro_seen)));
 }
 function updateBoingQuickEntry(){
-  const button=$('#boing-quick-entry');if(button)button.hidden=!isBoingUnlocked();
+  const button=$('#boing-quick-entry');if(button)button.hidden=false;
 }
 function syncBoingUnlock(){
   if(profileState.data?.boing?.game_intro_seen&&state.session?.nickname)writeBoingSeen(state.session.nickname);
@@ -40,8 +40,7 @@ function mergeBoingState(boing){
   const firePanel=$('.ogonyok-game'),fireKey=JSON.stringify(boing.streak||{});if(firePanel&&firePanel.dataset.streakState!==fireKey&&!firePanel.contains(document.activeElement)){firePanel.innerHTML=ogonyokPanel(boing);firePanel.dataset.streakState=fireKey;}
 }
 function profileHeader(title='Ваш аккаунт',mystery=false,appearance=false){
-  const showMystery=mystery&&!isBoingUnlocked();
-  return `<header class="profile-menu-head"><div class="profile-menu-heading"><span class="eyebrow">FLARE ID</span><div class="profile-title-line"><h2>${esc(title)}</h2>${showMystery?'<span class="profile-title-divider" aria-hidden="true"></span><button class="profile-mystery" id="open-boing" type="button" aria-label="Открыть BOING!">???</button>':''}</div></div><div class="profile-head-actions">${appearance?profileBadgeEditToggleMarkup():''}<button class="close-button" type="button" aria-label="Закрыть">×</button></div></header>`;
+  return `<header class="profile-menu-head"><div class="profile-menu-heading"><span class="eyebrow">FLARE ID</span><div class="profile-title-line"><h2>${esc(title)}</h2></div></div><div class="profile-head-actions">${appearance?profileBadgeEditToggleMarkup():''}<button class="close-button" type="button" aria-label="Закрыть">×</button></div></header>`;
 }
 function profileLoadingMarkup(){
   const nickname=state.session?.nickname||'Профиль';
@@ -172,7 +171,7 @@ function ogonyokMark(streak={},compact=false){
 function ogonyokPanel(boing={}){
  const st=boing.streak||{},days=Math.max(0,Number(st.days)||0),score=Math.max(0,Number(st.today_score)||0);
  const label=`Огонёк: ${days} дн. подряд · +${Number(st.bonus)||0} к клику · ${Math.min(score,1000)} / 1000 очков сегодня`;
- return `<span class="ogonyok-mini" role="img" tabindex="0" aria-label="${esc(label)}" title="${esc(label)}">${ogonyokMark(st,true)}<span class="ogonyok-mini-progress" aria-hidden="true"><i style="height:${Math.min(100,score/10)}%"></i></span></span>`;
+ return `<span class="ogonyok-mini" role="img" tabindex="0" aria-label="${esc(label)}" title="${esc(label)}">${ogonyokMark(st,true)}</span>`;
 }
 function profileBobAside(boing={},own=false){
  const best=Math.max(0,Number(boing.streak?.best)||0);
@@ -643,7 +642,7 @@ function showBoing(){
   if(!boing.game_intro_seen){boing.game_intro_seen=true;rpc('mark_boing_intro_seen',{p_token:profileToken()}).catch(error=>console.info('Отметка о входе в BOING! не сохранена:',error.message))}
 }
 async function openBoingQuickEntry(){
-  if(!state.session)return;
+  if(!state.session){renderAuth();return;}
   const nickname=state.session.nickname.toLowerCase();
   if(profileState.data?.nickname?.toLowerCase()===nickname&&profileState.data.boing){showBoing();return}
   profileState.view='profile';profileState.email=null;profileState.busy=false;profileState.badgeEditing=false;profileState.badgeDraft=null;
@@ -817,7 +816,7 @@ function showBoingShop(category=profileState.shopCategory||'upgrades'){
   const allItems=Array.isArray(boing.shop)?boing.shop:[],items=allItems.filter(item=>item.id!=='leader-bob-name'&&boingShopGroups[category].kinds.includes(item.kind));
   if(category==='profile'){const rank=item=>item.kind==='frame'?Math.max(0,['frame-gold','frame-aurora','frame-eclipse','frame-inferno'].indexOf(item.id)):item.kind==='banner'?100:200;items.sort((a,b)=>rank(a)-rank(b));}
   const tabs=Object.entries(boingShopGroups).map(([id,group])=>`<button type="button" data-shop-category="${id}" class="${id===category?'is-active':''}">${boingShopGroupIcon(id)}<span>${group.label}</span></button>`).join('');
-  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3>${boingShopItemPreview(item,boing)}<p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?(boing.economy_version>=3?'100 COINS за каждые полные 200 очков одного раунда. Остаток не переносится между раундами. Награда зачисляется после завершения; незасчитанный раунд ничего не приносит. COINS BOOST: +10% за уровень.':boing.economy_version===2?'POWER CLICK увеличивает очки, но не ускоряет выдачу COINS. Награда — за каждые 100 кликов: 100 COINS, с 10 000 кликов — 200. COINS BOOST добавляет 10% за уровень. Следующий уровень всегда дороже.':'Улучшения действуют на следующие клики и начисления COINS. Актуальные цены и эффекты указаны в карточках.'):category==='cosmetics'?'Аксессуары можно надевать и снимать. Имя BOB видно в таблице всем бесплатно. BOB PNG FACE открывает загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
+  replaceModalView(`${boingHeader('shop')}<div class="boing-panel-scroll"><nav class="boing-shop-categories" aria-label="Категории магазина">${tabs}</nav><div class="boing-shop-grid">${items.map(item=>`<article class="boing-shop-item kind-${esc(item.kind)}"><div class="boing-shop-item-top"><span>${esc(boingShopKindLabels[item.kind]||item.kind)}</span>${item.kind==='click'||item.kind==='coin'?`<small>LVL ${item.level} / ${item.max_level}</small>`:''}</div><h3>${esc(item.name)}</h3>${boingShopItemPreview(item,boing)}<p>${esc(item.description)}</p><div class="boing-shop-item-action">${shopItemButton(item,boing)}</div></article>`).join('')}</div><p class="boing-shop-note">${category==='upgrades'?(boing.economy_version>=3?`100 COINS за каждые полные ${Number(boing.reward_step_score)||200} очков одного раунда. Остаток не переносится между раундами. Награда зачисляется после завершения; незасчитанный раунд ничего не приносит. COINS BOOST: +10% за уровень.`:boing.economy_version===2?'POWER CLICK увеличивает очки, но не ускоряет выдачу COINS. Награда — за каждые 100 кликов: 100 COINS, с 10 000 кликов — 200. COINS BOOST добавляет 10% за уровень. Следующий уровень всегда дороже.':'Улучшения действуют на следующие клики и начисления COINS. Актуальные цены и эффекты указаны в карточках.'):category==='cosmetics'?'Аксессуары можно надевать и снимать. Имя BOB видно в таблице всем бесплатно. BOB PNG FACE открывает загрузку своих PNG.':'Рамки можно менять, баннер загружается в профиле, а новый бейдж надевается автоматически.'}</p></div>`,'profile-modal boing-modal');
   bindBoingNavigation('shop');bindProfileAvatarFallback();
   $$('[data-shop-category]').forEach(button=>button.onclick=()=>showBoingShop(button.dataset.shopCategory));
   $$('[data-buy-item]').forEach(button=>button.onclick=async()=>{

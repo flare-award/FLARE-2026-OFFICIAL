@@ -898,3 +898,10 @@
  .public-profile-layout .profile-equipped-badges .profile-badge,.own-profile-layout .profile-equipped-badges .profile-badge{flex-basis:30px;width:30px;height:30px;min-height:30px}
  .own-profile-info .profile-stats,.public-profile-info .profile-stats{grid-template-columns:1fr}
 }
+
+/* Balance and close share one height and centered row at every viewport. */
+.boing-head{--boing-control-height:44px}
+.boing-head>.close-button,.boing-head>.boing-header-balance{height:var(--boing-control-height);min-height:var(--boing-control-height);box-sizing:border-box;align-self:center}
+.boing-head>.boing-header-balance{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;border-radius:12px;line-height:1;padding-block:0}
+.boing-header-balance>span,.boing-header-balance>strong{display:block;line-height:1.2;letter-spacing:0;font-variant-numeric:tabular-nums}
+@media(max-width:700px){.boing-head{--boing-control-height:40px}.boing-head>.boing-header-balance{border-radius:10px;gap:6px}}

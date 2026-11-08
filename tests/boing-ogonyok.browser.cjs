@@ -18,7 +18,7 @@ for(const width of [1360,700,390,320]){
  await page.screenshot({path:`/tmp/ogonyok-public-${width}.png`});
  await page.evaluate(()=>{profileState.data=sampleProfile;renderProfile()});g=await geometry();assert(g.x>=g.bannerRight);assert(Math.abs(g.delta)<2);assert(!g.overflow);assert(!g.modalOverflow);
  await page.screenshot({path:`/tmp/ogonyok-own-${width}.png`});
- await page.evaluate(()=>{renderBoingGame()});assert.equal(await page.$$eval('.ogonyok-game .ogonyok-mark',es=>es.length),1);assert((await page.$eval('.ogonyok-mini',e=>e.getAttribute('aria-label'))).includes('+6 к клику'));assert.equal(await page.$eval('.ogonyok-mini-progress i',e=>e.style.height),'50%');assert(await page.$('.boing-game-footer>.ogonyok-game'));
+ await page.evaluate(()=>{renderBoingGame()});assert.equal(await page.$$eval('.ogonyok-game .ogonyok-mark',es=>es.length),1);assert((await page.$eval('.ogonyok-mini',e=>e.getAttribute('aria-label'))).includes('+6 к клику'));assert.equal(await page.$('.ogonyok-mini-progress'),null);assert(await page.$('.boing-game-footer>.ogonyok-game'));
  assert.equal(await page.$('.ogonyok-help'),null);assert.equal(await page.$('#boing-back'),null);assert.equal(await page.$('.boing-level'),null);
  await page.evaluate(async()=>{
   rpc=async(name,args)=>name==='get_boing_leaders'?{leaders:[3,10,30].map((days,i)=>({nickname:'Maronnix',rank:i+1,bob_name:'ОченьДлинноеИмя16',best_score:3000,coins:1000,streak:{days,best:days,bonus:3}}))}:name==='get_public_flare_profile'?sampleProfile:{up:3,down:0};
