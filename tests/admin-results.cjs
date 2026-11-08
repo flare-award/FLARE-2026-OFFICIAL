@@ -24,9 +24,9 @@ console.log('PASS global standing remains second place even when the selected ba
 // Competition ranks span occupied positions: 1,2,2,2,5, not dense 1,2,2,2,3.
 function audit(counts){const votes=counts.flatMap((count,i)=>Array.from({length:count},(_,v)=>({nomination_title:'KING',option_name:'Candidate '+i,nickname:i+'-'+v})));return ctx.adminResultIssues(ctx.adminResultModel({votes},catalog));}
 assert.equal(audit([]).length,0);assert.equal(audit([3]).length,0);
-for(const counts of [[5,3,3],[5,4,2,2],[6,5,4,2,2],[6,5,4,3,2,2,2]])assert.equal(audit(counts).length,0);
-for(const [counts,rank] of [[[3,3],1],[[5,3,3,3],2],[[5,4,2,2,2],3],[[6,5,4,2,2,2],4]]){const issue=audit(counts);assert.equal(issue.length,1);assert.equal(issue[0].ties[0].rank,rank);assert.equal(issue[0].ties[0].choices.length,rank===1?2:3);}
+for(const counts of [[5,3,3],[5,2,2,2,1],[5,3,3,3],[5,4,2,2],[6,5,4,2,2],[6,5,4,3,2,2,2]])assert.equal(audit(counts).length,0);
+for(const [counts,rank] of [[[3,3],1],[[5,3,3,3,3],2],[[5,4,2,2,2],3],[[6,5,4,2,2,2],4]]){const issue=audit(counts);assert.equal(issue.length,1);assert.equal(issue[0].ties[0].rank,rank);assert.equal(issue[0].ties[0].choices.length,rank===1?2:rank===2?4:3);}
 assert.equal(audit([5,5,2,2,2])[0].ties.map(t=>t.rank).join(','),'1,3');
 assert.equal(audit([5,5,5,2,2,2])[0].ties.map(t=>t.rank).join(','),'1,4');
 assert.equal(JSON.stringify(rows),before);
-console.log('PASS tie audit: all first-place ties, 3+ sharing places 2–4, allowed pairs, skipped ranks, multiple issues and no zero-vote/low-ranking false positives');
+console.log('PASS tie audit: all first-place ties, 4+ sharing second, 3+ sharing third/fourth, allowed pairs and top-four trio, skipped ranks, multiple issues and no zero-vote/low-ranking false positives');

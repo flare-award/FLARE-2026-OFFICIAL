@@ -28,7 +28,8 @@ function adminResultStandings(model){
  return byNomination;
 }
 // Only actual, positive-vote ties near the podium need a decision.
-// A pair on places 2–4 is allowed; any tie for first needs a winner.
+// Pairs on places 2–4 are allowed; exactly three runners-up fill the top four.
+// Any tie for first still needs a winner.
 function adminResultIssues(model){
  const standings=adminResultStandings(model),issues=[];
  for(const nomination of model.nominations){
@@ -37,7 +38,7 @@ function adminResultIssues(model){
    if(!groups.has(choice.rank))groups.set(choice.rank,[]);
    groups.get(choice.rank).push(choice);
   }
-  const ties=[...groups].filter(([rank,choices])=>(rank===1&&choices.length>1)||(rank>=2&&rank<=4&&choices.length>2)).map(([rank,choices])=>({rank,count:choices[0].count,choices}));
+  const ties=[...groups].filter(([rank,choices])=>(rank===1&&choices.length>1)||(rank===2&&choices.length>3)||(rank>=3&&rank<=4&&choices.length>2)).map(([rank,choices])=>({rank,count:choices[0].count,choices}));
   if(ties.length)issues.push({nomination,ties});
  }
  return issues;
@@ -50,7 +51,7 @@ function mountAdminResults(host,initial){
  const option=(value,label)=>`<option value="${esc(value)}">${esc(label)}</option>`;
  function renderIssues(){
   const container=find('#admin-result-issues'),wasOpen=container.querySelector('details')?.open,issues=adminResultIssues(model);
-  container.innerHTML=`<details class="admin-result-issues" ${wasOpen?'open':''}><summary><strong>Спорные места</strong><span class="admin-issues-count ${issues.length?'':'is-clear'}">${issues.length?countLabel(issues.length,'номинация','номинации','номинаций'):'Всё спокойно'}</span></summary><div class="admin-issues-body"><p class="admin-issues-help">По всем голосам, независимо от фильтров: ничья за первое место или три и более номинанта на одном из мест со второго по четвёртое.</p>${issues.length?issues.map(issue=>`<article class="admin-issue" data-issue-nomination="${esc(issue.nomination.id)}"><div class="admin-issue-heading"><h4>${esc(issue.nomination.title)}</h4><button type="button" class="admin-issue-open" data-issue-open="${esc(issue.nomination.id)}">Открыть рейтинг</button></div>${issue.ties.map(tie=>`<div class="admin-issue-tie"><div class="admin-issue-label"><strong>${tie.rank===1?'Ничья за победу':tie.rank+' место делят '+countLabel(tie.choices.length,'номинант','номинанта','номинантов')}</strong><span>По ${countLabel(tie.count,'голосу','голоса','голосов')}</span></div><div class="admin-issue-names">${tie.choices.map(choice=>`<span>${esc(choice.name)}</span>`).join('')}</div></div>`).join('')}</article>`).join(''):'<p class="admin-issues-empty">Спорных мест нет. Пары на втором, третьем и четвёртом местах допустимы.</p>'}</div></details>`;
+  container.innerHTML=`<details class="admin-result-issues" ${wasOpen?'open':''}><summary><strong>Спорные места</strong><span class="admin-issues-count ${issues.length?'':'is-clear'}">${issues.length?countLabel(issues.length,'номинация','номинации','номинаций'):'Всё спокойно'}</span></summary><div class="admin-issues-body"><p class="admin-issues-help">По всем голосам, независимо от фильтров: ничья за первое место, четверо и более на втором или трое и более на третьем либо четвёртом. Трое на втором месте образуют топ-4 и не считаются проблемой.</p>${issues.length?issues.map(issue=>`<article class="admin-issue" data-issue-nomination="${esc(issue.nomination.id)}"><div class="admin-issue-heading"><h4>${esc(issue.nomination.title)}</h4><button type="button" class="admin-issue-open" data-issue-open="${esc(issue.nomination.id)}">Открыть рейтинг</button></div>${issue.ties.map(tie=>`<div class="admin-issue-tie"><div class="admin-issue-label"><strong>${tie.rank===1?'Ничья за победу':tie.rank+' место делят '+countLabel(tie.choices.length,'номинант','номинанта','номинантов')}</strong><span>По ${countLabel(tie.count,'голосу','голоса','голосов')}</span></div><div class="admin-issue-names">${tie.choices.map(choice=>`<span>${esc(choice.name)}</span>`).join('')}</div></div>`).join('')}</article>`).join(''):'<p class="admin-issues-empty">Спорных мест нет. Пары на местах 2–4 и тройка на втором допустимы.</p>'}</div></details>`;
  }
  find('#admin-result-issues').addEventListener('click',event=>{
   const button=event.target.closest('[data-issue-open]');if(!button)return;
