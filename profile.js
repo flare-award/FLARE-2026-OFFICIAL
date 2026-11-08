@@ -892,5 +892,5 @@ updateBoingQuickEntry();
 
 function profileSiteThemeMarkup(){
  const enabled=document.documentElement.dataset.theme==='liquid-glass';
- return `<section class="profile-site-theme" aria-label="Тема сайта"><div class="profile-site-theme-copy"><strong id="liquid-glass-label">Liquid Glass</strong><small>Стеклянная тема для всего сайта</small><small data-liquid-glass-status aria-live="polite">${enabled?'Включена · в этом браузере':'Выключена'}</small></div><button class="liquid-glass-switch" type="button" role="switch" aria-labelledby="liquid-glass-label" aria-checked="${enabled}" data-liquid-glass-toggle></button></section>`;
+ return `<section class="profile-site-theme" aria-label="Тема сайта"><div class="profile-site-theme-copy"><strong id="liquid-glass-label">Liquid Glass</strong><small>Экспериментальная функция · тема для всего сайта</small><small data-liquid-glass-status aria-live="polite">${enabled?'Включена · в этом браузере':'Выключена'}</small></div><button class="liquid-glass-switch" type="button" role="switch" aria-labelledby="liquid-glass-label" aria-checked="${enabled}" data-liquid-glass-toggle></button></section>`;
 }
