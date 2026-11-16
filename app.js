@@ -7,14 +7,13 @@ let nomineeViewRevision=0;
 const nomineeViewWriteQueues=new Map();
 const state={session:initialSession,votes:{},eventChoice:null,eventSaved:null,eventResults:null,eventSaving:false,eventChoiceRevision:0,hiddenOptionIds:[],category:'основная',nomination:null,selected:null,carousel:0,busy:false,nominationListScrollTop:0,pendingCategory:null,nomineeView:loadNomineeViewPreference(initialSession?.nickname)};
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
-const closing=new Date('2026-11-22T00:00:00+03:00');
+const closing=new Date('2026-10-23T00:00:00Z');
 const ceremonyDates={
   'dec-4':new Date('2026-12-04T00:00:00+03:00'),
   'dec-5':new Date('2026-12-05T00:00:00+03:00'),
   'dec-6':new Date('2026-12-06T00:00:00+03:00')
 };
 const eventChoiceLabels={'dec-4':'4 декабря','dec-5':'5 декабря','dec-6':'6 декабря'};
-const winnersReleaseDate=new Date('2026-12-06T00:00:00+03:00');
 const selfHoverMessages=['ЗА СЕБЯ НЕЛЬЗЯ ГОЛОСОВАТЬ','УБЕРИ КУРСОР','МНОГО ХОЧЕШЬ','КУДА ЛЕЗЕШЬ?','ЧИТАЙ ПРАВИЛА','ИДИ НАХУЙ','ТЫ СЛУЧАЕМ НЕ АХУЕЛ?','ДОСТУП ОТКЛОНЁН','СПАСИБО ЗА ПОНИМАНИЕ','НЕ ПОЛУЧАЕТСЯ?','ЭГОИСТ','ПИДОРАС ОБНАРУЖЕН','НЕ СЕЙЧАС','Я СКАЗАЛ НЕЛЬЗЯ','ПОПРОБУЙ ЕЩЁ РАЗ','ЩА ПОЧИНЮ, ПОДОЖДИ'];
 const isClosed=()=>Date.now()>=closing.getTime();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -64,7 +63,13 @@ function updateAccount(){
     state.votes={};state.hiddenOptionIds=[];state.eventChoice=null;state.eventSaved=null;state.eventResults=null;updateProgress();renderEventOptions();
   }
 }
-function updateProgress(){const total=nominations.length,done=Object.keys(state.votes).length;$('#overall-progress').textContent=state.session?`Проголосовано: ${done}/${total}`:'Войди, чтобы голосовать';$('#deadline-banner').hidden=!isClosed();$('#event-poll-status').textContent=!state.session?'Войди в аккаунт, чтобы ответить на опрос.':state.eventSaving?'Сохраняем твой ответ…':state.eventSaved?'Твой ответ сохранён. Нажми другой вариант, чтобы изменить его.':'Нажми на вариант — ответ сохранится сразу.';}
+function updateProgress(){
+  const total=nominations.length,done=Object.keys(state.votes).length;
+  $('#overall-progress').textContent=state.session?`Проголосовано: ${done}/${total}`:'Войди, чтобы голосовать';
+  $('#deadline-banner').hidden=!isClosed();
+  const savedDate=eventChoiceLabels[state.eventSaved];
+  $('#event-poll-status').textContent=!state.session?'Войди в аккаунт, чтобы ответить на опрос.':state.eventSaving?'Сохраняем твой ответ…':isEventPollClosed()?savedDate?`Опрос закрыт. Твой выбор: ${savedDate}.`:'Опрос закрыт. Дата премии определена по итогам опроса.':state.eventSaved?'Твой ответ сохранён. Его можно изменить до закрытия опроса за 2 дня до премии.':'Нажми на вариант — ответ сохранится сразу. Опрос закроется за 2 дня до премии.';
+}
 function countForm(count,one,few,many){const n=Math.abs(Number(count)||0)%100,last=n%10;return n>10&&n<20?many:last===1?one:last>=2&&last<=4?few:many}
 function countLabel(count,one,few,many){return `${count} ${countForm(count,one,few,many)}`}
 function nomineeCountLabel(count){return countLabel(count,'номинант','номинанта','номинантов')}
@@ -415,21 +420,26 @@ function bindAdminSocialPanel(){
 }
 function scrollToCategoryButtons(){const card=$('#category-primary');if(!card)return 0;const rect=card.getBoundingClientRect(),headerHeight=$('#site-header')?.getBoundingClientRect().height||95,desiredCenter=Math.max(headerHeight+rect.height/2+16,window.innerHeight*.58),maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),target=Math.min(maxScroll,Math.max(0,window.scrollY+rect.top+rect.height/2-desiredCenter)),distance=Math.abs(target-window.scrollY),reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;window.scrollTo({top:target,behavior:reducedMotion?'auto':'smooth'});return distance}
 let publicEventPollWinner=null,publicEventPollWinnerResolved=false,publicEventPollWinnerRequest=null;
-function loadPublicEventPollWinner(){
-  if(publicEventPollWinnerResolved)return Promise.resolve(publicEventPollWinner);
+const isEventPollClosed=()=>Boolean(publicEventPollWinner?.closed||(Number.isFinite(publicEventPollWinner?.closesAt)&&Date.now()>=publicEventPollWinner.closesAt));
+function loadPublicEventPollWinner({force=false}={}){
+  if(!force&&publicEventPollWinnerResolved)return Promise.resolve(publicEventPollWinner);
   if(publicEventPollWinnerRequest)return publicEventPollWinnerRequest;
-  publicEventPollWinnerRequest=rpc('get_event_poll_winner').then(result=>{
-    if(!result?.closed)throw new Error('Итоги опроса ещё не опубликованы.');
-    const choiceIds=(Array.isArray(result.choice_ids)?result.choice_ids:[]).filter(id=>ceremonyDates[id]).sort((a,b)=>ceremonyDates[a]-ceremonyDates[b]);
+  let request;
+  request=rpc('get_event_poll_winner').then(result=>{
+    const choiceIds=(Array.isArray(result?.choice_ids)?result.choice_ids:[]).filter(id=>ceremonyDates[id]).sort((a,b)=>ceremonyDates[a]-ceremonyDates[b]);
+    const closesAt=result?.closes_at?Date.parse(result.closes_at):NaN;
     publicEventPollWinnerResolved=true;
-    publicEventPollWinner=choiceIds.length?{choiceIds,target:ceremonyDates[choiceIds[0]]}:null;
+    publicEventPollWinner={choiceIds,target:choiceIds.length?ceremonyDates[choiceIds[0]]:null,closed:Boolean(result?.closed),closesAt:Number.isFinite(closesAt)?closesAt:null};
+    if($('#event-options'))renderEventOptions();
+    else updateProgress();
     return publicEventPollWinner;
-  }).catch(error=>{publicEventPollWinnerRequest=null;throw error});
-  return publicEventPollWinnerRequest;
+  }).finally(()=>{if(publicEventPollWinnerRequest===request)publicEventPollWinnerRequest=null});
+  publicEventPollWinnerRequest=request;
+  return request;
 }
 function initCountdown(){
   const units={days:$('#countdown-days'),hours:$('#countdown-hours'),minutes:$('#countdown-minutes')},minuteLabel=$('#countdown-minutes-label'),status=$('#countdown-status'),label=$('#countdown-title'),values=$('.countdown-values',$('#vote-countdown')),box=$('#vote-countdown');
-  let timer,currentPhase=-1,closedHandled=false,pollLoadStarted=false,pollLoadFailed=false;
+  let timer,currentPhase=-1,currentLeaderSignature='',pollLoadStarted=false,pollLoadFailed=false;
   const pad=n=>String(n).padStart(2,'0'),digitAnimations=new WeakMap();
   const setDigit=(element,value)=>{
     const previous=element.dataset.value??element.textContent.trim(),hasRendered=element.dataset.value!==undefined||Boolean(element.querySelector('.countdown-digit-stage'));
@@ -465,47 +475,43 @@ function initCountdown(){
     });
   };
   const showPollRetry=()=>{
-    status.replaceChildren(document.createTextNode('Не удалось получить результат опроса. '));
+    status.replaceChildren(document.createTextNode('Не удалось получить дату из опроса. '));
     const retry=document.createElement('button');retry.type='button';retry.className='text-button';retry.textContent='Повторить';
     retry.onclick=()=>{pollLoadFailed=false;pollLoadStarted=false;startPollLoad()};status.append(retry);
   };
   const startPollLoad=()=>{
-    if(pollLoadStarted||publicEventPollWinnerResolved)return;
-    pollLoadStarted=true;status.textContent='Получаем победившую дату из опроса…';
-    loadPublicEventPollWinner().then(()=>{pollLoadStarted=false;currentPhase=-1;tick()}).catch(()=>{pollLoadStarted=false;pollLoadFailed=true;showPollRetry()});
+    if(pollLoadStarted)return;
+    pollLoadStarted=true;status.textContent='Получаем лидирующую дату из опроса…';
+    loadPublicEventPollWinner({force:true}).then(()=>{pollLoadStarted=false;pollLoadFailed=false;currentPhase=-1;currentLeaderSignature='';tick()}).catch(()=>{pollLoadStarted=false;pollLoadFailed=true;showPollRetry()});
   };
   const tick=()=>{
-    const now=Date.now();
-    if(now>=winnersReleaseDate.getTime()){
-      values.hidden=true;label.textContent='ГОЛОСОВАНИЕ ЗАВЕРШЕНО';status.textContent='Итоги будут опубликованы отдельно.';box.classList.add('is-finished');box.setAttribute('aria-label','Голосование завершено');
-      clearInterval(timer);return;
-    }
-    if(now>=closing.getTime()&&!closedHandled){closedHandled=true;updateProgress()}
-    if(now>=closing.getTime()&&!publicEventPollWinnerResolved){
-      values.hidden=true;label.textContent='ДАТА ЦЕРЕМОНИИ ПО РЕЗУЛЬТАТАМ ОПРОСА';box.classList.add('is-finished');box.setAttribute('aria-label','Ожидание победившей даты церемонии из опроса');
+    if(!publicEventPollWinnerResolved){
+      values.hidden=true;label.textContent='ДО НАЧАЛА ПРЕМИИ';box.classList.add('is-finished');box.setAttribute('aria-label','Получаем дату премии из опроса');
       if(!pollLoadFailed)startPollLoad();
       return;
     }
-    if(now>=closing.getTime()&&!publicEventPollWinner){
-      values.hidden=true;label.textContent='ДАТА ЦЕРЕМОНИИ НЕ ОПРЕДЕЛЕНА';status.textContent='В опросе не оказалось голосов. Дату нужно определить отдельно.';box.classList.add('is-finished');box.setAttribute('aria-label','Дата церемонии не определена');return;
+    const poll=publicEventPollWinner;
+    if(!poll?.target){
+      values.hidden=true;label.textContent='ДАТА ПРЕМИИ НЕ ОПРЕДЕЛЕНА';status.textContent=poll?.closed?'Опрос закрыт, но голосов нет. Дату нужно определить отдельно.':'В опросе пока нет голосов. Дату определит опрос.';box.classList.add('is-finished');box.setAttribute('aria-label','Дата премии не определена');return;
     }
-    const phaseIndex=now<closing.getTime()?0:now<publicEventPollWinner.target.getTime()?1:2;
-    const target=phaseIndex===0?closing:phaseIndex===1?publicEventPollWinner.target:winnersReleaseDate;
-    const remaining=Math.max(0,target.getTime()-now),total=Math.floor(remaining/1000);
+    const now=Date.now(),phaseIndex=now<poll.target.getTime()?0:1,remaining=Math.max(0,poll.target.getTime()-now),total=Math.floor(remaining/1000);
     values.hidden=false;box.classList.remove('is-finished');
-    if(currentPhase!==phaseIndex){
-      currentPhase=phaseIndex;
-      if(phaseIndex===0){label.textContent='ДО ОКОНЧАНИЯ ГОЛОСОВАНИЯ';status.textContent='Закрытие 22 ноября в 00:00 по МСК'}
-      else if(phaseIndex===1){
-        const winningDates=publicEventPollWinner.choiceIds.map(id=>eventChoiceLabels[id]),selectedDate=eventChoiceLabels[publicEventPollWinner.choiceIds[0]];
-        label.textContent=publicEventPollWinner.choiceIds.length>1?'НИЧЬЯ В ОПРОСЕ · ДО БЛИЖАЙШЕЙ ДАТЫ':'ДО ДАТЫ ЦЕРЕМОНИИ';
-        status.textContent=publicEventPollWinner.choiceIds.length>1?`Ничья (${winningDates.join(' и ')}); отсчёт до ${selectedDate}`:`Победившая дата по опросу: ${selectedDate}`;
-      }else{label.textContent='ДО ПУБЛИКАЦИИ РЕЗУЛЬТАТОВ';status.textContent='Победители появятся 6 декабря'}
+    const signature=`${poll.choiceIds.join(',')}|${poll.closed?'closed':'open'}`;
+    if(currentPhase!==phaseIndex||currentLeaderSignature!==signature){
+      currentPhase=phaseIndex;currentLeaderSignature=signature;
+      const winningDates=poll.choiceIds.map(id=>eventChoiceLabels[id]),selectedDate=eventChoiceLabels[poll.choiceIds[0]];
+      label.textContent=phaseIndex===0?'ДО НАЧАЛА ПРЕМИИ':'ПРЕМИЯ УЖЕ НАЧАЛАСЬ';
+      if(poll.choiceIds.length>1){
+        status.textContent=`${poll.closed?'Опрос закрыт — ничья':'Сейчас ничья в опросе'} (${winningDates.join(' и ')}); ${phaseIndex===0?'отсчёт до':'ближайшая дата —'} ${selectedDate}`;
+      }else{
+        status.textContent=`${poll.closed?'Дата по итогам опроса':'Пока лидирует дата по опросу'}: ${selectedDate}`;
+      }
       box.setAttribute('aria-label',label.textContent.toLowerCase());
     }
     const minuteCount=Math.floor(total%3600/60);setDigit(units.days,pad(Math.floor(total/86400)));setDigit(units.hours,pad(Math.floor(total%86400/3600)));setDigit(units.minutes,pad(minuteCount));if(minuteLabel)minuteLabel.textContent=countForm(minuteCount,'минута','минуты','минут');
   };
-  tick();if(Date.now()<winnersReleaseDate.getTime())timer=setInterval(tick,1000);
+  startPollLoad();tick();timer=setInterval(tick,1000);
+  setInterval(()=>{if(!isEventPollClosed())loadPublicEventPollWinner({force:true}).then(()=>{currentPhase=-1;currentLeaderSignature='';tick()}).catch(error=>console.info('Не удалось обновить лидирующую дату опроса:',error.message))},60000);
 }
 function pushNominationHistory(screen,nominationId=null){
   const current=history.state?.flareNomination,depth=current?Math.max(1,Number(current.depth)||1)+1:1;
@@ -614,7 +620,7 @@ function nomineeDisplayName(nomination,item){
   const name=esc(displayName);
   return nomination.id==='conflict-of-year'?name.replace(/(^|\s)(vs)(?=\s|$)/gi,'$1<span class="nominee-versus">$2</span>'):name;
 }
-function showNomination(id,{fromHistory=false}={}){const nom=nominations.find(n=>n.id===id);if(!nom)return;if(nom.id==='clip-of-year')sortClipNominees();if(!fromHistory)pushNominationHistory('detail',id);state.nominationListScrollTop=$('.nomination-grid')?.scrollTop||0;state.nomination=nom;state.selected=state.votes[id]||null;if(isSelfNominee(nom,nom.nominees.find(item=>item.id===state.selected)))state.selected=null;const mediaNomination=nom.id!=='scam-of-year'&&(nom.type==='Картинка'||nom.type==='Видео'),clearImageOverlay=['scam-of-year','squad-of-year','conflict-of-year'].includes(nom.id),viewClass=state.nomineeView==='compact'?'nominee-grid-compact':state.nomineeView==='list'?'nominee-grid-list':'';const visibleNominees=nom.nominees;const nominees=visibleNominees.map(x=>{const hiddenForTester=Boolean(state.session?.is_test_account&&state.hiddenOptionIds.includes(x.id));const self=isSelfNominee(nom,x);const selected=state.selected===x.id?'selected':'';if(x.type==='person'){const photoKey=`avatar:${slugPhotoName(x.name)}`,portrait=hiddenForTester?'<span class="portrait tester-locked-portrait" aria-hidden="true"></span>':`<img class="portrait" src="${esc(photoSource(photoKey))}" data-photo-key="${esc(photoKey)}" alt="" loading="lazy">`;const social=nom.id==='style-of-year'&&!hiddenForTester;if(social)return `<div class="nominee-card ${selected} ${state.votes[id]===x.id?'saved':''} ${self?'self':''} ${self||isClosed()?'locked':''} style-profile-card" data-nominee="${esc(x.id)}" ${self?`data-hover-message="${esc(selfHoverMessages[0])}"`:''}><button class="nominee-style-vote" type="button" ${self||isClosed()?'disabled':''}>${portrait}<span class="nominee-name">${esc(x.name)}</span></button><button class="nominee-social-toggle" type="button" data-social-nickname="${esc(x.name)}" aria-label="Социальные сети: ${esc(x.name)}" aria-expanded="false">${styleSocialMenuIcon()}</button></div>`;return `<button class="nominee-card ${selected} ${state.votes[id]===x.id?'saved':''} ${self?'self':''} ${self||isClosed()?'locked':''} ${hiddenForTester?'tester-locked':''}" data-nominee="${esc(x.id)}" ${isClosed()||hiddenForTester?'disabled':''} ${self?`aria-disabled="true" data-hover-message="${esc(selfHoverMessages[0])}"`:hiddenForTester?'aria-disabled="true" title="Закрыто для тестового голосования"':''}>${portrait}<span class="nominee-name">${hiddenForTester?'Номинант скрыт':esc(x.name)}</span></button>`}const video=x.type==='video',photoKey=`nominee:${nom.id}:${x.id}`,visual=hiddenForTester?'<div class="visual visual-tester-locked" aria-hidden="true"></div>':`<div class="visual ${visualClass(x)}"><img class="visual-photo" src="${esc(photoSource(photoKey))}" data-photo-key="${esc(photoKey)}" alt="" loading="lazy">${video?`<button type="button" class="video-play" aria-label="${x.url?'Открыть видео в новой вкладке':'Ссылка на видео не добавлена'}"></button>`:''}</div>`;return `<div class="nominee-card ${selected} ${state.votes[id]===x.id?'saved':''} ${video?'video':''} ${self?'self locked':''} ${isClosed()?'locked':''} ${hiddenForTester?'tester-locked':''}" data-nominee="${esc(x.id)}" ${self?`aria-disabled="true" data-hover-message="${esc(selfHoverMessages[0])}"`:''} ${hiddenForTester?'aria-disabled="true" title="Закрыто для тестового голосования"':''}>${visual}<span class="nominee-name">${hiddenForTester?'Номинант скрыт':nomineeDisplayName(nom,x)}</span></div>`}).join('');const current=state.votes[id];const msg=isClosed()?'Голосование завершено — выбор доступен только для просмотра.':!state.session?'Войди, чтобы выбрать номинанта.':current?'Текущий голос сохранён. Можно изменить его до 21 ноября.':'Выбери одного номинанта, затем отдай голос.';const changed=Boolean(current&&state.selected&&state.selected!==current);const voteButton=`<div class="vote-actions"><span class="vote-message">${msg}</span><button class="button" id="cast-vote" ${!state.session||isClosed()||!state.selected||(current&&!changed)?'disabled':''}>${current?(changed?'Изменить выбор':'Выбрать'):'Выбрать'}</button></div>`;replaceModalView(`<div class="nom-detail-top"><button class="back-link" id="back-nominations"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"/></svg><span>Вернуться к номинациям</span></button><div class="nom-detail-actions">${renderNomineeViewControl()}<button class="close-button" aria-label="Закрыть">×</button></div></div><div class="nom-detail-scroll"><div class="nom-detail"><h2 class="nom-detail-title">${esc(nom.title)}</h2><p class="description">${esc(nom.description)}</p><div class="nominee-grid ${mediaNomination?'nominee-grid-media':''} ${viewClass}">${nominees}</div></div></div>${voteButton}`,`nomination-detail-modal ${clearImageOverlay?'nomination-no-photo-shade':''}`);
+function showNomination(id,{fromHistory=false}={}){const nom=nominations.find(n=>n.id===id);if(!nom)return;if(nom.id==='clip-of-year')sortClipNominees();if(!fromHistory)pushNominationHistory('detail',id);state.nominationListScrollTop=$('.nomination-grid')?.scrollTop||0;state.nomination=nom;state.selected=state.votes[id]||null;if(isSelfNominee(nom,nom.nominees.find(item=>item.id===state.selected)))state.selected=null;const mediaNomination=nom.id!=='scam-of-year'&&(nom.type==='Картинка'||nom.type==='Видео'),clearImageOverlay=['scam-of-year','squad-of-year','conflict-of-year'].includes(nom.id),viewClass=state.nomineeView==='compact'?'nominee-grid-compact':state.nomineeView==='list'?'nominee-grid-list':'';const visibleNominees=nom.nominees;const nominees=visibleNominees.map(x=>{const hiddenForTester=Boolean(state.session?.is_test_account&&state.hiddenOptionIds.includes(x.id));const self=isSelfNominee(nom,x);const selected=state.selected===x.id?'selected':'';if(x.type==='person'){const photoKey=`avatar:${slugPhotoName(x.name)}`,portrait=hiddenForTester?'<span class="portrait tester-locked-portrait" aria-hidden="true"></span>':`<img class="portrait" src="${esc(photoSource(photoKey))}" data-photo-key="${esc(photoKey)}" alt="" loading="lazy">`;const social=nom.id==='style-of-year'&&!hiddenForTester;if(social)return `<div class="nominee-card ${selected} ${state.votes[id]===x.id?'saved':''} ${self?'self':''} ${self||isClosed()?'locked':''} style-profile-card" data-nominee="${esc(x.id)}" ${self?`data-hover-message="${esc(selfHoverMessages[0])}"`:''}><button class="nominee-style-vote" type="button" ${self||isClosed()?'disabled':''}>${portrait}<span class="nominee-name">${esc(x.name)}</span></button><button class="nominee-social-toggle" type="button" data-social-nickname="${esc(x.name)}" aria-label="Социальные сети: ${esc(x.name)}" aria-expanded="false">${styleSocialMenuIcon()}</button></div>`;return `<button class="nominee-card ${selected} ${state.votes[id]===x.id?'saved':''} ${self?'self':''} ${self||isClosed()?'locked':''} ${hiddenForTester?'tester-locked':''}" data-nominee="${esc(x.id)}" ${isClosed()||hiddenForTester?'disabled':''} ${self?`aria-disabled="true" data-hover-message="${esc(selfHoverMessages[0])}"`:hiddenForTester?'aria-disabled="true" title="Закрыто для тестового голосования"':''}>${portrait}<span class="nominee-name">${hiddenForTester?'Номинант скрыт':esc(x.name)}</span></button>`}const video=x.type==='video',photoKey=`nominee:${nom.id}:${x.id}`,visual=hiddenForTester?'<div class="visual visual-tester-locked" aria-hidden="true"></div>':`<div class="visual ${visualClass(x)}"><img class="visual-photo" src="${esc(photoSource(photoKey))}" data-photo-key="${esc(photoKey)}" alt="" loading="lazy">${video?`<button type="button" class="video-play" aria-label="${x.url?'Открыть видео в новой вкладке':'Ссылка на видео не добавлена'}"></button>`:''}</div>`;return `<div class="nominee-card ${selected} ${state.votes[id]===x.id?'saved':''} ${video?'video':''} ${self?'self locked':''} ${isClosed()?'locked':''} ${hiddenForTester?'tester-locked':''}" data-nominee="${esc(x.id)}" ${self?`aria-disabled="true" data-hover-message="${esc(selfHoverMessages[0])}"`:''} ${hiddenForTester?'aria-disabled="true" title="Закрыто для тестового голосования"':''}>${visual}<span class="nominee-name">${hiddenForTester?'Номинант скрыт':nomineeDisplayName(nom,x)}</span></div>`}).join('');const current=state.votes[id];const msg=isClosed()?'Голосование за номинации завершено — сохранённый выбор доступен только для просмотра.':!state.session?'Войди, чтобы выбрать номинанта.':current?'Текущий голос сохранён.':'Выбери одного номинанта, затем отдай голос.';const changed=Boolean(current&&state.selected&&state.selected!==current);const voteButton=`<div class="vote-actions"><span class="vote-message">${msg}</span><button class="button" id="cast-vote" ${!state.session||isClosed()||!state.selected||(current&&!changed)?'disabled':''}>${current?(changed?'Изменить выбор':'Выбрать'):'Выбрать'}</button></div>`;replaceModalView(`<div class="nom-detail-top"><button class="back-link" id="back-nominations"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14.5 5.5-6.5 6.5 6.5 6.5"/></svg><span>Вернуться к номинациям</span></button><div class="nom-detail-actions">${renderNomineeViewControl()}<button class="close-button" aria-label="Закрыть">×</button></div></div><div class="nom-detail-scroll"><div class="nom-detail"><h2 class="nom-detail-title">${esc(nom.title)}</h2><p class="description">${esc(nom.description)}</p><div class="nominee-grid ${mediaNomination?'nominee-grid-media':''} ${viewClass}">${nominees}</div></div></div>${voteButton}`,`nomination-detail-modal ${clearImageOverlay?'nomination-no-photo-shade':''}`);
 bindVisualPhotoFallbacks($('.nomination-detail-modal'));$('#back-nominations').onclick=returnToNominations;bindNomineeViewControl();bindSocialProfileControls();if(nom.id==='style-of-year')prefetchStyleSocialProfiles();$$('[data-nominee]').forEach(el=>{const item=nom.nominees.find(x=>x.id===el.dataset.nominee);const hiddenForTester=Boolean(state.session?.is_test_account&&state.hiddenOptionIds.includes(item?.id));const self=isSelfNominee(nom,item);if(item?.type==='video')$('.video-play',el)?.addEventListener('click',event=>openNomineeVideo(event,item));if(self){let firstHover=true,lastMessage=selfHoverMessages[0];el.addEventListener('pointerenter',()=>{if(firstHover){firstHover=false;return}const choices=selfHoverMessages.slice(1).filter(message=>message!==lastMessage);lastMessage=choices[Math.floor(Math.random()*choices.length)]||selfHoverMessages[1];el.dataset.hoverMessage=lastMessage})}if(self||hiddenForTester||isClosed())return;el.onclick=event=>{if(event.target.closest('.video-play,.nominee-social-toggle'))return;state.selected=el.dataset.nominee;$$('.nominee-card').forEach(c=>c.classList.toggle('selected',c.dataset.nominee===state.selected));const changed=Boolean(current&&state.selected!==current);$('#cast-vote').textContent=current?(changed?'Изменить выбор':'Выбрать'):'Выбрать';$('#cast-vote').disabled=!state.session||!state.selected||isClosed()||Boolean(current&&!changed)};});$('#cast-vote').onclick=async()=>{if(state.busy)return;state.busy=true;try{if(isSelfNominee(nom,nom.nominees.find(item=>item.id===state.selected)))throw new Error('Нельзя голосовать за себя.');await rpc('cast_vote',{p_token:state.session.token,p_nomination_id:nom.id,p_option_id:state.selected});state.votes[nom.id]=state.selected;toast('Твой голос учтён.');updateProgress();returnToNominations();}catch(e){toast(e.message)}finally{state.busy=false}};}
 let socialPopover=null,socialPopoverButton=null,socialPopoverRequest=0,socialPopoverFrame=0,socialPhotoOverlay=null,socialGlobalEventsBound=false;
 const socialProfileCache=new Map(),socialProfileRequests=new Map(),socialProfileVersions=new Map();
@@ -720,6 +726,7 @@ function displayedEventResults(){
 function renderEventOptions(){
   const box=$('#event-options');
   const results=displayedEventResults();
+  const pollClosed=isEventPollClosed();
   const showResults=Boolean(state.eventSaved&&results);
   const counts=results?.counts||{};
   const total=Number(results?.total)||0;
@@ -731,11 +738,11 @@ function renderEventOptions(){
     const leader=showResults&&max>0&&count===max;
     const selected=state.eventChoice===id;
     const badge=leader?(leaders.length===1?'ЛИДИРУЕТ':'НИЧЬЯ'):'';
-    return `<button class="poll-option ${selected?'selected':''} ${showResults?'has-results':''} ${leader?'poll-leader':''}" data-event-choice="${id}" ${isClosed()?'disabled':''}><span class="poll-option-top"><span class="radio"></span><span class="poll-option-date"><strong>${date} (${day[0].toUpperCase()+day.slice(1)})</strong></span>${showResults?`<span class="poll-result-badge">${badge}</span>`:''}</span>${showResults?`<span class="poll-result-track" aria-hidden="true"><span style="width:${percent}%"></span></span><span class="poll-result-meta"><span>${countLabel(count,'голос','голоса','голосов')}</span><strong>${percent}%</strong></span>`:''}</button>`
+    return `<button class="poll-option ${selected?'selected':''} ${showResults?'has-results':''} ${leader?'poll-leader':''}" data-event-choice="${id}" ${pollClosed?'disabled':''}><span class="poll-option-top"><span class="radio"></span><span class="poll-option-date"><strong>${date} (${day[0].toUpperCase()+day.slice(1)})</strong></span>${showResults?`<span class="poll-result-badge">${badge}</span>`:''}</span>${showResults?`<span class="poll-result-track" aria-hidden="true"><span style="width:${percent}%"></span></span><span class="poll-result-meta"><span>${countLabel(count,'голос','голоса','голосов')}</span><strong>${percent}%</strong></span>`:''}</button>`
   }).join('');
   $$('[data-event-choice]',box).forEach(button=>button.onclick=()=>{
     if(!state.session){renderAuth();return}
-    if(isClosed())return;
+    if(isEventPollClosed())return;
     const choice=button.dataset.eventChoice;
     if(state.eventChoice===choice)return;
     state.eventChoice=choice;
@@ -747,7 +754,25 @@ function renderEventOptions(){
 }
 function renderFaq(){$('#faq-list').innerHTML=faq.map(([q,a])=>`<div class="faq-item"><button class="faq-question"><span>${esc(q)}</span><span aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 6.5v11M6.5 12h11"></path></svg></span></button><div class="faq-answer"><div class="faq-answer-content">${esc(a)}</div></div></div>`).join('');$$('.faq-question').forEach(b=>b.onclick=()=>b.parentElement.classList.toggle('open'))}
 function initFloatingHeader(){const header=$('#site-header'),logo=$('.intro-logo'),faqSection=$('.faq-section');if(!header||!logo||!faqSection)return;let logoVisible=true,faqActive=false,scheduled=false,faqObserver;const refresh=()=>{const atTop=logoVisible&&!faqActive,scrolled=!logoVisible;header.classList.toggle('is-at-top',atTop);header.classList.toggle('is-scrolled',scrolled);header.classList.toggle('is-faq-hidden',faqActive)};const observeFaqBoundary=()=>{if(!('IntersectionObserver'in window))return;faqObserver?.disconnect();const line=header.offsetHeight,bottom=Math.max(0,innerHeight-line-1);faqObserver=new IntersectionObserver(([entry])=>{faqActive=entry.isIntersecting;refresh()},{rootMargin:`-${line}px 0px -${bottom}px 0px`,threshold:0});faqObserver.observe(faqSection)};if('IntersectionObserver'in window){new IntersectionObserver(([entry])=>{logoVisible=entry.isIntersecting;refresh()},{threshold:0}).observe(logo);observeFaqBoundary();window.addEventListener('resize',observeFaqBoundary)}else{const update=()=>{scheduled=false;const l=logo.getBoundingClientRect(),f=faqSection.getBoundingClientRect(),line=header.offsetHeight;logoVisible=l.bottom>0&&l.top<innerHeight;faqActive=f.top<=line&&f.bottom>line;refresh()};const schedule=()=>{if(!scheduled){scheduled=true;requestAnimationFrame(update)}};window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);schedule()}}
-async function saveEvent(){if(!state.session||!state.eventChoice||isClosed()||state.eventSaving||state.eventChoice===state.eventSaved)return;state.eventSaving=true;updateProgress();const token=state.session.token;try{while(state.session?.token===token&&state.eventChoice&&state.eventChoice!==state.eventSaved&&!isClosed()){const choice=state.eventChoice;try{const data=await rpc('save_event_choice',{p_token:token,p_choice_id:choice});if(state.session?.token!==token)break;state.eventSaved=choice;state.eventResults=data.event_results||state.eventResults;renderEventOptions()}catch(e){if(state.session?.token!==token)break;if(choice!==state.eventChoice)continue;state.eventChoice=state.eventSaved;toast(e.message);renderEventOptions();break}}}finally{state.eventSaving=false;renderEventOptions();updateProgress()}}
+async function saveEvent(){
+  if(!state.session||!state.eventChoice||isEventPollClosed()||state.eventSaving||state.eventChoice===state.eventSaved)return;
+  state.eventSaving=true;updateProgress();const token=state.session.token;
+  try{
+    while(state.session?.token===token&&state.eventChoice&&state.eventChoice!==state.eventSaved&&!isEventPollClosed()){
+      const choice=state.eventChoice;
+      try{
+        const data=await rpc('save_event_choice',{p_token:token,p_choice_id:choice});
+        if(state.session?.token!==token)break;
+        state.eventSaved=choice;state.eventResults=data.event_results||state.eventResults;renderEventOptions();
+        loadPublicEventPollWinner({force:true}).catch(error=>console.info('Не удалось обновить лидирующую дату опроса:',error.message));
+      }catch(e){
+        if(state.session?.token!==token)break;
+        if(choice!==state.eventChoice)continue;
+        state.eventChoice=state.eventSaved;toast(e.message);renderEventOptions();break;
+      }
+    }
+  }finally{state.eventSaving=false;renderEventOptions();updateProgress()}
+}
 function renderTestBallotContent(ballot){
   if(!ballot)return '<p class="admin-access-note">Чтобы включить просмотр тестовых голосов, выполни SQL из <code>supabase/migrations/20261104_test_ballot_review_and_locked_options.sql</code> в Supabase SQL Editor.</p>';
   const votes=Array.isArray(ballot.votes)?ballot.votes:[];

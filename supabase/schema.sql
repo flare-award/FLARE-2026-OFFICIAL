@@ -120,7 +120,22 @@ ALTER TABLE public.flare_account_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flare_access_settings ENABLE ROW LEVEL SECURITY;
 
 create or replace function public.flare_closed() returns boolean language sql stable as $$
-  select now() >= timestamptz '2026-11-22 00:00:00+03'
+  select now() >= timestamptz '2026-10-23 00:00:00+00'
+$$;
+create or replace function public.flare_event_poll_closes_at() returns timestamptz language sql stable as $$
+  with tallies as (
+    select choice_id,count(*)::integer as vote_count from public.flare_event_choices group by choice_id
+  ), leaders as (
+    select choice_id from tallies where vote_count=(select max(vote_count) from tallies)
+  )
+  select min(case choice_id
+    when 'dec-4' then timestamptz '2026-12-04 00:00:00+03'
+    when 'dec-5' then timestamptz '2026-12-05 00:00:00+03'
+    when 'dec-6' then timestamptz '2026-12-06 00:00:00+03'
+  end) - interval '2 days' from leaders
+$$;
+create or replace function public.flare_event_poll_closed() returns boolean language sql stable as $$
+  select coalesce(now() >= public.flare_event_poll_closes_at(),false)
 $$;
 create or replace function public.flare_assert_account_access(p_account uuid) returns void language plpgsql security definer set search_path=public,extensions,pg_temp as $$
 begin
@@ -337,7 +352,7 @@ create or replace function public.save_event_choice(p_token text,p_choice_id tex
 declare v_account uuid:=flare_session_account(p_token); v_is_test_account boolean:=false; v_event_results jsonb;
 begin
   perform flare_assert_account_access(v_account);
-  if flare_closed() then raise exception 'Голосование завершено.'; end if;
+  if flare_event_poll_closed() then raise exception 'Опрос даты премии закрыт.'; end if;
   if p_choice_id not in ('dec-4','dec-5','dec-6') then raise exception 'Выбери один из предложенных дней.'; end if;
   select is_test_account into v_is_test_account from flare_accounts where id=v_account;
   if v_is_test_account then
@@ -347,14 +362,12 @@ begin
   end if;
   select jsonb_build_object('total',coalesce(sum(votes),0),'counts',coalesce(jsonb_object_agg(choice_id,votes),'{}'::jsonb)) into v_event_results
   from (select choice_id,count(*)::integer as votes from flare_event_choices group by choice_id) poll_counts;
-  return jsonb_build_object('ok',true,'event_results',v_event_results,'test_vote',v_is_test_account);
+  return jsonb_build_object('ok',true,'event_results',v_event_results,'test_vote',v_is_test_account,'event_poll_closed',flare_event_poll_closed());
 end $$;
 
--- After voting closes, expose only the leading ceremony date(s), never poll participants.
 create or replace function public.get_event_poll_winner() returns jsonb language plpgsql stable security definer set search_path=public,extensions,pg_temp as $$
-declare v_choice_ids jsonb;
+declare v_choice_ids jsonb; v_closed boolean; v_closes_at timestamptz;
 begin
-  if not flare_closed() then return jsonb_build_object('closed',false,'choice_ids','[]'::jsonb); end if;
   with tallies as (
     select choice_id,count(*)::integer as vote_count from public.flare_event_choices group by choice_id
   ), leaders as (
@@ -362,7 +375,9 @@ begin
   )
   select coalesce(jsonb_agg(choice_id order by choice_id),'[]'::jsonb)
   into v_choice_ids from leaders;
-  return jsonb_build_object('closed',true,'choice_ids',v_choice_ids);
+  v_closed:=public.flare_event_poll_closed();
+  v_closes_at:=public.flare_event_poll_closes_at();
+  return jsonb_build_object('closed',v_closed,'choice_ids',v_choice_ids,'closes_at',v_closes_at);
 end $$;
 
 create or replace function public.finalize_ballot(p_token text) returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
@@ -510,6 +525,8 @@ begin
 end $$;
 
 revoke all on function public.flare_closed() from public,anon,authenticated;
+revoke all on function public.flare_event_poll_closes_at() from public,anon,authenticated;
+revoke all on function public.flare_event_poll_closed() from public,anon,authenticated;
 revoke all on function public.flare_assert_account_access(uuid) from public,anon,authenticated;
 revoke all on function public.flare_new_session(uuid) from public,anon,authenticated;
 revoke all on function public.flare_session_account(text) from public,anon,authenticated;
