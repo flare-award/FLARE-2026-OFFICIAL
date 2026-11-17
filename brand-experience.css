@@ -1769,3 +1769,31 @@ body.modal-scroll-locked{position:fixed;left:0;right:0;width:100%;overflow:hidde
 
 /* Honest fallback for a nominee without a photo; it remains a selectable card. */
 .nominee-card .portrait.portrait-placeholder{display:grid;place-items:center;background:#171716;color:#8c877d;font:500 12px var(--font);border:1px solid #ffffff12}
+
+/* A compact warm status card for the read-only nomination archive. */
+.deadline-banner{position:relative;display:flex;align-items:center;gap:14px;overflow:hidden;margin-top:18px;padding:15px 20px 15px 17px;border:1px solid rgba(240,180,73,.2);border-radius:15px;background:radial-gradient(ellipse at 0% 50%,rgba(218,150,51,.09),transparent 48%),linear-gradient(115deg,#15130f,#11100f 76%);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 10px 26px rgba(0,0,0,.16);color:#e8dfcd}
+.deadline-banner[hidden]{display:none}
+.deadline-banner::before{content:"";position:absolute;left:0;top:16%;bottom:16%;width:3px;border-radius:0 99px 99px 0;background:linear-gradient(180deg,#ffd77b,#dc8d31)}
+.deadline-banner-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid rgba(241,186,82,.2);border-radius:12px;background:linear-gradient(145deg,rgba(255,196,82,.12),rgba(255,133,28,.045));color:#e7b75a}
+.deadline-banner-icon svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+.deadline-banner-copy{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 9px;min-width:0;font-size:13px;line-height:1.5}
+.deadline-banner-copy strong{color:#f1d49b;font-size:14px;font-weight:650;letter-spacing:-.012em}
+.deadline-banner-copy>span{color:#aaa295;font-size:13px}
+
+/* The archive year behaves like a light inline selector, not a second heading. */
+.winner-year-switch{display:inline-flex;align-items:baseline;gap:clamp(6px,.9vw,12px);margin-left:8px;vertical-align:baseline;white-space:nowrap}
+.winner-year-button{position:relative;padding:0 1px .08em;border:0;border-bottom:1.5px solid transparent;background:transparent;color:rgba(243,240,233,.43);font:inherit;font-size:.8em;font-weight:600;letter-spacing:-.045em;line-height:1;cursor:pointer;transition:color .18s ease,border-color .18s ease}
+.winner-year-button:hover{color:#f0e1bf}
+.winner-year-button.is-active,.winner-year-button[aria-pressed="true"]{color:#f0b449;border-bottom-color:rgba(240,180,73,.72)}
+.winner-year-button:active{color:#ffd77b}
+@media(max-width:600px){
+ .deadline-banner{align-items:flex-start;gap:11px;margin-top:15px;padding:13px 14px 13px 13px;border-radius:13px}
+ .deadline-banner-icon{flex-basis:33px;width:33px;height:33px;border-radius:10px}
+ .deadline-banner-icon svg{width:16px;height:16px}
+ .deadline-banner-copy{display:grid;gap:2px;align-items:start;font-size:12px;line-height:1.45}
+ .deadline-banner-copy strong{font-size:12.5px}
+ .deadline-banner-copy>span{font-size:12px}
+ .winner-year-switch{gap:6px;margin-left:5px}
+ .winner-year-button{font-size:.74em}
+}
+@media(prefers-reduced-motion:reduce){.winner-year-button{transition:none}}
